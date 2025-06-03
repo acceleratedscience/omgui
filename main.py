@@ -75,4 +75,5 @@ def health():
         "<a href='?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl&d3=1'>3D example A</a>",
         "<a href='?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl&d3=1'>3D example B</a>",
     ]
-    return "<br>".join(response)
+    response_str = "<br>".join(response)
+    return Response(content=response_str, media_type="text/html")
