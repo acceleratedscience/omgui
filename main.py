@@ -5,7 +5,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 # Tool
-from viz_tools import render_molecule_svg_2d, render_molecule_svg_3d
+from render import render_molecule_svg_2d, render_molecule_svg_3d
 
 app = FastAPI(
     title="Molecule Visualization API using RDKit",

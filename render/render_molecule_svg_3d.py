@@ -66,7 +66,7 @@ def render_molecule_svg_3d(smiles: str) -> str:
 
     # Add width & height
     regex_pattern = r'(<svg[^>]*?viewBox="[^"]*?")'
-    replacement_string = r'\1 width="600" height="600">'
+    replacement_string = r'\1 width="400" height="300">'
     svg_str = re.sub(regex_pattern, replacement_string, svg_str)
 
     # Report
