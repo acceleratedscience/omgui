@@ -69,11 +69,11 @@ def health():
     """
     response = [
         "Example usage:<br>",
-        "<a href='?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl'>2D example A</a>",
-        "<a href='?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl'>2D example B</a>",
+        "<a href='render-molecule-svg?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl'>2D example A</a>",
+        "<a href='render-molecule-svg?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl'>2D example B</a>",
         "",
-        "<a href='?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl&d3=1'>3D example A</a>",
-        "<a href='?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl&d3=1'>3D example B</a>",
+        "<a href='render-molecule-svg?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl&d3=1'>3D example A</a>",
+        "<a href='render-molecule-svg?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl&d3=1'>3D example B</a>",
     ]
     response_str = "<br>".join(response)
     return Response(content=response_str, media_type="text/html")
