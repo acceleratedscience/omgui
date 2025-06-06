@@ -1,24 +1,22 @@
 # Molecular Visualisation
 
-Demo visualisation API to experiment with agentic workflows.
-
-See it in actions:
-[molvis.onrender.com/demo](https://molvis.onrender.com/demo)
-
-It uses [RDKit](https://www.rdkit.org/) to generate the conformers and to render 2D SVGs, and [Cinemol](https://github.com/moltools/CineMol) to render 3D SVGs.
+Demo visualisation API to experiment with agentic workflows.  
+See it in action: [molvis.onrender.com/demo](https://molvis.onrender.com/demo)
 
 ### Launch
+
+```
+pip install -r requirements.txt
+```
 
 ```
 uvicorn 'main:app' --host=0.0.0.0 --port=8034 --reload
 ```
 
-### Infer
+### Optional parameters
 
-Optional parameters
-
-|               |        |                |                                                           |
-| ------------- | ------ | -------------- | --------------------------------------------------------- |
+| Parameter     | Type   | Default        | Description                                               |
+| :------------ | :----- | :------------- | :-------------------------------------------------------- |
 | width         | number | None           | Width of the image                                        |
 | height        | number | None           | Height of the image                                       |
 | png           | bool   | 0              | Render PNG instead of SVG                                 |
@@ -31,20 +29,26 @@ Optional parameters
 | d3_style      | str    | BALL_AND_STICK | `BALL_AND_STICK` / `SPACE_FILLING` / `TUBE` / `WIREFRAME` |
 | d3_look       | str    | CARTOON        | `CARTOON` / `GLOSSY`                                      |
 
+### Examples
+
 **2D**
 
--   http://localhost:8034/render-molecule-svg?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl
--   http://localhost:8034/render-molecule-svg?smiles=CC(C)Oc1cc(-n2nc(C(C)(C)C)oc2=O)c(Cl)cc1Cl
+-   [molvis.onrender.com/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl](<http://molvis.onrender.com/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl>)
+-   [molvis.onrender.com/CC(C)Oc1cc(-n2nc(C(C)(C)C)oc2=O)c(Cl)cc1Cl](<http://molvis.onrender.com/CC(C)Oc1cc(-n2nc(C(C)(C)C)oc2=O)c(Cl)cc1Cl>)
 
 ![image](assets/hematein-2d.svg)
 ![image](assets/oxadiazon-2d.svg)
 
 **3D**
 
--   http://localhost:8034/render-molecule-svg?smiles=Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl&d3=1
--   http://localhost:8034/render-molecule-svg?smiles=CC(C)Oc1cc(-n2nc(C(C)(C)C)oc2=O)c(Cl)cc1Cl&d3=1
+-   [molvis.onrender.com/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl&d3=1](<http://molvis.onrender.com/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl?d3=1>)
+-   [molvis.onrender.com/CC(C)Oc1cc(-n2nc(C(C)(C)C)oc2=O)c(Cl)cc1Cl&d3=1](<http://molvis.onrender.com/CC(C)Oc1cc(-n2nc(C(C)(C)C)oc2=O)c(Cl)cc1Cl?d3=1>)
 
 ![image](assets/hematein-3d.svg)
 ![image](assets/oxadiazon-3d.svg)
+
+### Stack
+
+This library uses [RDKit](https://www.rdkit.org/) to generate the conformers and to render 2D SVGs, and [Cinemol](https://github.com/moltools/CineMol) to render 3D SVGs.
 
 <!-- source ../agenv/bin/activate -->
