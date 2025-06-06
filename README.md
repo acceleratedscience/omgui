@@ -1,11 +1,11 @@
 # Molecular Visualization
 
-Visualization API to render small molecule images on the fly.
+Visualization server to render 2D and 3D small molecule images on the fly.  
 See it in action: [molvis.onrender.com/demo](https://molvis.onrender.com/demo)
 
 <br>
 
-### Launch
+### Install
 
 ```
 pip install -r requirements.txt
