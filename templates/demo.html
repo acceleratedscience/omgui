@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Molecule Visualization API Demo</title>
+		<style>
+			/** Layout **/
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+					Roboto, Helvetica, Arial, sans-serif;
+				font-size: 14px;
+				line-height: 16px;
+				margin: 0;
+				padding: 0;
+				color: #333;
+				background-color: #f5f5f7;
+			}
+			.container {
+				margin: 0;
+				padding: 0;
+				height: 100vh;
+			}
+			.demo-container {
+				display: flex;
+				height: 100%;
+				/* border: 5px solid blue; */
+			}
+			.control-panel {
+				flex: 0 0 530px;
+				background: white;
+				padding: 20px;
+				overflow-y: auto;
+				border-right: solid 1px #ddd;
+			}
+			.preview-panel {
+				flex: 1 1 530px;
+				min-width: 530px;
+				background: white;
+				display: flex;
+				flex-direction: column;
+				/* border: 5px solid green; */
+			}
+			.preview-panel iframe {
+				flex-grow: 1;
+				border: none;
+				background: #eee;
+				padding: 20px;
+			}
+
+			/** Content **/
+			h1 {
+				color: #0f62fe;
+				margin-top: 0;
+				margin-bottom: 30px;
+				font-size: 1.5rem;
+			}
+			h3 {
+				margin-top: 50px;
+				border-bottom: solid 2px #666;
+				padding-bottom: 5px;
+				margin-bottom: 20px;
+			}
+			h4 {
+				margin: 0;
+			}
+			.subtitle {
+				color: #6e6e73;
+				font-size: 1.2em;
+				margin-bottom: 30px;
+			}
+			.form-group {
+				margin-top: 20px;
+			}
+			label {
+				display: block;
+				margin-bottom: 5px;
+				font-weight: 500;
+			}
+			input,
+			select {
+				width: 100%;
+				padding: 8px;
+				border: 1px solid #d1d1d1;
+				background: #fafafa;
+				border-radius: 3px;
+				font-size: 16px;
+				box-sizing: border-box;
+			}
+			input[type="checkbox"] {
+				width: auto;
+			}
+			.checkbox-label {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			button {
+				background: #0071e3;
+				color: white;
+				border: none;
+				padding: 10px 15px;
+				border-radius: 3px;
+				font-size: 16px;
+				cursor: pointer;
+				transition: background 0.3s;
+				margin-right: 10px;
+			}
+			button:hover {
+				background: #005bbc;
+			}
+			.url-preview {
+				margin-bottom: 20px;
+				padding: 10px;
+				border-radius: 3px;
+				background-color: #f2f2f7;
+				word-break: break-all;
+				font-family: monospace;
+				font-size: 0.8rem;
+				position: relative;
+			}
+			.copy-btn {
+				position: absolute;
+				right: 10px;
+				top: 10px;
+				background: #e0e0e0;
+				color: #333;
+				border: none;
+				border-radius: 3px;
+				padding: 5px 10px;
+				font-size: 12px;
+				cursor: pointer;
+			}
+			.copy-btn:hover {
+				background: #d0d0d0;
+			}
+			.example-section {
+				background: #e9e9e3;
+				padding: 10px;
+				border-radius: 3px;
+				margin-bottom: 20px;
+			}
+			.example-buttons {
+				display: flex;
+				flex-wrap: wrap;
+				margin-top: 10px;
+			}
+			.example-btn {
+				background: #fff;
+				color: #333;
+				border: 1px solid #d1d1d1;
+				padding: 5px 10px;
+				border-radius: 3px;
+				font-size: 14px;
+				cursor: pointer;
+			}
+			.example-btn:last-child {
+				margin-right: 0;
+			}
+			.example-btn:hover {
+				background: #e5e5ea;
+			}
+			.section-title {
+				font-weight: bold;
+				margin-bottom: 10px;
+				color: #1d1d1f;
+				border-bottom: 1px solid #e0e0e0;
+				padding-bottom: 5px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="demo-container">
+				<div class="control-panel">
+					<h1>Molecule Visualization API Demo</h1>
+					<form id="molVisForm">
+						<div class="example-section">
+							<h4>Example SMILES</h4>
+							<div class="example-buttons" id="exampleSmiles">
+								<button
+									class="example-btn"
+									data-smiles="C1=CC=CC=C1"
+								>
+									Benzene
+								</button>
+								<button
+									class="example-btn"
+									data-smiles="CC(=O)OC1=CC=CC=C1C(=O)O"
+								>
+									Aspirin
+								</button>
+								<button
+									class="example-btn"
+									data-smiles="CN1C=NC2=C1C(=O)N(C(=O)N2C)C"
+								>
+									Caffeine
+								</button>
+								<button
+									class="example-btn"
+									data-smiles="C1=CC=C2C(=C1)C=CC3=CC=CC=C32"
+								>
+									Naphthalene
+								</button>
+								<button
+									class="example-btn"
+									data-smiles="Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl"
+								>
+									PCB
+								</button>
+							</div>
+							<br />
+							<h4>Example Highlights (SMARTS)</h4>
+							<div class="example-buttons" id="exampleHighlights">
+								<button
+									class="example-btn"
+									data-highlight="c1ccccc1"
+								>
+									Benzene Ring
+								</button>
+								<button
+									class="example-btn"
+									data-highlight="C(=O)O"
+								>
+									Carboxylic Acid
+								</button>
+								<button
+									class="example-btn"
+									data-highlight="C(=O)OC"
+								>
+									Ester Group
+								</button>
+								<button class="example-btn" data-highlight="CN">
+									Amine
+								</button>
+								<button class="example-btn" data-highlight="Cl">
+									Chlorine
+								</button>
+							</div>
+						</div>
+
+						<div class="url-preview" id="urlPreview">
+							URL will appear here
+							<button class="copy-btn" id="copyUrlBtn">
+								Copy
+							</button>
+						</div>
+
+						<button type="submit" id="renderBtn">
+							Render Molecule
+						</button>
+						<button type="reset" id="resetBtn">Reset Form</button>
+
+						<h3>Molecule Input</h3>
+						<div class="form-group">
+							<label for="smiles">SMILES String:</label>
+							<input
+								type="text"
+								id="smiles"
+								name="smiles"
+								value="C1=CC=CC=C1"
+								required
+							/>
+						</div>
+
+						<div class="form-group">
+							<label for="highlight"
+								>Highlight Substructure (SMARTS):</label
+							>
+							<input
+								type="text"
+								id="highlight"
+								name="highlight"
+								placeholder="e.g., c1ccccc1"
+							/>
+						</div>
+
+						<h3>Rendering Options</h3>
+						<div class="form-group">
+							<div class="checkbox-label">
+								<input type="checkbox" id="d3" name="d3" />
+								<label for="d3">Render in 3D</label>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<div class="checkbox-label">
+								<input
+									type="checkbox"
+									id="d3_rot_random"
+									name="d3_rot_random"
+									checked
+								/>
+								<label for="d3_rot_random"
+									>Random 3D rotation if not specified</label
+								>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<div class="checkbox-label">
+								<input type="checkbox" id="png" name="png" />
+								<label for="png"
+									>Render as PNG (instead of SVG)</label
+								>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label for="width">Width (pixels):</label>
+							<input
+								type="number"
+								id="width"
+								name="width"
+								value="800"
+								min="100"
+							/>
+						</div>
+
+						<div class="form-group">
+							<label for="height">Height (pixels):</label>
+							<input
+								type="number"
+								id="height"
+								name="height"
+								value="600"
+								min="100"
+							/>
+						</div>
+
+						<h3>3D Options</h3>
+						<div class="form-group">
+							<label for="d3_style">3D Style:</label>
+							<select id="d3_style" name="d3_style">
+								<option value="BALL_AND_STICK">
+									BALL_AND_STICK
+								</option>
+								<option value="SPACEFILLING">
+									SPACEFILLING
+								</option>
+								<option value="TUBE">TUBE</option>
+								<option value="WIREFRAME">WIREFRAME</option>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="d3_look">3D Look:</label>
+							<select id="d3_look" name="d3_look">
+								<option value="CARTOON">CARTOON</option>
+								<option value="GLOSSY">GLOSSY</option>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="d3_rot_x"
+								>Rotation X (60° units):</label
+							>
+							<input
+								type="number"
+								id="d3_rot_x"
+								name="d3_rot_x"
+								placeholder="Optional"
+							/>
+						</div>
+
+						<div class="form-group">
+							<label for="d3_rot_y"
+								>Rotation Y (60° units):</label
+							>
+							<input
+								type="number"
+								id="d3_rot_y"
+								name="d3_rot_y"
+								placeholder="Optional"
+							/>
+						</div>
+
+						<div class="form-group">
+							<label for="d3_rot_z"
+								>Rotation Z (60° units):</label
+							>
+							<input
+								type="number"
+								id="d3_rot_z"
+								name="d3_rot_z"
+								placeholder="Optional"
+							/>
+						</div>
+					</form>
+				</div>
+
+				<div class="preview-panel">
+					<iframe
+						id="previewFrame"
+						title="Molecule Visualization"
+					></iframe>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			document.addEventListener("DOMContentLoaded", () => {
+				const form = document.getElementById("molVisForm")
+				const urlPreview = document.getElementById("urlPreview")
+				const previewFrame = document.getElementById("previewFrame")
+				const copyUrlBtn = document.getElementById("copyUrlBtn")
+
+				// Function to update the URL and preview
+				function updatePreview() {
+					const formData = new FormData(form)
+					const params = new URLSearchParams()
+					let smiles = ""
+
+					for (const [key, value] of formData.entries()) {
+						// Only add parameters with values or checkboxes that are checked
+						if (key == "smiles") {
+							smiles = value
+						} else if (value === "on") {
+							// For checkboxes, add them as boolean true
+							params.append(key, "true")
+						} else if (value && value.trim() !== "") {
+							params.append(key, value)
+						}
+					}
+
+					// Special handling for unchecked checkboxes that we want to explicitly set to false
+					if (!formData.has("d3")) params.append("d3", "false")
+					if (!formData.has("png")) params.append("png", "false")
+					if (!formData.has("d3_rot_random"))
+						params.append("d3_rot_random", "false")
+
+					const url = `/${smiles}?${params.toString()}`
+					urlPreview.textContent = "https://molvis.onrender.com" + url
+					urlPreview.appendChild(copyUrlBtn)
+
+					// Update the iframe src
+					previewFrame.src = url
+				}
+
+				// Initially update the preview
+				updatePreview()
+
+				// Update on form submit
+				form.addEventListener("submit", (e) => {
+					e.preventDefault()
+					updatePreview()
+				})
+
+				// Update when inputs change (for real-time preview)
+				form.addEventListener("input", () => {
+					updatePreview()
+				})
+
+				// Reset button handler
+				document
+					.getElementById("resetBtn")
+					.addEventListener("click", () => {
+						setTimeout(updatePreview, 10) // Small delay to ensure form is reset first
+					})
+
+				// Copy URL button
+				copyUrlBtn.addEventListener("click", () => {
+					const url = urlPreview.textContent
+						.replace("Copy", "")
+						.trim()
+					navigator.clipboard.writeText(url).then(() => {
+						const originalText = copyUrlBtn.textContent
+						copyUrlBtn.textContent = "Copied!"
+						setTimeout(() => {
+							copyUrlBtn.textContent = originalText
+						}, 2000)
+					})
+				})
+
+				// Example SMILES buttons
+				document
+					.getElementById("exampleSmiles")
+					.addEventListener("click", (e) => {
+						if (e.target.classList.contains("example-btn")) {
+							document.getElementById("smiles").value =
+								e.target.dataset.smiles
+							updatePreview()
+						}
+					})
+
+				// Example Highlights buttons
+				document
+					.getElementById("exampleHighlights")
+					.addEventListener("click", (e) => {
+						if (e.target.classList.contains("example-btn")) {
+							document.getElementById("highlight").value =
+								e.target.dataset.highlight
+							updatePreview()
+						}
+					})
+			})
+		</script>
+	</body>
+</html>

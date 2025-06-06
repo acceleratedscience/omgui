@@ -1,12 +1,13 @@
-"""
-Render a 2D molecule from SMILES string to SVG format.
-"""
-
 from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
 
 
-def render_molecule_svg_2d(smiles, highlight=None):
+def render_molecule_svg_2d(
+    smiles: str,
+    width: int = 600,
+    height: int = 450,
+    highlight: str = None,
+) -> str:
     """
     Render a 2D molecule from SMILES string to SVG format.
 
@@ -35,7 +36,7 @@ def render_molecule_svg_2d(smiles, highlight=None):
         else:
             highlight_atoms = None
 
-        mol_drawer = rdMolDraw2D.MolDraw2DSVG(400, 300)  # pylint: disable=no-member
+        mol_drawer = rdMolDraw2D.MolDraw2DSVG(width, height)
         mol_drawer.DrawMolecule(mol_rdkit, highlightAtoms=highlight_atoms)
         mol_drawer.FinishDrawing()
         return mol_drawer.GetDrawingText()

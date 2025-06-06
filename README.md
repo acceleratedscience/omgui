@@ -29,3 +29,5 @@ Add the optional parameter `d3=1` to render the molecule in 3D.
 
 ![image](assets/hematein-3d.svg)
 ![image](assets/oxadiazon-3d.svg)
+
+<!-- source ../agenv/bin/activate -->
