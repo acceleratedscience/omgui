@@ -1,7 +1,9 @@
-# Molecular Visualisation
+# Molecular Visualization
 
-Demo visualisation API to experiment with agentic workflows.  
+Visualization API to render small molecule images on the fly.
 See it in action: [molvis.onrender.com/demo](https://molvis.onrender.com/demo)
+
+<br>
 
 ### Launch
 
@@ -12,6 +14,8 @@ pip install -r requirements.txt
 ```
 uvicorn 'main:app' --host=0.0.0.0 --port=8034 --reload
 ```
+
+<br>
 
 ### Optional parameters
 
@@ -28,6 +32,8 @@ uvicorn 'main:app' --host=0.0.0.0 --port=8034 --reload
 | d3_rot_random | bool   | 0              | Random 3D rotation if not specified                       |
 | d3_style      | str    | BALL_AND_STICK | `BALL_AND_STICK` / `SPACE_FILLING` / `TUBE` / `WIREFRAME` |
 | d3_look       | str    | CARTOON        | `CARTOON` / `GLOSSY`                                      |
+
+<br>
 
 ### Examples
 
@@ -46,6 +52,8 @@ uvicorn 'main:app' --host=0.0.0.0 --port=8034 --reload
 
 ![image](assets/hematein-3d.svg)
 ![image](assets/oxadiazon-3d.svg)
+
+<br>
 
 ### Stack
 
