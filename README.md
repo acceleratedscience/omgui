@@ -7,7 +7,18 @@ See it in action: [molvis.onrender.com/demo](https://molvis.onrender.com/demo)
 
 ### Install
 
-```
+> [!NOTE]
+> Optional: create virtual environment
+>
+> ```shell
+> python -m venv .venv
+> ```
+>
+> ```shell
+> source .venv/bin/activate
+> ```
+
+```shell
 pip install -r requirements.txt
 ```
 
