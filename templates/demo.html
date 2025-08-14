@@ -429,7 +429,7 @@
 					if (!formData.has("d3_rot_random"))
 						params.append("d3_rot_random", "false")
 
-					const url = `/${smiles}?${params.toString()}`
+					const url = `/molecule/${smiles}?${params.toString()}`
 					urlPreview.textContent = "https://molvis.onrender.com" + url
 					urlPreview.appendChild(copyUrlBtn)
 
