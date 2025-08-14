@@ -7,8 +7,8 @@ See it in action: [molvis.onrender.com/demo](https://molvis.onrender.com/demo)
 
 ### Install
 
-> [!NOTE]
-> Optional: create virtual environment
+> [!NOTE]  
+> _Optional: create virtual environment_
 >
 > ```shell
 > python -m venv .venv

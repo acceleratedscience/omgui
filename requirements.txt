@@ -4,3 +4,5 @@ rdkit
 cinemol
 cairosvg
 jinja2
+
+playwright

@@ -1,20 +1,25 @@
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, HTMLResponse
+from fastapi.responses import (
+    Response,
+    HTMLResponse,
+    StreamingResponse,
+    PlainTextResponse,
+)
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pathlib import Path
 
 # Modules
-import base64
+import json
 import logging
 from io import BytesIO
 from cairosvg import svg2png
+from urllib.parse import quote, unquote
 from pydantic import BaseModel
 from typing import Optional, Literal
 
 # Tool
-from render import render_molecule_svg_2d, render_molecule_svg_3d
+from render import render_molecule_svg_2d, render_molecule_svg_3d, screenshot
 
 
 # ------------------------------------
@@ -85,9 +90,8 @@ def demo_page(request: Request):
     return templates.TemplateResponse("demo.html", {"request": request})
 
 
-# fmt:off
 # Smiles as query parameter
-@app.get("/{smiles}", summary="Visualize any molecule from a SMILES string")
+@app.get("/molecule/{smiles}", summary="Visualize any molecule from a SMILES string")
 def visualize_molecule(
     # Input
     smiles: str,
@@ -151,8 +155,6 @@ def visualize_molecule(
             highlight=highlight,
         )
 
-    # fmt:on
-
     # Fail
     if svg_str is None:
         logger.info(f"ERROR generating SVG for SMILES: {smiles}")
@@ -182,4 +184,79 @@ def visualize_molecule(
         content=svg_str,
         media_type="image/svg+xml",
         headers={"Content-Disposition": f'inline; filename="{smiles}.svg"'},
+    )
+
+
+@app.get("/sample_data")
+async def sample_data():
+    chart_data = {
+        "labels": ["January", "February", "March", "April", "May", "June", "July"],
+        "dataset1": {
+            "label": "Dataset A",
+            "data": [65, 59, 80, 81, 56, 55, 40],
+            "backgroundColor": "red",
+            "borderColor": "purple",
+            "borderWidth": 2,
+        },
+        "dataset2": {
+            "label": "Dataset B",
+            "data": [28, 48, 40, 19, 86, 27, 90],
+            "backgroundColor": "blue",
+            "borderColor": "green",
+            "borderWidth": 4,
+        },
+    }
+
+    # Convert the dictionary to a JSON string
+    json_string = json.dumps(chart_data)
+
+    # URL-encode the JSON string
+    encoded_data = quote(json_string)
+
+    return PlainTextResponse(
+        f"{json_string}\n\n---\n\nhttp://localhost:8034/chart?data={encoded_data}"
+    )
+
+
+@app.get("/chart/png", summary="Return a PNG image of a chart from JSON data.")
+async def chart_png(data: str, width: int = 1000, height: int = 750):
+    html_url = f"http://localhost:8034/chart?screenshot=true&width={width}&height={height}&data={data}"
+    png_bytes = await screenshot(html_url)
+
+    # # Disable caching
+    # headers = {
+    #     "Cache-Control": "no-cache, no-store, must-revalidate",
+    #     "Pragma": "no-cache",
+    #     "Expires": "0",
+    # }
+
+    return StreamingResponse(
+        BytesIO(png_bytes),
+        media_type="image/png",
+        # headers=headers,
+    )
+
+
+@app.get("/chart", summary="Render a chart from JSON data.")
+async def chart(
+    request: Request,
+    data: str,
+    screenshot: bool = False,
+    width: int = 1000,
+    height: int = 750,
+):
+    decoded_data = unquote(data)
+    chart_data = json.loads(decoded_data)
+    return templates.TemplateResponse(
+        "chart.jinja",
+        {
+            "request": request,
+            "chart_data": chart_data,
+            "screenshot": screenshot,
+            "width": width,
+            "height": height,
+            "title": "Demo Chart",
+            "subtitle": "Some subtitle",
+            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tempor feugiat tortor eget pellentesque. Pellentesque quis luctus augue, eu pellentesque eros. Nullam ornare dictum odio, sit amet ullamcorper tellus tincidunt cursus. In molestie tempor augue nec elementum. Sed eu dolor quam. Sed sagittis vitae magna ullamcorper accumsan. Aenean eu tempor tellus. Donec ac consequat nisi. Aenean id lectus nibh.\n\nSed lobortis est purus, sed varius nunc viverra eget. Vivamus sit amet ligula tortor. Ut nibh sem, condimentum nec pulvinar in, suscipit vitae augue. Nam ac erat semper, semper nisi eget, consectetur nulla. Donec vitae risus et odio dignissim pharetra sit amet vitae mi. In varius dui odio, at commodo lorem aliquam eget. Vestibulum sed neque vel sem auctor feugiat eu vel arcu. Nulla facilisi. Etiam pharetra eros erat.",
+        },
     )
