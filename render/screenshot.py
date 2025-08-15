@@ -2,7 +2,7 @@ from playwright.async_api import async_playwright
 
 
 async def screenshot(
-    url: str, width: int = 1000, height: int = 750, scale_factor: int = 1
+    url: str, width: int = 1000, height: int = 750, scale: int = 1
 ) -> bytes:
     """
     Render a chart from a URL and return the screenshot as bytes.
@@ -12,7 +12,7 @@ async def screenshot(
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             viewport={"width": width, "height": height},
-            device_scale_factor=scale_factor,  # Retina resolution
+            device_scale_factor=scale,  # Retina resolution
         )
         page = await context.new_page()
         await page.set_viewport_size({"width": width, "height": height})

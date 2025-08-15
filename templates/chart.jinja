@@ -1,3 +1,9 @@
+{# Opacity for style B #}
+{% set title = title | default('') %}
+{% set subtitle = subtitle | default('') %}
+{% set body = body | default('') %}
+{% set opacity = opacity | default(0.7) %}
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -5,16 +11,27 @@
 		<title>Bar Chart</title>
 		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 		<style>
+			@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400,600&display=swap');
+
 			body,
 			html {
 				height: 100%;
 			}
 			body {
 				margin: 60px;
-				font-family: sans-serif;
+				font-family: 'IBM Plex Sans', sans-serif;
 				color: rgba(0,0,0,.7);
 				font-size: 16px;
-				{# font-weight: 300; #}
+				font-weight: 400;
+			}
+			h1, h2, h3, h4 {
+				margin: 0;
+				margin-bottom: 20px;
+				font-weight: 600;
+			}
+			#params {
+				display: block;
+				margin-bottom: 50px;
 			}
 			pre {
 				font-size: 13px;
@@ -27,8 +44,11 @@
 				border: solid 1px rgba(0,0,0,.1);
 			}
 			details {
-				margin-top: 50px;
 				cursor: pointer;
+				margin-bottom: 0;
+			}
+			details.open {
+				margin-bottom: 50px;
 			}
 			details h3 {
 				display: inline-block;
@@ -40,7 +60,7 @@
 			#the-chart-wrap {
 				width: 100%;
 				height: 600px;
-				margin-top: 100px;
+				margin-top: 50px;
 				/* max-width: 800px; */
 			}
 			#the-chart {
@@ -54,8 +74,7 @@
 		{{ ('<h2>' + subtitle + '</h2>') | safe if subtitle else '' }}
 		{{ ('<p>' + body + '</p>') | safe if body else '' }}
 		
-		<small>
-			Screenshot mode: {{ screenshot }}<br />
+		<small id="params">
 			Width: {{ width }}<br />
 			Height: {{ height }}<br />
 		</small>
@@ -65,36 +84,66 @@
 			<pre>{{ chart_data | tojson }}</pre>
 		</details>
 
+		<details open_>
+			<summary><h3>Color Palette</h3></summary>
+
+			<h4>Style A - Chromatic</h4>
+			<div style="display:flex; flex-wrap:wrap; width:407px; gap:1px; margin-bottom:10px">
+			{% for color in palette %}
+				<div style="width:50px; height:50px; margin-bottom:0px; background-color:rgba({{ color[0] }},{{ color[1] }},{{ color[2] }}, 1)"></div>
+			{% endfor %}
+			</div>
+
+			<h4>Style B - Chromatic</h4>
+			<div style="display:flex; flex-wrap:wrap; width:407px; gap:1px; margin-bottom:10px">
+			{% for color in palette %}
+				<div style="width:50px; height:50px; margin-bottom:0px; background-color:rgba({{ color[0] }},{{ color[1] }},{{ color[2] }}, {{ opacity }}); border:solid 1px rgba({{ color[0] }},{{ color[1] }},{{ color[2] }}, 1); box-sizing:border-box;"></div>
+			{% endfor %}
+			</div>
+
+			<h4>Style A - Mixed</h4>
+			<div style="display:flex; flex-wrap:wrap; width:407px; gap:1px; margin-bottom:10px">
+			{% for i in range(0,palette|length) %}
+				{% set color = palette[(i * 5) % palette|length] %}
+				<div style="width:50px; height:50px; margin-bottom:0px; background-color:rgba({{ color[0] }},{{ color[1] }},{{ color[2] }}, 1)"></div>
+			{% endfor %}
+			</div>
+
+			<h4>Style B - Mixed</h4>
+			<div style="display:flex; flex-wrap:wrap; width:407px; gap:1px; margin-bottom:10px">
+			{% for i in range(0,palette|length) %}
+				{% set color = palette[(i * 5) % palette|length] %}
+				<div style="width:50px; height:50px; margin-bottom:0px; background-color:rgba({{ color[0] }},{{ color[1] }},{{ color[2] }}, {{ opacity }}); border:solid 1px rgba({{ color[0] }},{{ color[1] }},{{ color[2] }}, 1); box-sizing:border-box;"></div>
+			{% endfor %}
+			</div>
+		</details>
+
 		<div id="the-chart-wrap" style="width: {{ width | default(800) }}px; height: {{ height | default(800) }}px">
-			<canvas
-				id="the-chart"
-				class="{{ 'screenshot' if screenshot else '' }}"
-			></canvas>
+			<canvas id="the-chart"></canvas>
 		</div>
 
 		<script>
-			const ctx = document.getElementById("the-chart").getContext("2d")
+			const ctx = document.getElementById('the-chart').getContext('2d')
+			const datasets = {{ chart_data.datasets | tojson }}
+			const opacity = {{ opacity }}
+			const style = '{{ style | default(B) }}' // A or B
+			palette = {{ palette | tojson }}
+			for (let i = 0; i < datasets.length; i++) {
+				const colorIndex = (i * 5) % palette.length
+				if (style == 'A') {
+					datasets[i].backgroundColor = `rgb(${palette[colorIndex][0]}, ${palette[colorIndex][1]}, ${palette[colorIndex][2]})`
+				} else if (style == 'B') {
+					datasets[i].backgroundColor = `rgba(${palette[colorIndex][0]}, ${palette[colorIndex][1]}, ${palette[colorIndex][2]}, ${opacity})`
+					datasets[i].borderColor = `rgba(${palette[colorIndex][0]}, ${palette[colorIndex][1]}, ${palette[colorIndex][2]}, 1)`
+					datasets[i].borderWidth = datasets[i].borderWidth || 1
+				}
+			}
 
 			const theChart = new Chart(ctx, {
 				type: "bar",
 				data: {
 					labels: {{ chart_data.labels | tojson }},
-					datasets: [
-						{
-							label: "{{ chart_data.dataset1.label }}",
-							data: {{ chart_data.dataset1.data | tojson }},
-							backgroundColor: "{{ chart_data.dataset1.backgroundColor | default('rgba(255, 99, 132, 0.5)') }}",
-							borderColor: "{{ chart_data.dataset1.borderColor | default('rgba(255, 99, 132, 1)') }}",
-							borderWidth: {{ chart_data.dataset1.borderWidth | default(1) }},
-						},
-						{
-							label: "{{ chart_data.dataset2.label }}",
-							data: {{ chart_data.dataset2.data | tojson }},
-							backgroundColor: "{{ chart_data.dataset2.backgroundColor | default('rgba(54, 162, 235, 0.5)') }}",
-							borderColor: "{{ chart_data.dataset2.borderColor | default('rgba(54, 162, 235, 1)') }}",
-							borderWidth: {{ chart_data.dataset2.borderWidth | default(1) }},
-						},
-					],
+					datasets
 				},
 				options: {
 					animation: false,
@@ -105,7 +154,7 @@
 						padding: {
 							left: 40,
 							right: 40,
-							top: 30,
+							top: 40,
 							bottom: 30,
 						},
 					},
@@ -114,6 +163,30 @@
 							beginAtZero: true,
 						},
 					},
+					plugins: {
+						legend: {
+							position: 'bottom',
+							align: 'start',
+							labels: {
+								font: { family: '"IBM Plex Sans", sans-serif' }
+							},
+							title: {
+								display: true,
+								text: '' // Empty title is used to create some padding between labels and graph
+							},
+						},
+						title: {
+							display: true,
+							text: '{{ title }}',
+							position: 'top',
+							align: 'start',
+							fullSize: true,
+							padding: {
+								bottom: 30,
+							},
+							font: { family: '"IBM Plex Sans", sans-serif', weight: 'bold', size: 18 }
+						}
+					}
 				},
 			})
 		</script>

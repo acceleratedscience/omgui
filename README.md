@@ -1,3 +1,5 @@
+<!-- playwright install chromium -->
+
 # Molecular Visualization
 
 Visualization server to render 2D and 3D small molecule images on the fly.  

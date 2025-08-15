@@ -47,7 +47,7 @@ app.add_middleware(
 templates = Jinja2Templates(directory="templates")
 
 # Mount static files directory if needed
-# app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 class SmilesPayload(BaseModel):
@@ -63,31 +63,48 @@ class SmilesPayload(BaseModel):
 @app.get("/", summary="Example links")
 def examples():
     response = [
-        "<a href='/demo'><button>Interactive demo</button></a>",
+        "<a href='/demo/molecules'><button>Interactive molecule demo</button></a><br>",
+        "<a href='/demo/charts'><button>Interactive chart demo</button></a>",
         "",
-        "Example usage:<br>",
-        "<a href='/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl'>2D example A</a>",
-        "<a href='/CC(=O)OC1=CC=CC=C1C(=O)O'>2D example B (Aspirin)</a>",
-        "<a href='/CN1C=NC2=C1C(=O)N(C(=O)N2C)C'>2D example C (Caffeine)</a>",
+        "<b>Molecule examples:</b>",
+        "<a href='/molecule/CC(=O)OC1=CC=CC=C1C(=O)O'>2D example A (Aspirin)</a>",
+        "<a href='/molecule/CN1C=NC2=C1C(=O)N(C(=O)N2C)C'>2D example B (Caffeine)</a>",
+        "<a href='/molecule/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl'>2D example C (PCB 202)</a>",
         "",
-        "<a href='/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl?d3=1'>3D example A</a>",
-        "<a href='/CC(=O)OC1=CC=CC=C1C(=O)O?d3=1'>3D example B (Aspirin)</a>",
-        "<a href='/CN1C=NC2=C1C(=O)N(C(=O)N2C)C?d3=1'>3D example C (Caffeine)</a>",
+        "<a href='/molecule/CC(=O)OC1=CC=CC=C1C(=O)O?d3=1'>3D example A (Aspirin)</a>",
+        "<a href='/molecule/CN1C=NC2=C1C(=O)N(C(=O)N2C)C?d3=1'>3D example B (Caffeine)</a>",
+        "<a href='/molecule/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl?d3=1'>3D example C (PCB 202)</a>",
     ]
     response_str = "<br>".join(response)
     return Response(content=response_str, media_type="text/html")
 
 
-# Demo
+# Demo page - molecules
 @app.get(
-    "/demo", response_class=HTMLResponse, summary="Interactive demo UI for the API"
+    "/demo/molecules",
+    response_class=HTMLResponse,
+    summary="Interactive demo UI for the molecules API",
 )
-def demo_page(request: Request):
+def demo_molecules(request: Request):
     """
     Interactive HTML demo page for the Molecule Visualization API.
     Provides a user interface with controls for all API parameters.
     """
-    return templates.TemplateResponse("demo.html", {"request": request})
+    return templates.TemplateResponse("demo-molecules.html", {"request": request})
+
+
+# Demo page - charts
+@app.get(
+    "/demo/charts",
+    response_class=HTMLResponse,
+    summary="Interactive demo UI for the charts API",
+)
+def chart_molecules(request: Request):
+    """
+    Interactive HTML demo page for the Charts API.
+    Provides a user interface with controls for all API parameters.
+    """
+    return templates.TemplateResponse("demo-charts.html", {"request": request})
 
 
 # Smiles as query parameter
@@ -189,28 +206,23 @@ def visualize_molecule(
 
 @app.get("/sample_data")
 async def sample_data():
+    import random
+
     chart_data = {
-        "labels": ["January", "February", "March", "April", "May", "June", "July"],
-        "dataset1": {
-            "label": "Dataset A",
-            "data": [65, 59, 80, 81, 56, 55, 40],
-            "backgroundColor": "red",
-            "borderColor": "purple",
-            "borderWidth": 2,
-        },
-        "dataset2": {
-            "label": "Dataset B",
-            "data": [28, 48, 40, 19, 86, 27, 90],
-            "backgroundColor": "blue",
-            "borderColor": "green",
-            "borderWidth": 4,
-        },
+        "labels": ["January", "February", "March"],
+        "datasets": [],
     }
 
-    # Convert the dictionary to a JSON string
-    json_string = json.dumps(chart_data)
+    for i in range(0, 16):
+        chart_data["datasets"].append(
+            {
+                "label": f"Dataset {i}",
+                "data": [random.randint(0, 100) for _ in range(0, 3)],
+            }
+        )
 
-    # URL-encode the JSON string
+    # Convert the dictionary to a URL-encode JSON string
+    json_string = json.dumps(chart_data)
     encoded_data = quote(json_string)
 
     return PlainTextResponse(
@@ -219,21 +231,22 @@ async def sample_data():
 
 
 @app.get("/chart/png", summary="Return a PNG image of a chart from JSON data.")
-async def chart_png(data: str, width: int = 1000, height: int = 750):
-    html_url = f"http://localhost:8034/chart?screenshot=true&width={width}&height={height}&data={data}"
-    png_bytes = await screenshot(html_url)
-
-    # # Disable caching
-    # headers = {
-    #     "Cache-Control": "no-cache, no-store, must-revalidate",
-    #     "Pragma": "no-cache",
-    #     "Expires": "0",
-    # }
+async def chart_png(
+    data: str,
+    width: int = 1000,
+    height: int = 750,
+    title: str = None,
+    #
+    # PNG parameters
+    scale: int = 1,
+):
+    data = quote(data)
+    html_url = f"http://localhost:8034/chart?width={width}&height={height}&title={title}&data={data}"
+    png_bytes = await screenshot(html_url, scale=scale)
 
     return StreamingResponse(
         BytesIO(png_bytes),
         media_type="image/png",
-        # headers=headers,
     )
 
 
@@ -241,22 +254,68 @@ async def chart_png(data: str, width: int = 1000, height: int = 750):
 async def chart(
     request: Request,
     data: str,
-    screenshot: bool = False,
     width: int = 1000,
     height: int = 750,
+    title: str = None,
+    #
+    # Interactive parameters
+    subtitle: str = None,
+    body: str = None,
 ):
     decoded_data = unquote(data)
     chart_data = json.loads(decoded_data)
+    palette = [
+        # v1
+        # (204, 129, 130),
+        # (204, 173, 129),
+        # (203, 204, 127),
+        # (174, 204, 129),
+        # (129, 204, 173),
+        # (129, 173, 204),
+        # (173, 129, 204),
+        # (203, 129, 205),
+        # v2 - color shift
+        # (216, 129, 150),
+        # (220, 173, 155),
+        # (223, 204, 158),
+        # (189, 204, 158),
+        # (139, 204, 208),
+        # (138, 173, 239),
+        # (183, 129, 235),
+        # (216, 129, 239),
+        # v3 - desat
+        (203, 136, 151),
+        (212, 176, 162),
+        (219, 205, 169),
+        (191, 203, 168),
+        (153, 202, 205),
+        (148, 173, 224),
+        (177, 135, 216),
+        (205, 138, 222),
+        #
+        # Full color
+        (231, 96, 105),
+        (238, 147, 109),
+        (243, 186, 112),
+        (208, 185, 111),
+        (155, 185, 158),
+        (153, 145, 193),
+        (198, 96, 191),
+        (232, 97, 193),
+        #
+    ]
     return templates.TemplateResponse(
         "chart.jinja",
         {
             "request": request,
             "chart_data": chart_data,
-            "screenshot": screenshot,
+            "palette": palette,
+            "style": "B",
+            # "opacity": 0.5,
             "width": width,
             "height": height,
-            "title": "Demo Chart",
-            "subtitle": "Some subtitle",
-            "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tempor feugiat tortor eget pellentesque. Pellentesque quis luctus augue, eu pellentesque eros. Nullam ornare dictum odio, sit amet ullamcorper tellus tincidunt cursus. In molestie tempor augue nec elementum. Sed eu dolor quam. Sed sagittis vitae magna ullamcorper accumsan. Aenean eu tempor tellus. Donec ac consequat nisi. Aenean id lectus nibh.\n\nSed lobortis est purus, sed varius nunc viverra eget. Vivamus sit amet ligula tortor. Ut nibh sem, condimentum nec pulvinar in, suscipit vitae augue. Nam ac erat semper, semper nisi eget, consectetur nulla. Donec vitae risus et odio dignissim pharetra sit amet vitae mi. In varius dui odio, at commodo lorem aliquam eget. Vestibulum sed neque vel sem auctor feugiat eu vel arcu. Nulla facilisi. Etiam pharetra eros erat.",
+            "title": title,
+            "subtitle": subtitle,
+            "body": body,
         },
     )
