@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Plotly.js Stock Ticker Example</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+  <h1>Stock Ticker with Plotly.js</h1>
+  <div id="myChart" style="width:100%; max-width:700px; height:500px;"></div>
+
+  <script>
+    // Sample data for a stock ticker
+    var data = [{
+      x: ['2023-11-01', '2023-11-02', '2023-11-03', '2023-11-04', '2023-11-05'],
+      open: [150, 155, 148, 160, 158],
+      high: [158, 162, 152, 165, 163],
+      low: [147, 153, 145, 157, 155],
+      close: [155, 149, 160, 158, 161],
+      type: 'candlestick',
+      name: 'My Stock'
+    }];
+
+    // Define the layout of the chart
+    var layout = {
+      title: 'Candlestick Chart Example',
+      xaxis: {
+        title: 'Date',
+        rangeslider: {visible: false} // You can enable this to show a range slider
+      },
+      yaxis: {
+        title: 'Price ($)'
+      }
+    };
+
+    // Render the chart in the div with the id "myChart"
+    Plotly.newPlot('myChart', data, layout);
+  </script>
+
+</body>
+</html>
