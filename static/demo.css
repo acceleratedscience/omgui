@@ -142,14 +142,17 @@ button.tense {
 }
 .copy-btn {
 	position: absolute;
-	right: 10px;
-	top: 10px;
+	right: 7px;
+	top: 7px;
 	background: #e0e0e0;
 	color: #333;
 	border: none;
 	border-radius: 3px;
-	padding: 5px 10px;
 	font-size: 12px;
+	height: 22px;
+	line-height: 22px;
+	margin: 0;
+	padding: 0 8px;
 	cursor: pointer;
 }
 .copy-btn:hover {
@@ -184,10 +187,12 @@ button.tense {
 	border-radius: 3px;
 	margin-bottom: 20px;
 }
-.example-buttons {
+.example-section > .example-buttons {
 	display: flex;
 	flex-wrap: wrap;
-	margin-top: 10px;
+}
+.example-section > .example-buttons:not(:last-child) {
+	margin-bottom: 20px;
 }
 .example-btn {
 	background: #fff;
@@ -197,6 +202,8 @@ button.tense {
 	border-radius: 3px;
 	font-size: 14px;
 	cursor: pointer;
+	margin-top: 10px;
+	margin-right: 10px;
 }
 .example-btn:last-child {
 	margin-right: 0;

@@ -5,3 +5,6 @@ _*
 .venv
 test*
 todo.txt
+data_files/*
+!data_files/sample-*
+!data_files/README.md

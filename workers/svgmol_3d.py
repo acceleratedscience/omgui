@@ -11,7 +11,7 @@ from cinemol.api import Atom, Bond, Look, Style, draw_molecule
 logger = logging.getLogger(__name__)
 
 
-def render_molecule_svg_3d(
+def render(
     # fmt: off
     smiles: str,
     width: Optional[int] = 600,

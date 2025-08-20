@@ -164,16 +164,17 @@
 			const title = "{{ title if title is not none else '' }}"
 			const subtitle = "{{ subtitle if subtitle is not none else '' }}"
 			const body = "{{ body if body is not none else '' }}"
-			const xTitle = "{{ xTitle if xTitle is not none else '' }}"
-			const yTitle = "{{ yTitle if yTitle is not none else '' }}"
-			const xPrefix = "{{ xPrefix if xPrefix is not none else '' }}"
-			const yPrefix = "{{ yPrefix if yPrefix is not none else '' }}"
-			const xSuffix = "{{ xSuffix if xSuffix is not none else '' }}"
-			const ySuffix = "{{ ySuffix if ySuffix is not none else '' }}"
+			const xTitle = "{{ x_title if x_title is not none else '' }}"
+			const yTitle = "{{ y_title if y_title is not none else '' }}"
+			const xPrefix = "{{ x_prefix if x_prefix is not none else '' }}"
+			const yPrefix = "{{ y_prefix if y_prefix is not none else '' }}"
+			const xSuffix = "{{ x_suffix if x_suffix is not none else '' }}"
+			const ySuffix = "{{ y_suffix if y_suffix is not none else '' }}"
 			const opacity = {{ opacity }}
 
 			// Boxplot specific options
 			const boxmode = "{{ boxmode if boxmode is not none else 'overlay' }}"
+			const barmode = "{{ barmode if barmode is not none else 'group' }}" //  stack | group | overlay | relative
 
 			// Style constants
 			const colorText = "#777"
@@ -188,6 +189,9 @@
 			const layout = {
 				title: {
 					text: title,
+					y: 0.9,
+					yanchor: "top",
+					yref: "container",
 					font: {
 						family,
 						weight: weightBold,
@@ -205,7 +209,7 @@
 				margin: {
 					l: 100,
 					r: 80,
-					t: 100,
+					t: 140, // 100
 					b: 90,
 				},
 				xaxis: {
@@ -283,8 +287,8 @@
 				// Boxplot chart options
 				boxmode,
 				
-				// Histogram chart options
-				barmode: "overlay",
+				// Histogram/bar chart options
+				barmode,
 			}
 
 			// Chart configuration

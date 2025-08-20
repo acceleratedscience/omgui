@@ -2,7 +2,7 @@ from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
 
 
-def render_molecule_svg_2d(
+def render(
     smiles: str,
     width: int = 600,
     height: int = 450,

@@ -1,5 +1,12 @@
-from fastapi import FastAPI, HTTPException, Query, Request, Depends
+# ------------------------------------
+# region - Imports
+# ------------------------------------
+
+# Fast API
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, Query, Request, Depends
 from fastapi.responses import (
     Response,
     HTMLResponse,
@@ -7,8 +14,6 @@ from fastapi.responses import (
     PlainTextResponse,
     RedirectResponse,
 )
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
 # Modules
 import os
@@ -16,12 +21,12 @@ import json
 import logging
 from io import BytesIO
 from cairosvg import svg2png
-from urllib.parse import quote, unquote
 from pydantic import BaseModel
 from typing import Optional, Literal
+from urllib.parse import quote, unquote
 
-# Tool
-from render import render_molecule_svg_2d, render_molecule_svg_3d, screenshot
+# Tools
+from workers import svgmol_2d, svgmol_3d, sampler, screenshot
 
 # Color palette for charts
 palette = [
@@ -66,8 +71,9 @@ palette = [
 ]
 
 
+# endregion
 # ------------------------------------
-# Setup
+# region - Setup
 # ------------------------------------
 
 
@@ -98,8 +104,9 @@ class SmilesPayload(BaseModel):
     smiles: str
 
 
+# endregion
 # ------------------------------------
-# Routes
+# region - Routes: General
 # ------------------------------------
 
 
@@ -151,6 +158,12 @@ def chart_molecules(request: Request):
     return templates.TemplateResponse("demo-charts.html", {"request": request})
 
 
+# endregion
+# ------------------------------------
+# region - Routes: Molecules
+# ------------------------------------
+
+
 # Smiles as query parameter
 @app.get("/molecule/{smiles}", summary="Visualize any molecule from a SMILES string")
 def visualize_molecule(
@@ -195,7 +208,7 @@ def visualize_molecule(
 
     # Render molecule SVG
     if d3 is True:
-        svg_str = render_molecule_svg_3d(
+        svg_str = svgmol_3d.render(
             smiles,
             width=width,
             height=height,
@@ -209,7 +222,7 @@ def visualize_molecule(
             rot_z=d3_rot_z,
         )
     else:
-        svg_str = render_molecule_svg_2d(
+        svg_str = svgmol_2d.render(
             smiles,
             width=width,
             height=height,
@@ -248,40 +261,112 @@ def visualize_molecule(
     )
 
 
-@app.get(
-    "/g/{chart_type}",
-    summary="Generate random data for various chart types",
-)
+# endregion
+# ------------------------------------
+# region - Chart functions
+# ------------------------------------
+
+
+def chart_options(
+    # fmt: off
+    width: Optional[int] | Literal['auto'] = Query(None, description="Width of the chart"),
+    height: Optional[int] | Literal['auto'] = Query(None, description="Height of the chart"),
+    title: Optional[str] = Query(None, description="Chart title"),
+    subtitle: Optional[str] = Query(None, description="Chart subtitle"),
+    body: Optional[str] = Query(None, description="Paragraph displayed in the HTML page only"),
+    x_title: Optional[str] = Query(None, description="Title for the x axis"),
+    y_title: Optional[str] = Query(None, description="Title for the y axis"),
+    x_prefix: Optional[str] = Query(None, description="Prefix for the x axis labels"),
+    y_prefix: Optional[str] = Query(None, description="Prefix for the y axis labels"),
+    x_suffix: Optional[str] = Query(None, description="Suffix for the x axis labels"),
+    y_suffix: Optional[str] = Query(None, description="Suffix for the y axis labels"),
+    # fmt: on
+):
+    """
+    Shared chart options from query parameters.
+    """
+    return {
+        "width": width,
+        "height": height,
+        "title": title,
+        "subtitle": subtitle,
+        "body": body,
+        "x_title": x_title,
+        "y_title": y_title,
+        "x_prefix": x_prefix,
+        "y_prefix": y_prefix,
+        "x_suffix": x_suffix,
+        "y_suffix": y_suffix,
+    }
+
+
+def compile_template_response(
+    request: Request,
+    chart_data: list[dict],
+    input_data: list[dict] = None,
+    options: dict = {},
+    additional_options: dict = None,
+):
+    """
+    Shared template response for all charts.
+    """
+
+    return templates.TemplateResponse(
+        "chart.jinja",
+        {
+            "request": request,
+            "input_data": input_data,
+            "chart_data": chart_data,
+            "palette": palette,
+            # Options
+            "width": options.get("width"),
+            "height": options.get("height"),
+            "title": options.get("title"),
+            "subtitle": options.get("subtitle"),
+            "body": options.get("body"),
+            "x_title": options.get("x_title"),
+            "y_title": options.get("y_title"),
+            "x_prefix": options.get("x_prefix"),
+            "y_prefix": options.get("y_prefix"),
+            "x_suffix": options.get("x_suffix"),
+            "y_suffix": options.get("y_suffix"),
+            # Additional options for specific charts
+            **(additional_options if additional_options is not None else {}),
+        },
+    )
+
+
+# endregion
+# ------------------------------------
+# region - Routes: Charts
+# ------------------------------------
+
+
+@app.get("/r/{chart_type}", summary="Generate random data for various chart types")
 async def random_data(
+    request: Request,
     chart_type: str,
     raw: Optional[bool] = Query(False),
     display: Optional[bool] = Query(False),
 ):
-    from fx.fx import (
-        sample_scatter,
-        sample_line,
-        sample_bubble,
-        sample_pie,
-        sample_bar,
-        sample_boxplot,
-        sample_histogram,
-    )
 
     chart_data = None
     if chart_type == "scatter":
-        chart_data = sample_scatter()
+        chart_data = sampler.scatter()
     elif chart_type == "line":
-        chart_data = sample_line()
+        chart_data = sampler.line()
     elif chart_type == "bubble":
-        chart_data = sample_bubble()
+        chart_data = sampler.bubble()
     elif chart_type == "pie":
-        chart_data = sample_pie()
+        chart_data = sampler.pie()
     elif chart_type == "bar":
-        chart_data = sample_bar()
+        chart_data = sampler.bar()
     elif chart_type == "boxplot":
-        chart_data = sample_boxplot()
+        chart_data = sampler.boxplot()
+    elif chart_type == "boxplot-group":
+        chart_data = sampler.boxplot(group=True)
     elif chart_type == "histogram":
-        chart_data = sample_histogram()
+        chart_data = sampler.histogram()
     else:
         return f"Invalid chart type '{chart_type}'"
 
@@ -289,8 +374,22 @@ async def random_data(
     json_string = json.dumps(chart_data, indent=2)
     encoded_data = quote(json_string)
 
+    # Get additional query parameters (excluding the ones we already handle)
+    additional_params = {}
+    for key, value in request.query_params.items():
+        if key not in ["raw", "display"]:
+            additional_params[key] = value
+
+    # Build additional parameters string for URL
+    additional_params_str = ""
+    if additional_params:
+        additional_params_str = "&" + "&".join(
+            [f"{k}={v}" for k, v in additional_params.items()]
+        )
+
     # Compile URL
-    url = f"http://localhost:8034/chart/{chart_type}?data={encoded_data}"
+    chart_type = "boxplot" if chart_type == "boxplot-group" else chart_type
+    url = f"http://localhost:8034/chart/{chart_type}?data={encoded_data}{additional_params_str}"
 
     #
     #
@@ -310,63 +409,138 @@ async def random_data(
         return RedirectResponse(url=url)
 
 
-def chart_options(
-    width: Optional[int] = Query(None, description="Width of the chart"),
-    height: Optional[int] = Query(None, description="Height of the chart"),
-    title: Optional[str] = Query(None, description="Chart title"),
-    subtitle: Optional[str] = Query(None, description="Chart subtitle"),
-    body: Optional[str] = Query(
-        None, description="Paragraph displayed in the HTML page only"
+# Bar chart
+# - - -
+# https://plotly.com/javascript/bar-charts/
+@app.get("/chart/bar", summary="Render a bar chart from URL data")
+async def chart_bar(
+    request: Request,
+    data_json: str = Query(..., alias="data"),
+    options: dict = Depends(chart_options),
+    horizontal: bool = Query(
+        False, alias="h", description="Render bar chart horizontally"
     ),
-    xTitle: Optional[str] = Query(None, description="Title for the x axis"),
-    yTitle: Optional[str] = Query(None, description="Title for the y axis"),
-    xPrefix: Optional[str] = Query(None, description="Prefix for the x axis labels"),
-    yPrefix: Optional[str] = Query(None, description="Prefix for the y axis labels"),
-    xSuffix: Optional[str] = Query(None, description="Suffix for the x axis labels"),
-    ySuffix: Optional[str] = Query(None, description="Suffix for the y axis labels"),
+    barmode: Literal["stack", "group", "overlay", "relative"] = Query(
+        "group", description="Bar mode for bar chart"
+    ),
 ):
-    return {
-        "width": width,
-        "height": height,
-        "title": title,
-        "subtitle": subtitle,
-        "body": body,
-        "xTitle": xTitle,
-        "yTitle": yTitle,
-        "xPrefix": xPrefix,
-        "yPrefix": yPrefix,
-        "xSuffix": xSuffix,
-        "ySuffix": ySuffix,
-    }
+
+    # Parse URL params
+    input_data = json.loads(unquote(data_json))
+
+    # Compile Plotly data object
+    chart_data = []
+    for [_, ds] in enumerate(input_data):
+        if horizontal:
+            chart_data.append(
+                {
+                    "type": "bar",
+                    "name": ds["name"],
+                    "y": ds["keys"],
+                    "x": ds["values"],
+                    "orientation": "h",
+                    # "opacity": 0.5,
+                }
+            )
+        else:
+            chart_data.append(
+                {
+                    "type": "bar",
+                    "name": ds["name"],
+                    "x": ds["keys"],
+                    "y": ds["values"],
+                    # "opacity": 0.5,
+                }
+            )
+
+    return compile_template_response(
+        request,
+        chart_data,
+        input_data,
+        options,
+        {"barmode": barmode},
+    )
 
 
+# Line chart
+# - - -
+# https://plotly.com/javascript/line-charts/
 @app.get("/chart/line", summary="Render a line chart from URL data")
 async def chart_line(
     request: Request,
-    data_json: str = Query(
-        ..., alias="data"
-    ),  # [{ name: 'Foo', x: [1,2,3], y: [4,5,6] }, { name: 'Bar', x: [10,11,12], y: [13,14,15] }]
+    data_json: str = Query(..., alias="data"),
     options: dict = Depends(chart_options),
+    horizontal: bool = Query(
+        False, alias="h", description="Render line chart horizontally"
+    ),
 ):
-    return response_line_scatter(request, data_json, "lines", options)
+    # Parse URL params
+    input_data = json.loads(unquote(data_json))
+
+    # Compile Plotly data object
+    chart_data = []
+    for [_, ds] in enumerate(input_data):
+        if horizontal:
+            chart_data.append(
+                {
+                    "type": "scatter",
+                    "mode": "lines",
+                    "name": ds["name"],
+                    "x": ds["y"],
+                    "y": ds["x"],
+                }
+            )
+        else:
+            chart_data.append(
+                {
+                    "type": "scatter",
+                    "mode": "lines",  # <--
+                    "name": ds["name"],
+                    "x": ds["x"],
+                    "y": ds["y"],
+                }
+            )
+
+    return compile_template_response(
+        request,
+        chart_data,
+        input_data,
+        options,
+    )
 
 
-class DatasetScatter:
-    name: Optional[str]
-    x: list[int | float | str]
-    y: list[int | float | str]
-
-
+# Scatter chart
+# - - -
+# https://plotly.com/javascript/line-and-scatter/
 @app.get("/chart/scatter", summary="Render a line chart from URL data")
 async def chart_scatter(
     request: Request,
-    data_json: str = Query(
-        ..., alias="data"
-    ),  # [{ name: 'Foo', x: [1,2,3], y: [4,5,6] }, { name: 'Bar', x: [10,11,12], y: [13,14,15] }]
+    data_json: str = Query(..., alias="data"),
     options: dict = Depends(chart_options),
 ):
 
-    return response_line_scatter(request, data_json, "markers", options)
+    # Parse URL params
+    input_data = json.loads(unquote(data_json))
+
+    # Compile Plotly data object
+    chart_data = []
+    for [_, ds] in enumerate(input_data):
+        chart_data.append(
+            {
+                "type": "scatter",
+                "mode": "markers",  # <--
+                "name": ds["name"],
+                "x": ds["x"],
+                "y": ds["y"],
+            }
+        )
+
+    return compile_template_response(
+        request,
+        chart_data,
+        input_data,
+        options,
+    )
 
 
 from enum import Enum
@@ -377,51 +551,9 @@ class ChartModes(Enum):
     PLOT: str = "markers"
 
 
-def response_line_scatter(
-    request,
-    data_json,
-    mode: ChartModes,
-    options,
-):
-    # Parse URL params
-    input_data = json.loads(unquote(data_json))
-
-    # Compile Plotly data object
-    chart_data = []
-    for [_, ds] in enumerate(input_data):
-        chart_data.append(
-            {
-                "type": "scatter",
-                "mode": mode,  # <--
-                "name": ds["name"],
-                "x": ds["x"],
-                "y": ds["y"],
-            }
-        )
-
-    return templates.TemplateResponse(
-        "chart.jinja",
-        {
-            "request": request,
-            "input_data": input_data,
-            "chart_data": chart_data,
-            "palette": palette,
-            # Options
-            "width": options["width"],
-            "height": options["height"],
-            "title": options["title"],
-            "subtitle": options["subtitle"],
-            "body": options["body"],
-            "xTitle": options["xTitle"],
-            "yTitle": options["yTitle"],
-            "xPrefix": options["xPrefix"],
-            "yPrefix": options["yPrefix"],
-            "xSuffix": options["xSuffix"],
-            "ySuffix": options["ySuffix"],
-        },
-    )
-
-
+# Bubble chart
+# - - -
+# https://plotly.com/javascript/bubble-charts/
 @app.get("/chart/bubble", summary="Render a bubble chart from URL data")
 async def chart_bubble(
     request: Request,
@@ -446,29 +578,17 @@ async def chart_bubble(
             }
         )
 
-    return templates.TemplateResponse(
-        "chart.jinja",
-        {
-            "request": request,
-            "input_data": input_data,
-            "chart_data": chart_data,
-            "palette": palette,
-            # Options
-            "width": options["width"],
-            "height": options["height"],
-            "title": options["title"],
-            "subtitle": options["subtitle"],
-            "body": options["body"],
-            "xTitle": options["xTitle"],
-            "yTitle": options["yTitle"],
-            "xPrefix": options["xPrefix"],
-            "yPrefix": options["yPrefix"],
-            "xSuffix": options["xSuffix"],
-            "ySuffix": options["ySuffix"],
-        },
+    return compile_template_response(
+        request,
+        chart_data,
+        input_data,
+        options,
     )
 
 
+# Pie chart
+# - - -
+# https://plotly.com/javascript/pie-charts/
 @app.get("/chart/pie", summary="Render a bubble chart from URL data")
 async def chart_pie(
     request: Request,
@@ -490,81 +610,11 @@ async def chart_pie(
             }
         )
 
-    return templates.TemplateResponse(
-        "chart.jinja",
-        {
-            "request": request,
-            "input_data": input_data,
-            "chart_data": chart_data,
-            "palette": palette,
-            # Options
-            "width": options["width"],
-            "height": options["height"],
-            "title": options["title"],
-            "subtitle": options["subtitle"],
-            "body": options["body"],
-            "xTitle": options["xTitle"],
-            "yTitle": options["yTitle"],
-            "xPrefix": options["xPrefix"],
-            "yPrefix": options["yPrefix"],
-            "xSuffix": options["xSuffix"],
-            "ySuffix": options["ySuffix"],
-        },
-    )
-
-
-@app.get("/chart/bar", summary="Render a bar chart from URL data")
-async def chart_bar(
-    request: Request,
-    data_json: str = Query(..., alias="data"),
-    options: dict = Depends(chart_options),
-    horizontal: bool = Query(False, description="Render bar chart horizontally"),
-):
-
-    # Parse URL params
-    input_data = json.loads(unquote(data_json))
-
-    # Compile Plotly data object
-    chart_data = []
-    for [_, ds] in enumerate(input_data):
-        if horizontal:
-            chart_data.append(
-                {
-                    "type": "bar",
-                    "y": ds["keys"],
-                    "x": ds["values"],
-                }
-            )
-        else:
-            chart_data.append(
-                {
-                    "type": "bar",
-                    "name": ds["name"],
-                    "x": ds["keys"],
-                    "y": ds["values"],
-                }
-            )
-
-    return templates.TemplateResponse(
-        "chart.jinja",
-        {
-            "request": request,
-            "input_data": input_data,
-            "chart_data": chart_data,
-            "palette": palette,
-            # Options
-            "width": options["width"],
-            "height": options["height"],
-            "title": options["title"],
-            "subtitle": options["subtitle"],
-            "body": options["body"],
-            "xTitle": options["xTitle"],
-            "yTitle": options["yTitle"],
-            "xPrefix": options["xPrefix"],
-            "yPrefix": options["yPrefix"],
-            "xSuffix": options["xSuffix"],
-            "ySuffix": options["ySuffix"],
-        },
+    return compile_template_response(
+        request,
+        chart_data,
+        input_data,
+        options,
     )
 
 
@@ -577,8 +627,10 @@ async def chart_boxplot(
     data_json: str = Query(..., alias="data"),
     options: dict = Depends(chart_options),
     # Boxplot specific options
-    horizontal: bool = Query(False, description="Render box plot horizontally"),
-    show_points: bool = Query(True, description="Show data points on the box plot"),
+    horizontal: bool = Query(
+        False, alias="h", description="Render box plot horizontally"
+    ),
+    show_points: bool = Query(False, description="Show data points on the box plot"),
     boxmean: Literal[
         True, "True", "true", "1", False, "False", "false", "0", "sd"
     ] = Query(False, description="Show mean and standard deviation on the box plot"),
@@ -631,28 +683,12 @@ async def chart_boxplot(
             }
         )
 
-    return templates.TemplateResponse(
-        "chart.jinja",
-        {
-            "request": request,
-            "input_data": input_data,
-            "chart_data": chart_data,
-            "palette": palette,
-            # Options
-            "width": options["width"],
-            "height": options["height"],
-            "title": options["title"],
-            "subtitle": options["subtitle"],
-            "body": options["body"],
-            "xTitle": options["xTitle"],
-            "yTitle": options["yTitle"],
-            "xPrefix": options["xPrefix"],
-            "yPrefix": options["yPrefix"],
-            "xSuffix": options["xSuffix"],
-            "ySuffix": options["ySuffix"],
-            # Boxplot specific options
-            "boxmode": boxmode,
-        },
+    return compile_template_response(
+        request,
+        chart_data,
+        input_data,
+        options,
+        {"boxmode": boxmode},
     )
 
 
@@ -664,7 +700,12 @@ async def chart_histogram(
     request: Request,
     data_json: str = Query(..., alias="data"),
     options: dict = Depends(chart_options),
-    horizontal: bool = Query(False, description="Render histogram chart horizontally"),
+    horizontal: bool = Query(
+        False, alias="h", description="Render histogram chart horizontally"
+    ),
+    barmode: Literal["stack", "group", "overlay", "relative"] = Query(
+        "overlay", description="Bar mode for histogram chart"
+    ),
 ):
 
     # Parse URL params
@@ -679,7 +720,7 @@ async def chart_histogram(
                     "type": "histogram",
                     "name": ds.get("name"),
                     "y": ds.get("values"),
-                    "opacity": 0.5,
+                    "opacity": 1 if barmode == "stack" else 0.5,
                 }
             )
         else:
@@ -688,32 +729,20 @@ async def chart_histogram(
                     "type": "histogram",
                     "name": ds.get("name"),
                     "x": ds.get("values"),
-                    "opacity": 0.5,
+                    "opacity": 1 if barmode == "stack" else 0.5,
                 }
             )
 
-    return templates.TemplateResponse(
-        "chart.jinja",
-        {
-            "request": request,
-            "input_data": input_data,
-            "chart_data": chart_data,
-            "palette": palette,
-            # Options
-            "width": options["width"],
-            "height": options["height"],
-            "title": options["title"],
-            "subtitle": options["subtitle"],
-            "body": options["body"],
-            "xTitle": options["xTitle"],
-            "yTitle": options["yTitle"],
-            "xPrefix": options["xPrefix"],
-            "yPrefix": options["yPrefix"],
-            "xSuffix": options["xSuffix"],
-            "ySuffix": options["ySuffix"],
-        },
+    return compile_template_response(
+        request,
+        chart_data,
+        input_data,
+        options,
+        {"barmode": barmode},
     )
 
+
+# endregion
 
 #
 #
@@ -739,38 +768,21 @@ async def chart_files():
     return HTMLResponse(content=response_content, status_code=200)
 
 
-@app.get("/chart/{filename}", summary="Render a chart from JSON data.")
+@app.get("/chart_file/{filename}", summary="Render a chart from JSON data.")
 async def chart_file(
     request: Request,
     filename: str,
-    width: int = None,
-    height: int = None,
-    title: str = None,
-    #
-    # Interactive parameters
-    subtitle: str = None,
-    body: str = None,
+    options: dict = Depends(chart_options),
 ):
 
     # Load json data from file
-    with open(f"sample-data/{filename}", encoding="utf-8") as f:
+    with open(f"data_store/{filename}", encoding="utf-8") as f:
         chart_data = json.load(f)
 
-    return templates.TemplateResponse(
-        "chart.jinja",
-        {
-            "request": request,
-            "chart_data": chart_data,
-            # "input_data": input_data,
-            "palette": palette,
-            "style": "B",
-            # "opacity": 0.5,
-            "width": width,
-            "height": height,
-            "title": title,
-            "subtitle": subtitle,
-            "body": body,
-        },
+    return compile_template_response(
+        request,
+        chart_data,
+        options,
     )
 
 
@@ -828,24 +840,24 @@ async def sample_data():
     return HTMLResponse(content=response_content, status_code=200)
 
 
-@app.get("/chart/png", summary="Return a PNG image of a chart from JSON data.")
-async def chart_png(
-    data: str,
-    width: int = 1000,
-    height: int = 750,
-    title: str = None,
-    #
-    # PNG parameters
-    scale: int = 1,
-):
-    data = quote(data)
-    html_url = f"http://localhost:8034/chart?width={width}&height={height}&title={title}&data={data}"
-    png_bytes = await screenshot(html_url, scale=scale)
+# @app.get("/chart/png", summary="Return a PNG image of a chart from JSON data.")
+# async def chart_png(
+#     data: str,
+#     width: int = 1000,
+#     height: int = 750,
+#     title: str = None,
+#     #
+#     # PNG parameters
+#     scale: int = 1,
+# ):
+#     data = quote(data)
+#     html_url = f"http://localhost:8034/chart?width={width}&height={height}&title={title}&data={data}"
+#     png_bytes = await screenshot(html_url, scale=scale)
 
-    return StreamingResponse(
-        BytesIO(png_bytes),
-        media_type="image/png",
-    )
+#     return StreamingResponse(
+#         BytesIO(png_bytes),
+#         media_type="image/png",
+#     )
 
 
 @app.get("/chart-v1", summary="Render a chart from JSON data.")
