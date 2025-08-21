@@ -111,6 +111,13 @@
 				box-shadow: 0 0 100px rgba(0, 0, 0, 0.1);
 			}
 		</style>
+		<script>
+			function openImage(format) {
+				const url = new URL(window.location.href);
+				url.searchParams.set('output', format);
+				window.open(url.href);
+			}
+		</script>
 	</head>
 	<body>
 		<div id="page-content">
@@ -119,8 +126,8 @@
 			{{ ('<p>' + body + '</p>') | safe if body else '' }}
 
 			<div class="btn-wrap">
-				<a href="#" onclick="window.open(window.location.href + '&output=svg')"><button>SVG</button></a>
-				<a href="#" onclick="window.open(window.location.href + '&output=png')"><button>PNG</button></a>
+				<a href="#" onclick="openImage('svg')"><button>SVG</button></a>
+				<a href="#" onclick="openImage('png')"><button>PNG</button></a>
 			</div>
 
 			{# <small id="params">
@@ -208,120 +215,6 @@
 			const weight = 400
 			const weightBold = 600
 			
-			// Define the layout of the chart
-			// https://plotly.com/javascript/reference/layout/
-			/*
-			const layout = {
-				title: {
-					text: title,
-					y: 0.9,
-					yanchor: "top",
-					yref: "container",
-					font: {
-						family,
-						weight: weightBold,
-						color: colorTextDark,
-					},
-					subtitle: {
-						text: subtitle,
-						font: {
-							family,
-							weight,
-							color: colorText,
-						},
-					},
-				},
-				margin: {
-					l: 100,
-					r: 80,
-					t: 140, // 100
-					b: 90,
-				},
-				xaxis: {
-					title: {
-						text: xTitle,
-						standoff: 20,
-					},
-					rangemode: "tozero",
-					rangeslider: {
-						visible: false,
-					},
-					showline: true,
-					mirror: "ticks",
-					color: colorText,
-					linecolor: colorLine,
-					ticklen: 5,
-					tickcolor: "transparent",
-					tickfont: {
-						family,
-						weight,
-					},
-					hoverformat: "%d %b, %Y",
-					tickprefix: xPrefix,
-					ticksuffix: xSuffix,
-				},
-				yaxis: {
-					title: {
-						text: yTitle,
-						standoff: 15,
-					},
-					rangemode: "tozero",
-					showline: true,
-					mirror: "ticks",
-					color: colorText,
-					linecolor: colorLine,
-					ticklen: 5,
-					tickcolor: "transparent",
-					tickfont: {
-						family,
-						weight,	
-					},
-					tickprefix: yPrefix,
-					ticksuffix: ySuffix,
-				},
-				legend: {
-					orientation: "h",
-					xanchor: "left",
-					x: 0,
-					y: 1.15,
-					font: {
-						family,
-						weight,
-						color: colorText,
-					},
-					bgcolor: "red",
-					visible: false,
-				},
-				
-				// Show hover information for all traces at a single x-coordinate
-				hovermode: "x unified",
-				hoverlabel: {
-					bordercolor: colorLine,
-					font: {
-						color: colorText,
-					},
-				},
-
-				// Buttons in top right hand corner
-				modebar: {
-					// bgcolor: "red",
-				},
-
-				// Use our own color palette
-				colorway: palette,
-
-				// ----------------------
-				// Chart-specific options
-				// ----------------------
-
-				// Boxplot chart options
-				boxmode,
-				
-				// Histogram/bar chart options
-				barmode,
-			}
-			*/
-
 			// Compile layout dict
 			// - - -
 			// We remove title and subtitle from the layout

@@ -96,11 +96,11 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="render-type">Render Type:</label>
-                        <select id="render-type" name="render-type">
-                            <option value="Interactive" selected>Interactive</option>
-                            <option value="PNG">PNG</option>
-                            <option value="SVG">SVG</option>
+                        <label for="output">Render Type:</label>
+                        <select id="output" name="output">
+                            <option value="" selected>HTML</option>
+                            <option value="png">PNG</option>
+                            <option value="svg">SVG</option>
                         </select>
                     </div>
 
@@ -142,10 +142,13 @@
                 qParams.body = document.getElementById("body").value;
                 qParams.width = document.getElementById("width").value || 'auto';
                 qParams.height = document.getElementById("height").value || 'auto';
-                qParams.renderType = document.getElementById("render-type").value;
+                qParams.output = document.getElementById("output").value || undefined;
                 qParams.scale = document.getElementById("scale").value;
 
-                console.log(222, qParams.width)
+                // Filter out empty values
+                for (const key in qParams) {
+                    if (!qParams[key]) delete qParams[key]
+                }
 
                 // Compile URL
                 qParams = new URLSearchParams(qParams)
@@ -176,10 +179,10 @@
                 updatePreviewBtn1.classList.add('tense')
                 updatePreviewBtn2.classList.add('tense')
                 
-                // Toggle PNG scale depending on render type
+                // Toggle PNG scale depending on output
                 const controlPanel = document.getElementById("control-panel")
-                const renderType = document.getElementById("render-type").value;
-                if (renderType === "PNG") {
+                const output = document.getElementById("output").value;
+                if (output === "PNG") {
                     scaleOption.style.display = "block";
                     controlPanel.scrollTo(0, controlPanel.scrollHeight);
                 } else {

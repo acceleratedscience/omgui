@@ -549,7 +549,7 @@ def compile_layout(chart_type: ChartType, options: dict = {}):
             layout_legend,
         )
 
-    print("\n", json.dumps(layout, indent=2), "\n")
+    # print("\n", json.dumps(layout, indent=2), "\n")
 
     return layout
 
@@ -687,7 +687,7 @@ async def random_data(
         return f"Invalid chart type '{chart_type}'"
 
     # Convert the dictionary to a URL-encode JSON string
-    json_string = json.dumps(chart_data, indent=2)
+    json_string = json.dumps(chart_data)
     encoded_data = quote(json_string)
 
     # Get additional query parameters (excluding the ones we already handle)
