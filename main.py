@@ -751,93 +751,58 @@ async def chart_histogram(
 #
 
 
-@app.get("/charts")
+@app.get("/data")
 async def chart_files():
     """
     List all sample charts available in the sample-data directory.
     """
 
-    sample_data_dir = "sample-data"
+    sample_data_dir = "data"
     files = os.listdir(sample_data_dir)
+    files = list(
+        filter(lambda f: f.startswith("sample-") and f.endswith(".json"), files)
+    )
     links = [
-        f"<a href='/chart/{file}'>{file}</a> - <a href='/sample-data/{file}?raw=1'>raw</a>"
+        f"<a href='/data/{file}' style='text-decoration:none'>{file.replace('sample-', '')}</a> - <a href='/data/{file}?raw=1' style='color:gray; text-decoration:none'>raw</a>"
         for file in files
         if file.endswith(".json")
     ]
-    response_content = "<br>".join(links)
+
+    response_content = (
+        "<h1>Sample Charts</h1><ul><li>" + "</li><li>".join(links) + "</li></ul>"
+    )
     return HTMLResponse(content=response_content, status_code=200)
 
 
-@app.get("/chart_file/{filename}", summary="Render a chart from JSON data.")
+@app.get("/data/{filename}", summary="Render a chart from JSON data.")
 async def chart_file(
     request: Request,
     filename: str,
+    raw: Optional[bool] = Query(False),
     options: dict = Depends(chart_options),
 ):
 
     # Load json data from file
-    with open(f"data_store/{filename}", encoding="utf-8") as f:
+    with open(f"data/{filename}", encoding="utf-8") as f:
         chart_data = json.load(f)
-
-    return compile_template_response(
-        request,
-        chart_data,
-        options,
-    )
-
-
-#
-#
-#
-#
-#
-#
-
-
-@app.get(
-    "/sample-data/{filename}",
-    summary="Return sample chart data in JSON format.",
-)
-async def sample_data_file(filename: str, raw: Optional[bool] = Query(False)):
-    """
-    Return sample chart data in JSON format from a file in the sample-data directory.
-    The filename should be a valid JSON file in the sample-data directory.
-    """
-
-    # Load json data from file
-    with open(f"sample-data/{filename}", encoding="utf-8") as f:
-        chart_data = json.load(f)
-
-    # Convert the dictionary to a URL-encode JSON string
-    json_string = json.dumps(chart_data, indent=2)
-    encoded_data = quote(json_string)
 
     if raw:
+        json_string = json.dumps(chart_data, indent=2)
         return PlainTextResponse(json_string)
     else:
-        # return PlainTextResponse(f"http://localhost:8034/chart?data={encoded_data}")
-        url = f"http://localhost:8034/chart?data={encoded_data}"
-        return HTMLResponse(
-            content=f"<a href='{url}' target='_blank'>View Chart</a>", status_code=200
+        return compile_template_response(
+            request,
+            chart_data,
+            options,
         )
 
 
-@app.get("/sample-data")
-async def sample_data():
-    """
-    List all sample data files available in the sample-data directory.
-    Returns links to JSON files that can be used with the /chart endpoint.
-    """
-
-    sample_data_dir = "sample-data"
-    files = os.listdir(sample_data_dir)
-    links = [
-        f"<a href='/sample-data/{file}'>{file}</a> - <a href='/sample-data/{file}?raw=1'>raw</a>"
-        for file in files
-        if file.endswith(".json")
-    ]
-    response_content = "<br>".join(links)
-    return HTMLResponse(content=response_content, status_code=200)
+#
+#
+#
+#
+#
+#
 
 
 # @app.get("/chart/png", summary="Return a PNG image of a chart from JSON data.")
@@ -858,67 +823,3 @@ async def sample_data():
 #         BytesIO(png_bytes),
 #         media_type="image/png",
 #     )
-
-
-@app.get("/chart-v1", summary="Render a chart from JSON data.")
-async def chart_v1(
-    request: Request,
-    data: str,
-    width: int = 1000,
-    height: int = 750,
-    title: str = None,
-    #
-    # Interactive parameters
-    subtitle: str = None,
-    body: str = None,
-):
-    decoded_data = unquote(data)
-    chart_data = json.loads(decoded_data)
-
-    return templates.TemplateResponse(
-        "chart-v1.jinja",
-        {
-            "request": request,
-            "chart_data": chart_data,
-            "palette": palette,
-            "style": "B",
-            # "opacity": 0.5,
-            "width": width,
-            "height": height,
-            "title": title,
-            "subtitle": subtitle,
-            "body": body,
-        },
-    )
-
-
-@app.get("/chart", summary="Render a chart from JSON data.")
-async def chart(
-    request: Request,
-    data: str,
-    width: int = 1000,
-    height: int = 750,
-    title: str = None,
-    #
-    # Interactive parameters
-    subtitle: str = None,
-    body: str = None,
-):
-    decoded_data = unquote(data)
-    chart_data = json.loads(decoded_data)
-
-    return templates.TemplateResponse(
-        "chart.jinja",
-        {
-            "request": request,
-            "chart_data": chart_data,
-            "palette": palette,
-            "style": "B",
-            # "opacity": 0.5,
-            "width": width,
-            "height": height,
-            "title": title,
-            "subtitle": subtitle,
-            "body": body,
-        },
-    )
