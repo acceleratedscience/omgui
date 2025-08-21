@@ -10,7 +10,6 @@ from fastapi import FastAPI, HTTPException, Query, Request, Depends
 from fastapi.responses import (
     Response,
     HTMLResponse,
-    StreamingResponse,
     PlainTextResponse,
     RedirectResponse,
 )
@@ -19,17 +18,20 @@ from fastapi.responses import (
 import os
 import json
 import logging
+from enum import Enum
 from io import BytesIO
 from cairosvg import svg2png
 from pydantic import BaseModel
+import plotly.graph_objects as go
 from typing import Optional, Literal
 from urllib.parse import quote, unquote
 
 # Tools
-from workers import svgmol_2d, svgmol_3d, sampler, screenshot
+from workers import svgmol_2d, svgmol_3d, sampler
+from workers.util import deep_merge
 
 # Color palette for charts
-palette = [
+palette_rgb = [
     # v1
     # (204, 129, 130),
     # (204, 173, 129),
@@ -70,6 +72,25 @@ palette = [
     (232, 97, 193),
 ]
 
+palette_trash = [
+    "#CB8897",
+    "#D4B0A2",
+    "#DBCDA9",
+    "#BFCBA8",
+    "#99CACD",
+    "#94ADE0",
+    "#B187D8",
+    "#CD8ADE",
+    "#E76069",
+    "#EE936D",
+    "#F3BA70",
+    "#D0B96F",
+    "#9BB99E",
+    "#9991C1",
+    "#C660BF",
+    "#E861C1",
+]
+
 
 # endregion
 # ------------------------------------
@@ -102,6 +123,16 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class SmilesPayload(BaseModel):
     smiles: str
+
+
+class ChartType(Enum):
+    BAR = "bar"
+    LINE = "line"
+    SCATTER = "scatter"
+    BUBBLE = "bubble"
+    PIE = "pie"
+    BOXPLOT = "boxplot"
+    HISTOGRAM = "histogram"
 
 
 # endregion
@@ -280,10 +311,18 @@ def chart_options(
     y_prefix: Optional[str] = Query(None, description="Prefix for the y axis labels"),
     x_suffix: Optional[str] = Query(None, description="Suffix for the x axis labels"),
     y_suffix: Optional[str] = Query(None, description="Suffix for the y axis labels"),
+    hide_legend: Optional[bool] = Query(False, description="Hide the legend in the chart"),
+    
+    # Chart-specific options
+    barmode: Optional[Literal["stack", "group", "overlay", "relative"]] = Query(None, description="Bar mode for bar/histogram charts"),
+    boxmode: Optional[Literal["group", "overlay"]] = Query(None, description="Box mode for box plot chart"),
     # fmt: on
 ):
     """
-    Shared chart options from query parameters.
+    Shared query parameters for the chart routes.
+
+    Exposed via:
+        options: dict = Depends(chart_options),
     """
     return {
         "width": width,
@@ -297,43 +336,321 @@ def chart_options(
         "y_prefix": y_prefix,
         "x_suffix": x_suffix,
         "y_suffix": y_suffix,
+        "hide_legend": hide_legend,
+        "barmode": barmode,
+        "boxmode": boxmode,
     }
 
 
-def compile_template_response(
+def compile_layout(chart_type: ChartType, options: dict = {}):
+    """
+    Compile the Plotly layout dictionary for all charts.
+    """
+
+    # Constants
+    color_text = "#777"
+    color_text_dark = "#444"
+    color_line = "#CCC"
+    color_line_soft = "#EEE"
+    family = '"IBM Plex Sans", sans-serif'
+    weight = 400
+    weight_bold = 600
+    palette_1 = [
+        "#CB8897",
+        "#D4B0A2",
+        "#DBCDA9",
+        "#BFCBA8",
+        "#99CACD",
+        "#94ADE0",
+        "#B187D8",
+        "#CD8ADE",
+        "#E76069",
+        "#EE936D",
+        "#F3BA70",
+        "#D0B96F",
+        "#9BB99E",
+        "#9991C1",
+        "#C660BF",
+        "#E861C1",
+    ]
+    # while len(palette) < len(palette_1):
+    palette = []
+    for i in range(0, len(palette_1)):
+        c = palette_1[(i * 5) % len(palette_1)]
+        palette.append(c)
+
+    # Base layout object
+    layout = {
+        "colorway": palette,
+        "paper_bgcolor": "#fff",
+        "plot_bgcolor": "#fff",
+    }
+
+    # Title and subtitle
+    layout_title = {
+        "title": {
+            "text": options.get("title"),
+            "x": 0.5,
+            "xanchor": "center",
+            "y": 1,
+            "yanchor": "top",
+            "pad": {
+                "t": 40,
+            },
+            "yref": "container",
+            "font": {
+                "family": family,
+                "weight": weight_bold,
+                "color": color_text_dark,
+            },
+            "subtitle": {
+                "text": options.get("subtitle"),
+                "font": {
+                    "family": family,
+                    "weight": weight,
+                    "color": color_text,
+                },
+            },
+        },
+    }
+
+    # X/Y axis
+    layout_xy = {
+        "xaxis": {
+            "title": {
+                "text": options.get("x_title"),
+                "standoff": 20,
+            },
+            "rangemode": "tozero",
+            "rangeslider": {
+                "visible": False,
+            },
+            "showline": True,
+            "mirror": "ticks",
+            "color": color_text,
+            # "gridcolor": color_line_soft,
+            "linecolor": color_line,
+            "ticklen": 5,
+            "tickcolor": "rgba(0,0,0,0)",
+            "tickfont": {
+                "family": family,
+                "weight": weight,
+            },
+            "hoverformat": "%d %b, %Y",
+            "tickprefix": options.get("x_prefix"),
+            "ticksuffix": options.get("x_suffix"),
+        },
+        "yaxis": {
+            "title": {
+                "text": options.get("y_title"),
+                "standoff": 15,
+            },
+            "rangemode": "tozero",
+            "showline": True,
+            "mirror": "ticks",
+            "color": color_text,
+            "gridcolor": color_line_soft,
+            "linecolor": color_line,
+            "ticklen": 5,
+            "tickcolor": "rgba(0,0,0,0)",
+            "tickfont": {
+                "family": family,
+                "weight": weight,
+            },
+            "tickprefix": options.get("y_prefix"),
+            "ticksuffix": options.get("y_suffix"),
+        },
+    }
+
+    # Legend
+    layout_legend = {
+        "legend": {
+            "orientation": "h",
+            # "xanchor": "left",
+            # "x": 0,
+            "xanchor": "center",
+            "x": 0.5,
+            "y": 1.03,
+            "yanchor": "bottom",
+            "yref": "paper",
+            "font": {
+                "family": family,
+                "weight": weight,
+                "color": color_text,
+            },
+            "visible": True,
+        },
+    }
+
+    # Margins
+    # Default for x/y charts has optical correction for ticks and labels
+    layout_margin = {
+        "margin": {
+            "l": 80,
+            "r": 80,
+            "t": 80,
+            "b": 80,
+        },
+    }
+
+    #
+    #
+
+    # Merge pie chart specific layout
+    if chart_type == ChartType.PIE:
+        layout = deep_merge(
+            layout,
+            {
+                "margin": {
+                    "l": 40,
+                    "r": 40,
+                    "t": 40,
+                    "b": 40,
+                },
+            },
+        )
+
+    # Merge x/y chart specific layout
+    else:
+        layout = deep_merge(
+            layout,
+            layout_xy,
+        )
+        layout = deep_merge(
+            layout,
+            layout_margin,
+        )
+
+    # Set barmode for bar charts & histograms
+    if chart_type in [ChartType.BAR]:
+        layout["barmode"] = options.get("barmode", "group") or "group"
+    elif chart_type == ChartType.HISTOGRAM:
+        layout["barmode"] = options.get("barmode", "overlay") or "overlay"
+
+    # Set boxmode for box plots
+    if chart_type == ChartType.BOXPLOT:
+        layout["boxmode"] = options.get("boxmode", "group")
+
+    # Merge title options
+    if options.get("title"):
+        layout = deep_merge(
+            layout,
+            layout_title,
+        )
+        if options.get("subtitle"):
+            layout["margin"]["t"] = 160
+        else:
+            layout["margin"]["t"] = 120
+
+    # Merge legend options
+    if options.get("hide_legend") is not True:
+        layout = deep_merge(
+            layout,
+            layout_legend,
+        )
+
+    print("\n", json.dumps(layout, indent=2), "\n")
+
+    return layout
+
+
+def _compile_template_response(
     request: Request,
     chart_data: list[dict],
     input_data: list[dict] = None,
-    options: dict = {},
+    layout: dict = None,
+    options: dict = None,
     additional_options: dict = None,
 ):
     """
     Shared template response for all charts.
     """
 
+    if options is None:
+        options = {}
+
     return templates.TemplateResponse(
         "chart.jinja",
         {
             "request": request,
-            "input_data": input_data,
             "chart_data": chart_data,
-            "palette": palette,
+            "input_data": input_data,
+            "layout": layout,
+            "palette": palette_trash,
             # Options
             "width": options.get("width"),
             "height": options.get("height"),
             "title": options.get("title"),
             "subtitle": options.get("subtitle"),
             "body": options.get("body"),
-            "x_title": options.get("x_title"),
-            "y_title": options.get("y_title"),
-            "x_prefix": options.get("x_prefix"),
-            "y_prefix": options.get("y_prefix"),
-            "x_suffix": options.get("x_suffix"),
-            "y_suffix": options.get("y_suffix"),
             # Additional options for specific charts
             **(additional_options if additional_options is not None else {}),
         },
     )
+
+
+def _compile_image_response(
+    chart_data: list[dict],
+    layout: dict,
+    options: dict,
+    output: Literal["png", "svg"],
+):
+    """
+    Compile the image response for charts.
+    """
+
+    fig = go.Figure(data=chart_data)
+
+    # Apply layout
+    fig.update_layout(layout)
+
+    # Parse width and height or set defaults
+    width = options.get("width", 1200) if options.get("width") != "auto" else 1200
+    height = options.get("height", 800) if options.get("height") != "auto" else 800
+
+    # Generate image
+    if output == "png":
+        img_bytes = fig.to_image(format="png", width=width, height=height)
+        return Response(
+            content=img_bytes,
+            media_type="image/png",
+            headers={"Content-Disposition": "inline; filename='pie_chart.png'"},
+        )
+    elif output == "svg":
+        svg_str = fig.to_image(format="svg", width=width, height=height).decode("utf-8")
+        return Response(
+            content=svg_str,
+            media_type="image/svg+xml",
+            headers={"Content-Disposition": "inline; filename='pie_chart.svg'"},
+        )
+
+
+def compile_response(
+    request: Request,
+    output: Optional[Literal["png", "svg"]],
+    chart_data: list[dict],
+    input_data: list[dict],
+    layout: dict,
+    options: dict,
+):
+    # Return PNG/SVG image
+    if output in ["png", "svg"]:
+        return _compile_image_response(
+            chart_data,
+            layout,
+            options,
+            output,
+        )
+
+    # Return HTML template
+    else:
+        return _compile_template_response(
+            request,
+            chart_data,
+            input_data,
+            layout,
+            options,
+        )
 
 
 # endregion
@@ -345,27 +662,26 @@ def compile_template_response(
 @app.get("/r/{chart_type}", summary="Generate random data for various chart types")
 async def random_data(
     request: Request,
-    chart_type: str,
+    chart_type: ChartType | Literal["boxplot-group"],
     raw: Optional[bool] = Query(False),
     display: Optional[bool] = Query(False),
 ):
-
     chart_data = None
-    if chart_type == "scatter":
+    if chart_type == ChartType.SCATTER:
         chart_data = sampler.scatter()
-    elif chart_type == "line":
+    elif chart_type == ChartType.LINE:
         chart_data = sampler.line()
-    elif chart_type == "bubble":
+    elif chart_type == ChartType.BUBBLE:
         chart_data = sampler.bubble()
-    elif chart_type == "pie":
+    elif chart_type == ChartType.PIE:
         chart_data = sampler.pie()
-    elif chart_type == "bar":
+    elif chart_type == ChartType.BAR:
         chart_data = sampler.bar()
-    elif chart_type == "boxplot":
+    elif chart_type == ChartType.BOXPLOT:
         chart_data = sampler.boxplot()
     elif chart_type == "boxplot-group":
         chart_data = sampler.boxplot(group=True)
-    elif chart_type == "histogram":
+    elif chart_type == ChartType.HISTOGRAM:
         chart_data = sampler.histogram()
     else:
         return f"Invalid chart type '{chart_type}'"
@@ -388,8 +704,8 @@ async def random_data(
         )
 
     # Compile URL
-    chart_type = "boxplot" if chart_type == "boxplot-group" else chart_type
-    url = f"http://localhost:8034/chart/{chart_type}?data={encoded_data}{additional_params_str}"
+    chart_type = ChartType.BOXPLOT if chart_type == "boxplot-group" else chart_type
+    url = f"http://localhost:8034/chart/{chart_type.value}?data={encoded_data}{additional_params_str}"
 
     #
     #
@@ -409,6 +725,65 @@ async def random_data(
         return RedirectResponse(url=url)
 
 
+@app.get("/data", summary="List available sample data files")
+async def data_files():
+
+    sample_data_dir = "data"
+    files = os.listdir(sample_data_dir)
+    files = list(
+        filter(lambda f: f.startswith("sample-") and f.endswith(".json"), files)
+    )
+    links_str = []
+    for file in files:
+        # fmt: off
+        link_chart = f"<a href='/data/{file}' style='text-decoration:none'>{file.replace('sample-', '')}</a>"
+        link_png = f"<a href='/data/{file}?output=png' style='text-decoration:none'>png</a>"
+        link_svg = f"<a href='/data/{file}?output=svg' style='text-decoration:none'>svg</a>"
+        link_raw = (f"<a href='/data/{file}?raw=1' style='color:gray; text-decoration:none'>raw</a>")
+
+        links_str.append(" / ".join([link_chart, link_png, link_svg, link_raw]))
+        # fmt: on
+
+    response_content = (
+        "<h1>Sample Charts</h1><ul><li>" + "</li><li>".join(links_str) + "</li></ul>"
+    )
+    return HTMLResponse(content=response_content, status_code=200)
+
+
+@app.get("/data/{filename}", summary="Render a chart from JSON data")
+async def chart_file(
+    request: Request,
+    filename: str,
+    raw: Optional[bool] = Query(False),
+    options: dict = Depends(chart_options),
+    output: Optional[Literal["png", "svg"]] = Query(
+        None, description="Output format: png, svg, or None for HTML"
+    ),
+):
+
+    # Load json data from file
+    with open(f"data/{filename}", encoding="utf-8") as f:
+        chart_data = json.load(f)
+        input_data = chart_data
+
+    if raw:
+        json_string = json.dumps(chart_data, indent=2)
+        return PlainTextResponse(json_string)
+    else:
+        # Compile Plotly layout dict
+        layout = compile_layout(ChartType.BAR, options)
+
+        # Response
+        return compile_response(
+            request,
+            output,
+            chart_data,
+            input_data,
+            layout,
+            options,
+        )
+
+
 # Bar chart
 # - - -
 # https://plotly.com/javascript/bar-charts/
@@ -420,24 +795,24 @@ async def chart_bar(
     horizontal: bool = Query(
         False, alias="h", description="Render bar chart horizontally"
     ),
-    barmode: Literal["stack", "group", "overlay", "relative"] = Query(
-        "group", description="Bar mode for bar chart"
+    output: Optional[Literal["png", "svg"]] = Query(
+        None, description="Output format: png, svg, or None for HTML"
     ),
 ):
 
     # Parse URL params
     input_data = json.loads(unquote(data_json))
 
-    # Compile Plotly data object
+    # Compile Plotly data dict
     chart_data = []
     for [_, ds] in enumerate(input_data):
         if horizontal:
             chart_data.append(
                 {
                     "type": "bar",
-                    "name": ds["name"],
-                    "y": ds["keys"],
-                    "x": ds["values"],
+                    "name": ds.get("name"),
+                    "y": ds.get("keys"),
+                    "x": ds.get("values"),
                     "orientation": "h",
                     # "opacity": 0.5,
                 }
@@ -446,19 +821,24 @@ async def chart_bar(
             chart_data.append(
                 {
                     "type": "bar",
-                    "name": ds["name"],
-                    "x": ds["keys"],
-                    "y": ds["values"],
+                    "name": ds.get("name"),
+                    "x": ds.get("keys"),
+                    "y": ds.get("values"),
                     # "opacity": 0.5,
                 }
             )
 
-    return compile_template_response(
+    # Compile Plotly layout dict
+    layout = compile_layout(ChartType.BAR, options)
+
+    # Response
+    return compile_response(
         request,
+        output,
         chart_data,
         input_data,
+        layout,
         options,
-        {"barmode": barmode},
     )
 
 
@@ -473,11 +853,14 @@ async def chart_line(
     horizontal: bool = Query(
         False, alias="h", description="Render line chart horizontally"
     ),
+    output: Optional[Literal["png", "svg"]] = Query(
+        None, description="Output format: png, svg, or None for HTML"
+    ),
 ):
     # Parse URL params
     input_data = json.loads(unquote(data_json))
 
-    # Compile Plotly data object
+    # Compile Plotly data dict
     chart_data = []
     for [_, ds] in enumerate(input_data):
         if horizontal:
@@ -485,9 +868,9 @@ async def chart_line(
                 {
                     "type": "scatter",
                     "mode": "lines",
-                    "name": ds["name"],
-                    "x": ds["y"],
-                    "y": ds["x"],
+                    "name": ds.get("name"),
+                    "x": ds.get("y"),
+                    "y": ds.get("x"),
                 }
             )
         else:
@@ -495,16 +878,22 @@ async def chart_line(
                 {
                     "type": "scatter",
                     "mode": "lines",  # <--
-                    "name": ds["name"],
-                    "x": ds["x"],
-                    "y": ds["y"],
+                    "name": ds.get("name"),
+                    "x": ds.get("x"),
+                    "y": ds.get("y"),
                 }
             )
 
-    return compile_template_response(
+    # Compile Plotly layout dict
+    layout = compile_layout(ChartType.LINE, options)
+
+    # Response
+    return compile_response(
         request,
+        output,
         chart_data,
         input_data,
+        layout,
         options,
     )
 
@@ -517,38 +906,39 @@ async def chart_scatter(
     request: Request,
     data_json: str = Query(..., alias="data"),
     options: dict = Depends(chart_options),
+    output: Optional[Literal["png", "svg"]] = Query(
+        None, description="Output format: png, svg, or None for HTML"
+    ),
 ):
 
     # Parse URL params
     input_data = json.loads(unquote(data_json))
 
-    # Compile Plotly data object
+    # Compile Plotly data dict
     chart_data = []
     for [_, ds] in enumerate(input_data):
         chart_data.append(
             {
                 "type": "scatter",
                 "mode": "markers",  # <--
-                "name": ds["name"],
-                "x": ds["x"],
-                "y": ds["y"],
+                "name": ds.get("name"),
+                "x": ds.get("x"),
+                "y": ds.get("y"),
             }
         )
 
-    return compile_template_response(
+    # Compile Plotly layout dict
+    layout = compile_layout(ChartType.SCATTER, options)
+
+    # Response
+    return compile_response(
         request,
+        output,
         chart_data,
         input_data,
+        layout,
         options,
     )
-
-
-from enum import Enum
-
-
-class ChartModes(Enum):
-    LINE: str = "lines"
-    PLOT: str = "markers"
 
 
 # Bubble chart
@@ -559,29 +949,38 @@ async def chart_bubble(
     request: Request,
     data_json: str = Query(..., alias="data"),
     options: dict = Depends(chart_options),
+    output: Optional[Literal["png", "svg"]] = Query(
+        None, description="Output format: png, svg, or None for HTML"
+    ),
 ):
 
     # Parse URL params
     input_data = json.loads(unquote(data_json))
 
-    # Compile Plotly data object
+    # Compile Plotly data dict
     chart_data = []
     for [_, ds] in enumerate(input_data):
         chart_data.append(
             {
                 "type": "scatter",
                 "mode": "markers",  # <--
-                "name": ds["name"],
-                "x": ds["x"],
-                "y": ds["y"],
-                "marker": {"size": ds["size"]},
+                "name": ds.get("name"),
+                "x": ds.get("x"),
+                "y": ds.get("y"),
+                "marker": {"size": ds.get("size")},
             }
         )
 
-    return compile_template_response(
+    # Compile Plotly layout dict
+    layout = compile_layout(ChartType.BUBBLE, options)
+
+    # Response
+    return compile_response(
         request,
+        output,
         chart_data,
         input_data,
+        layout,
         options,
     )
 
@@ -589,31 +988,40 @@ async def chart_bubble(
 # Pie chart
 # - - -
 # https://plotly.com/javascript/pie-charts/
-@app.get("/chart/pie", summary="Render a bubble chart from URL data")
+@app.get("/chart/pie", summary="Render a pie chart from URL data")
 async def chart_pie(
     request: Request,
     data_json: str = Query(..., alias="data"),
     options: dict = Depends(chart_options),
+    output: Optional[Literal["png", "svg"]] = Query(
+        None, description="Output format: png, svg, or None for HTML"
+    ),
 ):
 
     # Parse URL params
     input_data = json.loads(unquote(data_json))
 
-    # Compile Plotly data object
+    # Compile Plotly data dict
     chart_data = []
     for [_, ds] in enumerate(input_data):
         chart_data.append(
             {
                 "type": "pie",
-                "values": ds["values"],
-                "labels": ds["labels"],
+                "values": ds.get("values"),
+                "labels": ds.get("labels"),
             }
         )
 
-    return compile_template_response(
+    # Compile Plotly layout dict
+    layout = compile_layout(ChartType.PIE, options)
+
+    # Response
+    return compile_response(
         request,
+        output,
         chart_data,
         input_data,
+        layout,
         options,
     )
 
@@ -634,25 +1042,24 @@ async def chart_boxplot(
     boxmean: Literal[
         True, "True", "true", "1", False, "False", "false", "0", "sd"
     ] = Query(False, description="Show mean and standard deviation on the box plot"),
+    output: Optional[Literal["png", "svg"]] = Query(
+        None, description="Output format: png, svg, or None for HTML"
+    ),
 ):
 
     # Parse URL params
     input_data = json.loads(unquote(data_json))
 
     # Parse boxmean
-    # Because it's a boolean OR a string, it's always parsed as a string
     # fmt: off
-    boxmean = "sd" if boxmean is "sd" else True if boxmean in [True, "True", "true", "1"] else False
+    # Because it's a boolean OR a string, it's always parsed as a string
+    boxmean = "sd" if boxmean == "sd" else True if boxmean in [True, "True", "true", "1"] else False
     # fmt: on
 
-    # Determine box mode
-    boxmode = "group" if "groups" in data_json else "overlay"
-
-    # Compile Plotly data object
+    # Compile Plotly data dict
     chart_data = []
     for [_, ds] in enumerate(input_data):
         # fmt: off
-        # ds["groups"]  = None
         x = ds.get("data") if horizontal else ds.get("groups")
         y = ds.get("data") if not horizontal else ds.get("groups")
         # fmt: on
@@ -683,12 +1090,20 @@ async def chart_boxplot(
             }
         )
 
-    return compile_template_response(
+    # Determine boxmode
+    options["boxmode"] = "group" if "groups" in data_json else "overlay"
+
+    # Compile Plotly layout dict
+    layout = compile_layout(ChartType.BOXPLOT, options)
+
+    # Response
+    return compile_response(
         request,
+        output,
         chart_data,
         input_data,
+        layout,
         options,
-        {"boxmode": boxmode},
     )
 
 
@@ -706,12 +1121,15 @@ async def chart_histogram(
     barmode: Literal["stack", "group", "overlay", "relative"] = Query(
         "overlay", description="Bar mode for histogram chart"
     ),
+    output: Optional[Literal["png", "svg"]] = Query(
+        None, description="Output format: png, svg, or None for HTML"
+    ),
 ):
 
     # Parse URL params
     input_data = json.loads(unquote(data_json))
 
-    # Compile Plotly data object
+    # Compile Plotly data dict
     chart_data = []
     for [_, ds] in enumerate(input_data):
         if horizontal:
@@ -733,68 +1151,22 @@ async def chart_histogram(
                 }
             )
 
-    return compile_template_response(
+    # Compile Plotly layout dict
+    layout = compile_layout(ChartType.HISTOGRAM, options)
+
+    # Response
+    return compile_response(
         request,
+        output,
         chart_data,
         input_data,
+        layout,
         options,
-        {"barmode": barmode},
     )
 
 
 # endregion
-
-#
-#
-#
-#
-#
-
-
-@app.get("/data")
-async def chart_files():
-    """
-    List all sample charts available in the sample-data directory.
-    """
-
-    sample_data_dir = "data"
-    files = os.listdir(sample_data_dir)
-    files = list(
-        filter(lambda f: f.startswith("sample-") and f.endswith(".json"), files)
-    )
-    links = [
-        f"<a href='/data/{file}' style='text-decoration:none'>{file.replace('sample-', '')}</a> - <a href='/data/{file}?raw=1' style='color:gray; text-decoration:none'>raw</a>"
-        for file in files
-        if file.endswith(".json")
-    ]
-
-    response_content = (
-        "<h1>Sample Charts</h1><ul><li>" + "</li><li>".join(links) + "</li></ul>"
-    )
-    return HTMLResponse(content=response_content, status_code=200)
-
-
-@app.get("/data/{filename}", summary="Render a chart from JSON data.")
-async def chart_file(
-    request: Request,
-    filename: str,
-    raw: Optional[bool] = Query(False),
-    options: dict = Depends(chart_options),
-):
-
-    # Load json data from file
-    with open(f"data/{filename}", encoding="utf-8") as f:
-        chart_data = json.load(f)
-
-    if raw:
-        json_string = json.dumps(chart_data, indent=2)
-        return PlainTextResponse(json_string)
-    else:
-        return compile_template_response(
-            request,
-            chart_data,
-            options,
-        )
+# ------------------------------------
 
 
 #

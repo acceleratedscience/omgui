@@ -28,6 +28,8 @@ body {
 	padding: 20px;
 	overflow-y: auto;
 	border-right: solid 1px #ddd;
+	box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+	z-index: 1;
 }
 .preview-panel {
 	flex: 1 1 530px;
@@ -39,7 +41,7 @@ body {
 .preview-panel iframe {
 	flex-grow: 1;
 	border: none;
-	background: #eee;
+	background: #fff;
 	padding: 20px;
 }
 

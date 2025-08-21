@@ -1,8 +1,14 @@
+# Core
 fastapi
 uvicorn[standard]
+jinja2
+lodash
+
+# Molecule rendering
 rdkit
 cinemol
 cairosvg
-jinja2
 
-playwright
+# Chart rendering
+plotly
+kaleido
