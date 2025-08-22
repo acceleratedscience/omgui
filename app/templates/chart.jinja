@@ -4,13 +4,14 @@
 {% set body = body | default('') %}
 {% set opacity = opacity | default(1) %}
 
-{% if width %}
+{% if width and width != 'auto' %}
+	{% set width_int = width %}
     {% set width = width | string + 'px' %}
 {% else %}
     {% set width = 'auto' %}
 {% endif %}
 
-{% if height %}
+{% if height and height != 'auto' %}
     {% set height = height | string + 'px' %}
 {% else %}
     {% set height = 'auto' %}
@@ -135,9 +136,15 @@
 				Height: {{ height }}<br />
 			</small> #}
 
-			<div id="the-chart-wrap" style="width: {{ width }}; height: {{ height }}">
+			{% if width == 'auto'%}
+			<div id="the-chart-wrap">
 				<div id="the-chart"></div>
 			</div>
+			{% else %}
+			<div id="the-chart-wrap" style="width: {{ width }}; height: {{ height }}; margin-left: {{ (width_int - 900) / -2 }}px">
+				<div id="the-chart"></div>
+			</div>
+			{% endif %}
 
 			<br>
 			<br>
@@ -225,7 +232,7 @@
 
 			// Chart configuration
 			// https://plotly.com/javascript/configuration-options/
-			const config = { responsive: true, displaylogo: false, modeBarButtonsToRemove: [] }
+			const config = { responsive: false, displaylogo: false, modeBarButtonsToRemove: [] }
 
 			// Render the chart in the div with the id "the-chart"
 			Plotly.newPlot("the-chart", chartData, layout, config)

@@ -5,7 +5,7 @@ Molecule-related API routes.
 # Standard
 import logging
 from io import BytesIO
-from typing import Optional, Literal
+from typing import Literal
 
 # Fast API
 from fastapi.templating import Jinja2Templates
@@ -53,9 +53,9 @@ def visualize_molecule(
     # 3D options
     d3_style: Literal["SPACEFILLING", "BALL_AND_STICK", "TUBE", "WIREFRAME"] = Query("BALL_AND_STICK", description="3D rendering style"),
     d3_look: Literal["CARTOON", "GLOSSY"] = Query("CARTOON", description="3D rendering look"),
-    d3_rot_x: Optional[float] = Query(None, description="Rotation around x-axis in units of 60 degrees"),
-    d3_rot_y: Optional[float] = Query(None, description="Rotation around y-axis in units of 60 degrees"),
-    d3_rot_z: Optional[float] = Query(None, description="Rotation around z-axis in units of 60 degrees"),
+    d3_rot_x: float | None = Query(None, description="Rotation around x-axis in units of 60 degrees"),
+    d3_rot_y: float | None = Query(None, description="Rotation around y-axis in units of 60 degrees"),
+    d3_rot_z: float | None = Query(None, description="Rotation around z-axis in units of 60 degrees"),
     d3_rot_random: bool = Query(True, description="Random rotation per axis if no rotation angles are provided"),
     # fmt: on
 ):

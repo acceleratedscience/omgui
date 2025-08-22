@@ -1,5 +1,5 @@
 # Standard
-from pydantic import BaseModel
+from contextlib import asynccontextmanager
 
 # Fast API
 from fastapi import FastAPI, Request
@@ -7,6 +7,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, HTMLResponse
+
+# Redis
+import redis.asyncio as aioredis
+
+# Routers
 from .routers import charts, molecules
 
 
@@ -14,10 +19,31 @@ from .routers import charts, molecules
 # ------------------------------------
 
 
+# Lifespan Event Handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Manages the lifecycle of the application, including Redis connection.
+    """
+
+    # Logic to run on startup
+    app.state.redis = aioredis.from_url(
+        "redis://localhost:6379", encoding="utf-8", decode_responses=True
+    )
+
+    # The application will run from here
+    yield
+
+    # Logic to run on shutdown
+    await app.state.redis.close()
+
+
+# Initialize FastAPI
 app = FastAPI(
-    title="Molecule Visualization API using RDKit",
+    title="Data & molecule visualization API",
     version="1.0.0",
-    description="Returns 2D visualizations of molecules in SVG format using RDKit.",
+    description="Returns visualizations of data as Plotly charts in HTML, SVG or PNG format and molecules as 2D or 3D representations in SVG or PNG format.",
+    lifespan=lifespan,
 )
 
 # Include routers
@@ -36,10 +62,6 @@ templates = Jinja2Templates(directory="app/templates")
 
 # Mount static files directory if needed
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-
-class SmilesPayload(BaseModel):
-    smiles: str
 
 
 # Routes

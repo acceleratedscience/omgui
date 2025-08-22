@@ -6,12 +6,13 @@ Chart-related API routes.
 import os
 import json
 from enum import Enum
-from typing import Optional, Literal
+from typing import Literal
 from urllib.parse import quote, unquote
+
 
 # Fast API
 from fastapi import APIRouter
-from fastapi import Query, Request, Depends
+from fastapi import Request, HTTPException, status, Query, Body, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import (
     Response,
@@ -21,6 +22,7 @@ from fastapi.responses import (
 )
 
 # Modules
+from uuid import uuid4
 import plotly.graph_objects as go
 
 # Tools
@@ -64,22 +66,22 @@ class ChartType(Enum):
 
 def query_params(
     # fmt: off
-    width: Optional[int] | Literal['auto'] = Query(None, description="Width of the chart"),
-    height: Optional[int] | Literal['auto'] = Query(None, description="Height of the chart"),
-    title: Optional[str] = Query(None, description="Chart title"),
-    subtitle: Optional[str] = Query(None, description="Chart subtitle"),
-    body: Optional[str] = Query(None, description="Paragraph displayed in the HTML page only"),
-    x_title: Optional[str] = Query(None, description="Title for the x axis"),
-    y_title: Optional[str] = Query(None, description="Title for the y axis"),
-    x_prefix: Optional[str] = Query(None, description="Prefix for the x axis labels"),
-    y_prefix: Optional[str] = Query(None, description="Prefix for the y axis labels"),
-    x_suffix: Optional[str] = Query(None, description="Suffix for the x axis labels"),
-    y_suffix: Optional[str] = Query(None, description="Suffix for the y axis labels"),
-    hide_legend: Optional[bool] = Query(False, description="Hide the legend in the chart"),
+    width: int | Literal['auto'] | None = Query(None, description="Width of the chart"),
+    height: int | Literal['auto'] | None = Query(None, description="Height of the chart"),
+    title: str | None = Query(None, description="Chart title"),
+    subtitle: str | None = Query(None, description="Chart subtitle"),
+    body: str | None = Query(None, description="Paragraph displayed in the HTML page only"),
+    x_title: str | None = Query(None, description="Title for the x axis"),
+    y_title: str | None = Query(None, description="Title for the y axis"),
+    x_prefix: str | None = Query(None, description="Prefix for the x axis labels"),
+    y_prefix: str | None = Query(None, description="Prefix for the y axis labels"),
+    x_suffix: str | None = Query(None, description="Suffix for the x axis labels"),
+    y_suffix: str | None = Query(None, description="Suffix for the y axis labels"),
+    hide_legend: bool | None = Query(False, description="Hide the legend in the chart"),
     
     # Chart-specific options
-    barmode: Optional[Literal["stack", "group", "overlay", "relative"]] = Query(None, description="Bar mode for bar/histogram charts"),
-    boxmode: Optional[Literal["group", "overlay"]] = Query(None, description="Box mode for box plot chart"),
+    barmode: Literal["stack", "group", "overlay", "relative"] | None = Query(None, description="Bar mode for bar/histogram charts"),
+    boxmode: Literal["group", "overlay"] | None = Query(None, description="Box mode for box plot chart"),
     # fmt: on
 ):
     """
@@ -104,6 +106,38 @@ def query_params(
         "barmode": barmode,
         "boxmode": boxmode,
     }
+
+
+async def parse_input_data(
+    request: Request,
+    data_json: str | None,  # Data passed in the URL
+    data_id: str,  # Data stored in Redis
+):
+    """
+    Parse the input data from the URL or from Redis.
+    """
+
+    # From Redis
+    if data_id:
+        redis_client = request.app.state.redis
+        input_data = await redis_client.get(f"input_data:{data_id}")
+        input_data = json.loads(input_data)
+        if not input_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Chart data with ID '{data_id}' not found. It may have expired.",
+            )
+
+    # From URL
+    elif data_json:
+        input_data = json.loads(unquote(data_json))
+        if not input_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The 'data_json' query parameter cannot be empty.",
+            )
+
+    return input_data
 
 
 def compile_layout(
@@ -167,6 +201,8 @@ def compile_layout(
         "colorway": palette,
         "paper_bgcolor": "#fff",
         "plot_bgcolor": "#fff",
+        "width": options["width"],
+        "height": options["height"],
     }
 
     # Title and subtitle
@@ -371,7 +407,7 @@ def compile_layout(
         layout_modebar,
     )
 
-    print("\n", json.dumps(layout, indent=2), "\n")
+    # print("\n", json.dumps(layout, indent=2), "\n")
 
     return layout
 
@@ -447,7 +483,7 @@ def _compile_image_response(
 
 def compile_response(
     request: Request,
-    output: Optional[Literal["png", "svg"]],
+    output: Literal["png", "svg"] | None,
     chart_data: list[dict],
     input_data: list[dict],
     layout: dict,
@@ -475,7 +511,7 @@ def compile_response(
 
 # endregion
 # ------------------------------------
-# region - Routes
+# region - Routes: Demonstration
 # ------------------------------------
 
 
@@ -483,8 +519,8 @@ def compile_response(
 async def random_data(
     request: Request,
     chart_type: ChartType | Literal["boxplot-group"],
-    raw: Optional[bool] = Query(False),
-    display: Optional[bool] = Query(False),
+    raw: bool | None = Query(False),
+    display: bool | None = Query(False),
 ):
     chart_data = None
     if chart_type == ChartType.SCATTER:
@@ -571,14 +607,12 @@ async def data_files():
 
 @router.get("/data/{filename}", summary="Render a chart from JSON data")
 async def chart_file(
-    # fmt: on
+    # fmt: off
     request: Request,
     filename: str,
-    raw: Optional[bool] = Query(False),
+    raw: bool | None = Query(False),
     options: dict = Depends(query_params),
-    output: Optional[Literal["png", "svg"]] = Query(
-        None, description="Output format: png, svg, or None for HTML"
-    ),
+    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
 
@@ -605,26 +639,53 @@ async def chart_file(
         )
 
 
+# endregion
+# ------------------------------------
+# region - Routes: Chart Types
+# ------------------------------------
+
+
+# Redis POST
+@router.post(
+    "/chart/{chart_type}", summary="Render different chart types from POST data"
+)
+async def post_chart_data(
+    request: Request,
+    chart_type: ChartType,
+    data: list[dict] = Body(...),
+):
+    """
+    Takes chart data from the request body, stores it in Redis,
+    and returns a unique ID for the data.
+    """
+
+    unique_id = uuid4().hex
+
+    # Store data in Redis with a 24-hour expiration
+    redis_client = request.app.state.redis
+    await redis_client.set(f"input_data:{unique_id}", json.dumps(data), ex=86400)
+
+    return {"id": unique_id, "url": f"/chart/{chart_type.value}/{unique_id}"}
+
+
 # Bar chart
 # - - -
 # https://plotly.com/javascript/bar-charts/
 @router.get("/chart/bar", summary="Render a bar chart from URL data")
+@router.get("/chart/bar/{data_id}", summary="Render a bar chart from Redis data")
 async def chart_bar(
-    # fmt: on
+    # fmt: off
     request: Request,
-    data_json: str = Query(..., alias="data"),
+    data_json: str | None = Query(None, alias="data"),
+    data_id: str | None = None,
     options: dict = Depends(query_params),
-    horizontal: bool = Query(
-        False, alias="h", description="Render bar chart horizontally"
-    ),
-    output: Optional[Literal["png", "svg"]] = Query(
-        None, description="Output format: png, svg, or None for HTML"
-    ),
+    horizontal: bool = Query(False, alias="h", description="Render bar chart horizontally"),
+    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
 
-    # Parse URL params
-    input_data = json.loads(unquote(data_json))
+    # Parse data
+    input_data = await parse_input_data(request, data_json, data_id)
 
     # Compile Plotly data dict
     chart_data = []
@@ -669,17 +730,19 @@ async def chart_bar(
 # - - -
 # https://plotly.com/javascript/line-charts/
 @router.get("/chart/line", summary="Render a line chart from URL data")
+@router.get("/chart/line/{data_id}", summary="Render a line chart from Redis data")
 async def chart_line(
     # fmt: off
     request: Request,
-    data_json: str = Query(..., alias="data"),
+    data_json: str | None = Query(None, alias="data"),
+    data_id: str | None = None,
     options: dict = Depends(query_params),
     horizontal: bool = Query(False, alias="h", description="Render line chart horizontally"),
-    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
-    # Parse URL params
-    input_data = json.loads(unquote(data_json))
+    # Parse data
+    input_data = await parse_input_data(request, data_json, data_id)
 
     # Compile Plotly data dict
     chart_data = []
@@ -722,18 +785,20 @@ async def chart_line(
 # Scatter chart
 # - - -
 # https://plotly.com/javascript/line-and-scatter/
-@router.get("/chart/scatter", summary="Render a line chart from URL data")
+@router.get("/chart/scatter", summary="Render a scatter plot from URL data")
+@router.get("/chart/scatter/{data_id}", summary="Render a scatter plot from Redis data")
 async def chart_scatter(
     # fmt: off
     request: Request,
-    data_json: str = Query(..., alias="data"),
+    data_json: str | None = Query(None, alias="data"),
+    data_id: str | None = None,
     options: dict = Depends(query_params),
-    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
 
-    # Parse URL params
-    input_data = json.loads(unquote(data_json))
+    # Parse data
+    input_data = await parse_input_data(request, data_json, data_id)
 
     # Compile Plotly data dict
     chart_data = []
@@ -766,17 +831,19 @@ async def chart_scatter(
 # - - -
 # https://plotly.com/javascript/bubble-charts/
 @router.get("/chart/bubble", summary="Render a bubble chart from URL data")
+@router.get("/chart/bubble/{data_id}", summary="Render a bubble chart from Redis data")
 async def chart_bubble(
     # fmt: off
     request: Request,
-    data_json: str = Query(..., alias="data"),
+    data_json: str | None = Query(None, alias="data"),
+    data_id: str | None = None,
     options: dict = Depends(query_params),
-    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
 
-    # Parse URL params
-    input_data = json.loads(unquote(data_json))
+    # Parse data
+    input_data = await parse_input_data(request, data_json, data_id)
 
     # Compile Plotly data dict
     chart_data = []
@@ -808,19 +875,21 @@ async def chart_bubble(
 
 # Pie chart
 # - - -
+# fmt: off
 # https://plotly.com/javascript/pie-charts/
 @router.get("/chart/pie", summary="Render a pie chart from URL data")
+@router.get("/chart/pie/{data_id}", summary="Render a pie chart from Redis data")
 async def chart_pie(
-    # fmt: off
     request: Request,
-    data_json: str = Query(..., alias="data"),
+    data_json: str | None = Query(None, alias="data"),
+    data_id: str | None = None,
     options: dict = Depends(query_params),
-    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
 
-    # Parse URL params
-    input_data = json.loads(unquote(data_json))
+    # Parse data
+    input_data = await parse_input_data(request, data_json, data_id)
 
     # Compile Plotly data dict
     chart_data = []
@@ -849,12 +918,14 @@ async def chart_pie(
 
 # Box plot chart
 # - - -
+# fmt: off
 # https://plotly.com/javascript/box-plots/
 @router.get("/chart/boxplot", summary="Render a box plot chart from URL data")
+@router.get("/chart/boxplot/{data_id}", summary="Render a box plot chart from Redis data")
 async def chart_boxplot(
-    # fmt: off
     request: Request,
-    data_json: str = Query(..., alias="data"),
+    data_json: str | None = Query(None, alias="data"),
+    data_id: str | None = None,
     options: dict = Depends(query_params),
     
     # Boxplot specific options
@@ -862,15 +933,16 @@ async def chart_boxplot(
     show_points: bool = Query(False, description="Show data points on the box plot"),
     boxmean: Literal[True, "True", "true", "1", False, "False", "false", "0", "sd"]
         = Query(False, description="Show mean and standard deviation on the box plot"),
-    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
 
-    # Parse URL params
-    input_data = json.loads(unquote(data_json))
+    # Parse data
+    input_data = await parse_input_data(request, data_json, data_id)
+    print(888, input_data)
 
-    # Parse boxmean
     # fmt: off
+    # Parse boxmean
     # Because it's a boolean OR a string, it's always parsed as a string
     boxmean = "sd" if boxmean == "sd" else True if boxmean in [True, "True", "true", "1"] else False
     # fmt: on
@@ -910,7 +982,7 @@ async def chart_boxplot(
         )
 
     # Determine boxmode
-    options["boxmode"] = "group" if "groups" in data_json else "overlay"
+    options["boxmode"] = "group" if "groups" in input_data else "overlay"
 
     # Compile Plotly layout dict
     layout = compile_layout(ChartType.BOXPLOT, chart_data, options)
@@ -930,19 +1002,21 @@ async def chart_boxplot(
 # - - -
 # https://plotly.com/javascript/histograms/
 @router.get("/chart/histogram", summary="Render a histogram chart from URL data")
+@router.get("/chart/histogram/{data_id}", summary="Render a histogram chart from Redis data")
 async def chart_histogram(
     # fmt: off
     request: Request,
-    data_json: str = Query(..., alias="data"),
+    data_json: str | None = Query(None, alias="data"),
+    data_id: str | None = None,
     options: dict = Depends(query_params),
     horizontal: bool = Query(False, alias="h", description="Render histogram chart horizontally"),
     barmode: Literal["stack", "group", "overlay", "relative"] = Query("overlay", description="Bar mode for histogram chart"),
-    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
 
-    # Parse URL params
-    input_data = json.loads(unquote(data_json))
+    # Parse data
+    input_data = await parse_input_data(request, data_json, data_id)
 
     # Compile Plotly data dict
     chart_data = []
@@ -981,4 +1055,3 @@ async def chart_histogram(
 
 
 # endregion
-# ------------------------------------
