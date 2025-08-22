@@ -225,7 +225,7 @@
 
 			// Chart configuration
 			// https://plotly.com/javascript/configuration-options/
-			const config = { responsive: true, displaylogo: false }
+			const config = { responsive: true, displaylogo: false, modeBarButtonsToRemove: [] }
 
 			// Render the chart in the div with the id "the-chart"
 			Plotly.newPlot("the-chart", chartData, layout, config)

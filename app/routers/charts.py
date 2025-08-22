@@ -62,7 +62,7 @@ class ChartType(Enum):
 # ------------------------------------
 
 
-def chart_options(
+def query_params(
     # fmt: off
     width: Optional[int] | Literal['auto'] = Query(None, description="Width of the chart"),
     height: Optional[int] | Literal['auto'] = Query(None, description="Height of the chart"),
@@ -123,7 +123,7 @@ def compile_layout(
     family = '"IBM Plex Sans", sans-serif'
     weight = 400
     weight_bold = 600
-    palette_1 = [
+    palette_chromatic = [
         "#CB8897",
         "#D4B0A2",
         "#DBCDA9",
@@ -141,11 +141,26 @@ def compile_layout(
         "#C660BF",
         "#E861C1",
     ]
-    # while len(palette) < len(palette_1):
     palette = []
-    for i in range(0, len(palette_1)):
-        c = palette_1[(i * 5) % len(palette_1)]
+    for i in range(0, len(palette_chromatic)):
+        c = palette_chromatic[(i * 5) % len(palette_chromatic)]
         palette.append(c)
+    # palette_ibm = [
+    #     "#6929c4",
+    #     "#1192e8",
+    #     "#005d5d",
+    #     "#9f1853",
+    #     "#fa4d56",
+    #     "#570408",
+    #     "#198038",
+    #     "#002d9c",
+    #     "#ee538b",
+    #     "#b28600",
+    #     "#009d9a",
+    #     "#012749",
+    #     "#8a3800",
+    #     "#a56eff",
+    # ]
 
     # Base layout object
     layout = {
@@ -198,6 +213,7 @@ def compile_layout(
             "color": color_text,
             # "gridcolor": color_line_soft,
             "linecolor": color_line,
+            "ticks": "outside",
             "ticklen": 5,
             "tickcolor": "rgba(0,0,0,0)",
             "tickfont": {
@@ -218,6 +234,7 @@ def compile_layout(
             "color": color_text,
             "gridcolor": color_line_soft,
             "linecolor": color_line,
+            "ticks": "outside",
             "ticklen": 5,
             "tickcolor": "rgba(0,0,0,0)",
             "tickfont": {
@@ -258,8 +275,12 @@ def compile_layout(
                 "color": "#777",
             },
         },
+    }
+
+    # Mode bar - unused
+    layout_modebar = {
         "modebar": {
-            "bgcolor": "red",
+            "remove": ["zoomin", "zoomout", "lasso", "resetScale2d", "select"],
         },
     }
 
@@ -344,7 +365,13 @@ def compile_layout(
             layout_hover,
         )
 
-    # print("\n", json.dumps(layout, indent=2), "\n")
+    # Merge mode bar options
+    layout = deep_merge(
+        layout,
+        layout_modebar,
+    )
+
+    print("\n", json.dumps(layout, indent=2), "\n")
 
     return layout
 
@@ -520,7 +547,6 @@ async def random_data(
 
 @router.get("/data", summary="List available sample data files")
 async def data_files():
-
     sample_data_dir = "data"
     files = os.listdir(sample_data_dir)
     files = list(
@@ -545,13 +571,15 @@ async def data_files():
 
 @router.get("/data/{filename}", summary="Render a chart from JSON data")
 async def chart_file(
+    # fmt: on
     request: Request,
     filename: str,
     raw: Optional[bool] = Query(False),
-    options: dict = Depends(chart_options),
+    options: dict = Depends(query_params),
     output: Optional[Literal["png", "svg"]] = Query(
         None, description="Output format: png, svg, or None for HTML"
     ),
+    # fmt: on
 ):
 
     # Load json data from file
@@ -582,15 +610,17 @@ async def chart_file(
 # https://plotly.com/javascript/bar-charts/
 @router.get("/chart/bar", summary="Render a bar chart from URL data")
 async def chart_bar(
+    # fmt: on
     request: Request,
     data_json: str = Query(..., alias="data"),
-    options: dict = Depends(chart_options),
+    options: dict = Depends(query_params),
     horizontal: bool = Query(
         False, alias="h", description="Render bar chart horizontally"
     ),
     output: Optional[Literal["png", "svg"]] = Query(
         None, description="Output format: png, svg, or None for HTML"
     ),
+    # fmt: on
 ):
 
     # Parse URL params
@@ -640,15 +670,13 @@ async def chart_bar(
 # https://plotly.com/javascript/line-charts/
 @router.get("/chart/line", summary="Render a line chart from URL data")
 async def chart_line(
+    # fmt: off
     request: Request,
     data_json: str = Query(..., alias="data"),
-    options: dict = Depends(chart_options),
-    horizontal: bool = Query(
-        False, alias="h", description="Render line chart horizontally"
-    ),
-    output: Optional[Literal["png", "svg"]] = Query(
-        None, description="Output format: png, svg, or None for HTML"
-    ),
+    options: dict = Depends(query_params),
+    horizontal: bool = Query(False, alias="h", description="Render line chart horizontally"),
+    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    # fmt: on
 ):
     # Parse URL params
     input_data = json.loads(unquote(data_json))
@@ -696,12 +724,12 @@ async def chart_line(
 # https://plotly.com/javascript/line-and-scatter/
 @router.get("/chart/scatter", summary="Render a line chart from URL data")
 async def chart_scatter(
+    # fmt: off
     request: Request,
     data_json: str = Query(..., alias="data"),
-    options: dict = Depends(chart_options),
-    output: Optional[Literal["png", "svg"]] = Query(
-        None, description="Output format: png, svg, or None for HTML"
-    ),
+    options: dict = Depends(query_params),
+    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    # fmt: on
 ):
 
     # Parse URL params
@@ -739,12 +767,12 @@ async def chart_scatter(
 # https://plotly.com/javascript/bubble-charts/
 @router.get("/chart/bubble", summary="Render a bubble chart from URL data")
 async def chart_bubble(
+    # fmt: off
     request: Request,
     data_json: str = Query(..., alias="data"),
-    options: dict = Depends(chart_options),
-    output: Optional[Literal["png", "svg"]] = Query(
-        None, description="Output format: png, svg, or None for HTML"
-    ),
+    options: dict = Depends(query_params),
+    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    # fmt: on
 ):
 
     # Parse URL params
@@ -783,12 +811,12 @@ async def chart_bubble(
 # https://plotly.com/javascript/pie-charts/
 @router.get("/chart/pie", summary="Render a pie chart from URL data")
 async def chart_pie(
+    # fmt: off
     request: Request,
     data_json: str = Query(..., alias="data"),
-    options: dict = Depends(chart_options),
-    output: Optional[Literal["png", "svg"]] = Query(
-        None, description="Output format: png, svg, or None for HTML"
-    ),
+    options: dict = Depends(query_params),
+    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    # fmt: on
 ):
 
     # Parse URL params
@@ -824,20 +852,18 @@ async def chart_pie(
 # https://plotly.com/javascript/box-plots/
 @router.get("/chart/boxplot", summary="Render a box plot chart from URL data")
 async def chart_boxplot(
+    # fmt: off
     request: Request,
     data_json: str = Query(..., alias="data"),
-    options: dict = Depends(chart_options),
+    options: dict = Depends(query_params),
+    
     # Boxplot specific options
-    horizontal: bool = Query(
-        False, alias="h", description="Render box plot horizontally"
-    ),
+    horizontal: bool = Query(False, alias="h", description="Render box plot horizontally"),
     show_points: bool = Query(False, description="Show data points on the box plot"),
-    boxmean: Literal[
-        True, "True", "true", "1", False, "False", "false", "0", "sd"
-    ] = Query(False, description="Show mean and standard deviation on the box plot"),
-    output: Optional[Literal["png", "svg"]] = Query(
-        None, description="Output format: png, svg, or None for HTML"
-    ),
+    boxmean: Literal[True, "True", "true", "1", False, "False", "false", "0", "sd"]
+        = Query(False, description="Show mean and standard deviation on the box plot"),
+    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    # fmt: on
 ):
 
     # Parse URL params
@@ -905,18 +931,14 @@ async def chart_boxplot(
 # https://plotly.com/javascript/histograms/
 @router.get("/chart/histogram", summary="Render a histogram chart from URL data")
 async def chart_histogram(
+    # fmt: off
     request: Request,
     data_json: str = Query(..., alias="data"),
-    options: dict = Depends(chart_options),
-    horizontal: bool = Query(
-        False, alias="h", description="Render histogram chart horizontally"
-    ),
-    barmode: Literal["stack", "group", "overlay", "relative"] = Query(
-        "overlay", description="Bar mode for histogram chart"
-    ),
-    output: Optional[Literal["png", "svg"]] = Query(
-        None, description="Output format: png, svg, or None for HTML"
-    ),
+    options: dict = Depends(query_params),
+    horizontal: bool = Query(False, alias="h", description="Render histogram chart horizontally"),
+    barmode: Literal["stack", "group", "overlay", "relative"] = Query("overlay", description="Bar mode for histogram chart"),
+    output: Optional[Literal["png", "svg"]] = Query(None, description="Output format: png, svg, or None for HTML"),
+    # fmt: on
 ):
 
     # Parse URL params
