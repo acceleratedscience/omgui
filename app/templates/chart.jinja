@@ -122,7 +122,19 @@
 				Height: {{ height }}<br />
 			</small> #}
 
-			<div id="the-chart-wrap" style="width: {% if width %}{{ width + 2 }}px{% else %}auto{% endif %}; height: {% if height %}{{ height + 2 }}px{% else %}auto{% endif %}; margin-left: {% if width %}{{ (width + 2 - 900) / -2 }}px{% else %}auto{% endif %}">
+			{% if width %}
+				{% set width_plus_border = width + 2 %}
+			{% else %}
+				{% set width_plus_border = 0 %}
+			{% endif%}
+
+			{% if height %}
+				{% set height_plus_border = height + 2 %}
+			{% else %}
+				{% set height_plus_border = 0 %}
+			{% endif%}
+
+			<div id="the-chart-wrap" style="width: {% if width %}{{ width_plus_border }}px{% else %}auto{% endif %}; height: {% if height %}{{ height_plus_border }}px{% else %}auto{% endif %}; margin-left: {% if width %}{{ (width_plus_border - 900) / -2 }}px{% else %}auto{% endif %}">
 				<div id="the-chart"></div>
 			</div>
 
@@ -215,7 +227,7 @@
 
 			// Chart configuration
 			// https://plotly.com/javascript/configuration-options/
-			const config = { responsive: width == 'auto', displaylogo: false, modeBarButtonsToRemove: [] }
+			const config = { responsive: !!width, displaylogo: false, modeBarButtonsToRemove: [] }
 
 			// Render the chart in the div with the id "the-chart"
 			Plotly.newPlot("the-chart", chartData, layout, config)

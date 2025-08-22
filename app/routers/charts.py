@@ -91,8 +91,8 @@ def query_params(
         options: dict = Depends(query_params),
     """
     return {
-        "width": width,
-        "height": height,
+        "width": None if width == "auto" else width,
+        "height": None if height == "auto" else height,
         "scale": scale,
         "title": title,
         "subtitle": subtitle,
@@ -438,8 +438,8 @@ def _compile_template_response(
             "input_data": input_data,
             "layout": layout,
             # Options
-            "width": options.get("width") or "auto",
-            "height": options.get("height") or "auto",
+            "width": options.get("width"),
+            "height": options.get("height"),
             "title": options.get("title"),
             "subtitle": options.get("subtitle"),
             "body": options.get("body"),
@@ -699,6 +699,8 @@ async def chart_bar(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
+
+    print(444, options)
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)
@@ -997,7 +999,7 @@ async def chart_boxplot(
         )
 
     # Determine boxmode
-    options["boxmode"] = "group" if "groups" in input_data else "overlay"
+    options["boxmode"] = "group" if "groups" in input_data[0] else "overlay"
 
     # Compile Plotly layout dict
     layout = compile_layout(ChartType.BOXPLOT, chart_data, options)
