@@ -1,3 +1,5 @@
+import json
+import hashlib
 import pandas as pd
 
 
@@ -57,3 +59,12 @@ def is_dates(strings: list[str]) -> bool:
             return False
 
     return True
+
+
+def hash_data(data: dict) -> str:
+    """
+    Hashes a dictionary to create a deterministic ID.
+    The keys are sorted to ensure a consistent hash for the same data.
+    """
+    data_string = json.dumps(data, sort_keys=True)
+    return hashlib.sha256(data_string.encode("utf-8")).hexdigest()

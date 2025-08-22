@@ -5,14 +5,13 @@
 {% set opacity = opacity | default(1) %}
 
 {% if width and width != 'auto' %}
-	{% set width_int = width %}
-    {% set width = width | string + 'px' %}
+    {% set width = width %}
 {% else %}
     {% set width = 'auto' %}
 {% endif %}
 
 {% if height and height != 'auto' %}
-    {% set height = height | string + 'px' %}
+    {% set height = height %}
 {% else %}
     {% set height = 'auto' %}
 {% endif %}
@@ -136,15 +135,9 @@
 				Height: {{ height }}<br />
 			</small> #}
 
-			{% if width == 'auto'%}
-			<div id="the-chart-wrap">
+			<div id="the-chart-wrap" style="width: {% if width != 'auto' %}{{ width + 2 }}px{% else %}auto{% endif %}; height: {% if height != 'auto' %}{{ height + 2 }}px{% else %}auto{% endif %}; margin-left: {% if width != 'auto' %}{{ (width + 2 - 900) / -2 }}px{% else %}auto{% endif %}">
 				<div id="the-chart"></div>
 			</div>
-			{% else %}
-			<div id="the-chart-wrap" style="width: {{ width }}; height: {{ height }}; margin-left: {{ (width_int - 900) / -2 }}px">
-				<div id="the-chart"></div>
-			</div>
-			{% endif %}
 
 			<br>
 			<br>
@@ -180,6 +173,7 @@
 			// Parse data
 			const chartData = {{ chart_data | tojson }}
 			const inputData = {{ input_data | tojson | default(null) }}
+			const layout = {{ layout | tojson }}
 			
 			// Console message + data
 			// https://www.w3schools.com/charsets/ref_utf_box.asp
@@ -190,6 +184,9 @@
 			console.groupEnd()
 			console.groupCollapsed('%c📈 Chart Data', 'color: coral')
 			console.log(chartData)
+			console.groupEnd()
+			console.groupCollapsed('%c👁️ Layout', 'color: cornflowerblue')
+			console.log(layout)
 			console.groupEnd()
 			console.log('\n\n')
 			
@@ -206,6 +203,7 @@
 			const xSuffix = "{{ x_suffix if x_suffix is not none else '' }}"
 			const ySuffix = "{{ y_suffix if y_suffix is not none else '' }}"
 			const opacity = {{ opacity }}
+			console.log(888, width, height)
 
 			// Boxplot specific options
 			const boxmode = "{{ boxmode if boxmode is not none else 'overlay' }}"
@@ -224,7 +222,6 @@
 			// We remove title and subtitle from the layout
 			// because the're already displayed in the HTML,
 			// unless the user explicitly requests to include them.
-			const layout = {{ layout |  tojson }}
 			if (1) {
 				delete layout.title
 				layout.margin.t = 70
@@ -232,7 +229,7 @@
 
 			// Chart configuration
 			// https://plotly.com/javascript/configuration-options/
-			const config = { responsive: false, displaylogo: false, modeBarButtonsToRemove: [] }
+			const config = { responsive: width == 'auto', displaylogo: false, modeBarButtonsToRemove: [] }
 
 			// Render the chart in the div with the id "the-chart"
 			Plotly.newPlot("the-chart", chartData, layout, config)

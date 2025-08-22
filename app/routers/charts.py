@@ -22,12 +22,11 @@ from fastapi.responses import (
 )
 
 # Modules
-from uuid import uuid4
 import plotly.graph_objects as go
 
 # Tools
 from ..workers import chart_sampler
-from ..workers.util import deep_merge, is_dates
+from ..workers.util import deep_merge, is_dates, hash_data
 
 
 # Setup
@@ -68,6 +67,8 @@ def query_params(
     # fmt: off
     width: int | Literal['auto'] | None = Query(None, description="Width of the chart"),
     height: int | Literal['auto'] | None = Query(None, description="Height of the chart"),
+    scale: int | None = Query(None, description="PNG scale factor"),
+    hide_legend: bool | None = Query(False, description="Hide the legend in the chart"),
     title: str | None = Query(None, description="Chart title"),
     subtitle: str | None = Query(None, description="Chart subtitle"),
     body: str | None = Query(None, description="Paragraph displayed in the HTML page only"),
@@ -77,7 +78,6 @@ def query_params(
     y_prefix: str | None = Query(None, description="Prefix for the y axis labels"),
     x_suffix: str | None = Query(None, description="Suffix for the x axis labels"),
     y_suffix: str | None = Query(None, description="Suffix for the y axis labels"),
-    hide_legend: bool | None = Query(False, description="Hide the legend in the chart"),
     
     # Chart-specific options
     barmode: Literal["stack", "group", "overlay", "relative"] | None = Query(None, description="Bar mode for bar/histogram charts"),
@@ -88,11 +88,12 @@ def query_params(
     Shared query parameters for the chart routes.
 
     Exposed via:
-        options: dict = Depends(chart_options),
+        options: dict = Depends(query_params),
     """
     return {
         "width": width,
         "height": height,
+        "scale": scale,
         "title": title,
         "subtitle": subtitle,
         "body": body,
@@ -201,8 +202,9 @@ def compile_layout(
         "colorway": palette,
         "paper_bgcolor": "#fff",
         "plot_bgcolor": "#fff",
-        "width": options["width"],
-        "height": options["height"],
+        # Replace auto with None to avoid unwanted Plotly default size
+        "width": options["width"] if not options["width"] == "auto" else None,
+        "height": options["height"] if not options["height"] == "auto" else None,
     }
 
     # Title and subtitle
@@ -388,7 +390,9 @@ def compile_layout(
             layout["margin"]["t"] = 120
 
     # Merge legend options
-    if options.get("hide_legend") is not True:
+    if options.get("hide_legend") is True:
+        layout["legend"] = {"visible": False}
+    else:
         layout = deep_merge(
             layout,
             layout_legend,
@@ -434,8 +438,8 @@ def _compile_template_response(
             "input_data": input_data,
             "layout": layout,
             # Options
-            "width": options.get("width"),
-            "height": options.get("height"),
+            "width": options.get("width") or "auto",
+            "height": options.get("height") or "auto",
             "title": options.get("title"),
             "subtitle": options.get("subtitle"),
             "body": options.get("body"),
@@ -457,23 +461,34 @@ def _compile_image_response(
 
     fig = go.Figure(data=chart_data)
 
+    # Set width and height to defaults
+    layout["width"] = (
+        options.get("width", 1200) if options.get("width") != "auto" else 1200
+    )
+    layout["height"] = (
+        options.get("height", 900) if options.get("height") != "auto" else 900
+    )
+
     # Apply layout
     fig.update_layout(layout)
 
-    # Parse width and height or set defaults
-    width = options.get("width", 1200) if options.get("width") != "auto" else 1200
-    height = options.get("height", 800) if options.get("height") != "auto" else 800
-
     # Generate image
     if output == "png":
-        img_bytes = fig.to_image(format="png", width=width, height=height)
+        img_bytes = fig.to_image(
+            format="png",
+            width=layout["width"],
+            height=layout["height"],
+            scale=options.get("scale", 1),
+        )
         return Response(
             content=img_bytes,
             media_type="image/png",
             headers={"Content-Disposition": "inline; filename='pie_chart.png'"},
         )
     elif output == "svg":
-        svg_str = fig.to_image(format="svg", width=width, height=height).decode("utf-8")
+        svg_str = fig.to_image(
+            format="svg", width=layout["width"], height=layout["height"]
+        ).decode("utf-8")
         return Response(
             content=svg_str,
             media_type="image/svg+xml",
@@ -489,6 +504,7 @@ def compile_response(
     layout: dict,
     options: dict,
 ):
+
     # Return PNG/SVG image
     if output in ["png", "svg"]:
         return _compile_image_response(
@@ -659,7 +675,7 @@ async def post_chart_data(
     and returns a unique ID for the data.
     """
 
-    unique_id = uuid4().hex
+    unique_id = hash_data(data)
 
     # Store data in Redis with a 24-hour expiration
     redis_client = request.app.state.redis

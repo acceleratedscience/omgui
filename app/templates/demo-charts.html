@@ -84,6 +84,37 @@
                         <textarea id="body" name="body" rows="4" required>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse molestie quam erat, suscipit fringilla turpis feugiat sit amet. Donec iaculis convallis viverra. Pellentesque vel diam et velit molestie vulputate id sed dolor. Praesent et turpis mauris. Duis eget libero pretium, laoreet sapien sed, interdum erat. Nulla pretium, nunc et ultrices scelerisque, sapien urna lacinia ex, sed venenatis magna metus id sapien. Suspendisse cursus ligula ac dolor fermentum, id maximus nisl condimentum.</textarea>
                     </div>
 
+                    <!-- Added axis titles / prefixes / suffixes -->
+                    <div class="form-group">
+                        <label for="x_title">X axis title:</label>
+                        <input type="text" id="x_title" name="x_title" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="y_title">Y axis title:</label>
+                        <input type="text" id="y_title" name="y_title" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="x_prefix">X axis prefix:</label>
+                        <input type="text" id="x_prefix" name="x_prefix" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="y_prefix">Y axis prefix:</label>
+                        <input type="text" id="y_prefix" name="y_prefix" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="x_suffix">X axis suffix:</label>
+                        <input type="text" id="x_suffix" name="x_suffix" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="y_suffix">Y axis suffix:</label>
+                        <input type="text" id="y_suffix" name="y_suffix" value="" />
+                    </div>
+
                     <h3>Rendering Options</h3>
                     <div class="form-group">
                         <label for="width">Width (pixels):</label>
@@ -102,6 +133,12 @@
                             <option value="png">PNG</option>
                             <option value="svg">SVG</option>
                         </select>
+                    </div>
+
+                    <!-- Added hide_legend checkbox -->
+                    <div class="form-group">
+                        <label for="hide_legend">Hide legend:</label>
+                        <input type="checkbox" id="hide_legend" name="hide_legend" />
                     </div>
 
                     <div class="form-group" id="scale-option" style="display:none">
@@ -129,7 +166,6 @@
             const urlPreview = document.getElementById("urlPreview");
             const copyUrlBtn = document.getElementById("copy-url-btn");
             const scaleOption = document.getElementById("scale-option");
-            const datasetsContainer = document.getElementById("datasets-container");
             const updatePreviewBtn1 = document.getElementById("update-preview-btn-1");
             const updatePreviewBtn2 = document.getElementById("update-preview-btn-2");
             const openBtn1 = document.getElementById("open-btn-1");
@@ -137,13 +173,27 @@
 
             // Function to update the iframe with chart data
             function updatePreview(url='/r/bar', qParams={}) {
+                // Chart input
                 qParams.title = document.getElementById("title").value;
                 qParams.subtitle = document.getElementById("subtitle").value;
                 qParams.body = document.getElementById("body").value;
+                qParams.x_title = document.getElementById("x_title").value;
+                qParams.y_title = document.getElementById("y_title").value;
+                qParams.x_prefix = document.getElementById("x_prefix").value;
+                qParams.y_prefix = document.getElementById("y_prefix").value;
+                qParams.x_suffix = document.getElementById("x_suffix").value;
+                qParams.y_suffix = document.getElementById("y_suffix").value;
+
+                // Render options
                 qParams.width = document.getElementById("width").value || 'auto';
                 qParams.height = document.getElementById("height").value || 'auto';
                 qParams.output = document.getElementById("output").value || undefined;
                 qParams.scale = document.getElementById("scale").value;
+
+                // hide_legend only include when checked
+                if (document.getElementById("hide_legend").checked) {
+                    qParams.hide_legend = 1;
+                }
 
                 // Filter out empty values
                 for (const key in qParams) {
@@ -179,10 +229,10 @@
                 updatePreviewBtn1.classList.add('tense')
                 updatePreviewBtn2.classList.add('tense')
                 
-                // Toggle PNG scale depending on output
+                // Toggle PNG scale only if output is 'png'
                 const controlPanel = document.getElementById("control-panel")
                 const output = document.getElementById("output").value;
-                if (output === "PNG") {
+                if (output === "png") {
                     scaleOption.style.display = "block";
                     controlPanel.scrollTo(0, controlPanel.scrollHeight);
                 } else {
