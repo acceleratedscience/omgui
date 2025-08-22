@@ -4,21 +4,6 @@
 {% set body = body | default('') %}
 {% set opacity = opacity | default(1) %}
 
-{% if width and width != 'auto' %}
-    {% set width = width %}
-{% else %}
-    {% set width = 'auto' %}
-{% endif %}
-
-{% if height and height != 'auto' %}
-    {% set height = height %}
-{% else %}
-    {% set height = 'auto' %}
-{% endif %}
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -39,10 +24,12 @@
 				color: rgba(0,0,0,.7);
 				font-size: 16px;
 				font-weight: 400;
+				marg
 			}
 			#page-content {
 				max-width: 900px;
 				margin: 0 auto;
+				padding-bottom: 100px;
 			}
 			h1, h2, h3, h4 {
 				margin: 0;
@@ -135,7 +122,7 @@
 				Height: {{ height }}<br />
 			</small> #}
 
-			<div id="the-chart-wrap" style="width: {% if width != 'auto' %}{{ width + 2 }}px{% else %}auto{% endif %}; height: {% if height != 'auto' %}{{ height + 2 }}px{% else %}auto{% endif %}; margin-left: {% if width != 'auto' %}{{ (width + 2 - 900) / -2 }}px{% else %}auto{% endif %}">
+			<div id="the-chart-wrap" style="width: {% if width %}{{ width + 2 }}px{% else %}auto{% endif %}; height: {% if height %}{{ height + 2 }}px{% else %}auto{% endif %}; margin-left: {% if width %}{{ (width + 2 - 900) / -2 }}px{% else %}auto{% endif %}">
 				<div id="the-chart"></div>
 			</div>
 
@@ -203,7 +190,6 @@
 			const xSuffix = "{{ x_suffix if x_suffix is not none else '' }}"
 			const ySuffix = "{{ y_suffix if y_suffix is not none else '' }}"
 			const opacity = {{ opacity }}
-			console.log(888, width, height)
 
 			// Boxplot specific options
 			const boxmode = "{{ boxmode if boxmode is not none else 'overlay' }}"

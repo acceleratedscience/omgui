@@ -955,7 +955,6 @@ async def chart_boxplot(
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)
-    print(888, input_data)
 
     # fmt: off
     # Parse boxmean
