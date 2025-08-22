@@ -3,6 +3,7 @@ fastapi
 uvicorn[standard]
 jinja2
 redis
+pandas
 
 # Molecule rendering
 rdkit
