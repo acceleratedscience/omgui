@@ -1,12 +1,18 @@
-# ------------------------------------
-# region - Imports
-# ------------------------------------
+"""
+Chart-related API routes.
+"""
+
+# Standard
+import os
+import json
+from enum import Enum
+from typing import Optional, Literal
+from urllib.parse import quote, unquote
 
 # Fast API
-from fastapi.staticfiles import StaticFiles
+from fastapi import APIRouter
+from fastapi import Query, Request, Depends
 from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException, Query, Request, Depends
 from fastapi.responses import (
     Response,
     HTMLResponse,
@@ -15,117 +21,33 @@ from fastapi.responses import (
 )
 
 # Modules
-import os
-import json
-import logging
-from enum import Enum
-from io import BytesIO
-from cairosvg import svg2png
-from pydantic import BaseModel
 import plotly.graph_objects as go
-from typing import Optional, Literal
-from urllib.parse import quote, unquote
 
 # Tools
-from workers import svgmol_2d, svgmol_3d, sampler
-from workers.util import deep_merge
-
-# Color palette for charts
-palette_rgb = [
-    # v1
-    # (204, 129, 130),
-    # (204, 173, 129),
-    # (203, 204, 127),
-    # (174, 204, 129),
-    # (129, 204, 173),
-    # (129, 173, 204),
-    # (173, 129, 204),
-    # (203, 129, 205),
-    # v2 - color shift
-    # (216, 129, 150),
-    # (220, 173, 155),
-    # (223, 204, 158),
-    # (189, 204, 158),
-    # (139, 204, 208),
-    # (138, 173, 239),
-    # (183, 129, 235),
-    # (216, 129, 239),
-    #
-    # Desat
-    (203, 136, 151),
-    (212, 176, 162),
-    (219, 205, 169),
-    (191, 203, 168),
-    (153, 202, 205),
-    (148, 173, 224),
-    (177, 135, 216),
-    (205, 138, 222),
-    #
-    # Full color
-    (231, 96, 105),
-    (238, 147, 109),
-    (243, 186, 112),
-    (208, 185, 111),
-    (155, 185, 158),
-    (153, 145, 193),
-    (198, 96, 191),
-    (232, 97, 193),
-]
-
-palette_trash = [
-    "#CB8897",
-    "#D4B0A2",
-    "#DBCDA9",
-    "#BFCBA8",
-    "#99CACD",
-    "#94ADE0",
-    "#B187D8",
-    "#CD8ADE",
-    "#E76069",
-    "#EE936D",
-    "#F3BA70",
-    "#D0B96F",
-    "#9BB99E",
-    "#9991C1",
-    "#C660BF",
-    "#E861C1",
-]
+from ..workers import chart_sampler
+from ..workers.util import deep_merge
 
 
-# endregion
-# ------------------------------------
-# region - Setup
+# Setup
 # ------------------------------------
 
-
-logger = logging.getLogger(__name__)
-
-app = FastAPI(
-    title="Molecule Visualization API using RDKit",
-    version="1.0.0",
-    description="Returns 2D visualizations of molecules in SVG format using RDKit.",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Router
+router = APIRouter()
 
 # Set up templates and static files
-templates = Jinja2Templates(directory="templates")
-
-# Mount static files directory if needed
-app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
 
 
-class SmilesPayload(BaseModel):
-    smiles: str
+# Types
+# ------------------------------------
 
 
 class ChartType(Enum):
+    """
+    Supported chart types
+    More available: https://plotly.com/javascript/#basic-charts
+    """
+
     BAR = "bar"
     LINE = "line"
     SCATTER = "scatter"
@@ -135,166 +57,8 @@ class ChartType(Enum):
     HISTOGRAM = "histogram"
 
 
-# endregion
 # ------------------------------------
-# region - Routes: General
-# ------------------------------------
-
-
-# Examples
-@app.get("/", summary="Example links")
-def examples():
-    response = [
-        "<a href='/demo/molecules'><button>Interactive molecule demo</button></a><br>",
-        "<a href='/demo/charts'><button>Interactive chart demo</button></a>",
-        "",
-        "<b>Molecule examples:</b>",
-        "<a href='/molecule/CC(=O)OC1=CC=CC=C1C(=O)O'>2D example A (Aspirin)</a>",
-        "<a href='/molecule/CN1C=NC2=C1C(=O)N(C(=O)N2C)C'>2D example B (Caffeine)</a>",
-        "<a href='/molecule/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl'>2D example C (PCB 202)</a>",
-        "",
-        "<a href='/molecule/CC(=O)OC1=CC=CC=C1C(=O)O?d3=1'>3D example A (Aspirin)</a>",
-        "<a href='/molecule/CN1C=NC2=C1C(=O)N(C(=O)N2C)C?d3=1'>3D example B (Caffeine)</a>",
-        "<a href='/molecule/Clc1cc(Cl)c(Cl)c(-c2c(Cl)c(Cl)cc(Cl)c2Cl)c1Cl?d3=1'>3D example C (PCB 202)</a>",
-    ]
-    response_str = "<br>".join(response)
-    return Response(content=response_str, media_type="text/html")
-
-
-# Demo page - molecules
-@app.get(
-    "/demo/molecules",
-    response_class=HTMLResponse,
-    summary="Interactive demo UI for the molecules API",
-)
-def demo_molecules(request: Request):
-    """
-    Interactive HTML demo page for the Molecule Visualization API.
-    Provides a user interface with controls for all API parameters.
-    """
-    return templates.TemplateResponse("demo-molecules.html", {"request": request})
-
-
-# Demo page - charts
-@app.get(
-    "/demo/charts",
-    response_class=HTMLResponse,
-    summary="Interactive demo UI for the charts API",
-)
-def chart_molecules(request: Request):
-    """
-    Interactive HTML demo page for the Charts API.
-    Provides a user interface with controls for all API parameters.
-    """
-    return templates.TemplateResponse("demo-charts.html", {"request": request})
-
-
-# endregion
-# ------------------------------------
-# region - Routes: Molecules
-# ------------------------------------
-
-
-# Smiles as query parameter
-@app.get("/molecule/{smiles}", summary="Visualize any molecule from a SMILES string")
-def visualize_molecule(
-    # Input
-    smiles: str,
-    # Options
-    png: bool = Query(
-        False, description="Render as PNG if True, otherwise render as SVG"
-    ),
-    width: int = Query(800, description="Width of the rendered image in pixels"),
-    height: int = Query(600, description="Height of the rendered image in pixels"),
-    highlight: str = Query(
-        None, description="SMARTS substructure to highlight in the molecule"
-    ),
-    d3: bool = Query(False, description="Render in 3D if True, otherwise render in 2D"),
-    # 3D options
-    d3_style: Literal["SPACEFILLING", "BALL_AND_STICK", "TUBE", "WIREFRAME"] = Query(
-        "BALL_AND_STICK", description="3D rendering style"
-    ),
-    d3_look: Literal["CARTOON", "GLOSSY"] = Query(
-        "CARTOON", description="3D rendering look"
-    ),
-    d3_rot_x: Optional[float] = Query(
-        None, description="Rotation around x-axis in units of 60 degrees"
-    ),
-    d3_rot_y: Optional[float] = Query(
-        None, description="Rotation around y-axis in units of 60 degrees"
-    ),
-    d3_rot_z: Optional[float] = Query(
-        None, description="Rotation around z-axis in units of 60 degrees"
-    ),
-    d3_rot_random: bool = Query(
-        True, description="Random rotation per axis if no rotation angles are provided"
-    ),
-):
-    """
-    Render an image of a small molecule from a SMILES string provided as query parameter.
-
-    Examples:
-    http://localhost:8034/?smiles=C1=CC=CC=C1
-    """
-
-    # Render molecule SVG
-    if d3 is True:
-        svg_str = svgmol_3d.render(
-            smiles,
-            width=width,
-            height=height,
-            highlight=highlight,
-            #
-            style=d3_style,
-            look=d3_look,
-            rot_random=d3_rot_random,
-            rot_x=d3_rot_x,
-            rot_y=d3_rot_y,
-            rot_z=d3_rot_z,
-        )
-    else:
-        svg_str = svgmol_2d.render(
-            smiles,
-            width=width,
-            height=height,
-            highlight=highlight,
-        )
-
-    # Fail
-    if svg_str is None:
-        logger.info(f"ERROR generating SVG for SMILES: {smiles}")
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid SMILES string, unable to generate SVG: {smiles}",
-        )
-
-    # Success
-    logger.info(f"Success generating SVG for SMILES: {smiles}")
-    logger.info(f"\nSVG:\n---\n{svg_str}")
-
-    # Return as PNG
-    if png:
-        png_data = BytesIO()
-        svg2png(bytestring=svg_str.encode("utf-8"), write_to=png_data)
-        png_data.seek(0)  # Rewind to the beginning of the BytesIO object
-
-        return Response(
-            content=png_data.getvalue(),
-            media_type="image/png",
-            headers={"Content-Disposition": f'inline; filename="{smiles}.png"'},
-        )
-
-    # Return as SVG
-    return Response(
-        content=svg_str,
-        media_type="image/svg+xml",
-        headers={"Content-Disposition": f'inline; filename="{smiles}.svg"'},
-    )
-
-
-# endregion
-# ------------------------------------
-# region - Chart functions
+# region - Auxiliary functions
 # ------------------------------------
 
 
@@ -342,10 +106,12 @@ def chart_options(
     }
 
 
-def compile_layout(chart_type: ChartType, options: dict = {}):
+def compile_layout(chart_type: ChartType, options: dict = None):
     """
     Compile the Plotly layout dictionary for all charts.
     """
+
+    options = options or {}
 
     # Constants
     color_text = "#777"
@@ -566,8 +332,7 @@ def _compile_template_response(
     Shared template response for all charts.
     """
 
-    if options is None:
-        options = {}
+    options = options or {}
 
     return templates.TemplateResponse(
         "chart.jinja",
@@ -576,7 +341,6 @@ def _compile_template_response(
             "chart_data": chart_data,
             "input_data": input_data,
             "layout": layout,
-            "palette": palette_trash,
             # Options
             "width": options.get("width"),
             "height": options.get("height"),
@@ -655,11 +419,11 @@ def compile_response(
 
 # endregion
 # ------------------------------------
-# region - Routes: Charts
+# region - Routes
 # ------------------------------------
 
 
-@app.get("/r/{chart_type}", summary="Generate random data for various chart types")
+@router.get("/r/{chart_type}", summary="Generate random data for various chart types")
 async def random_data(
     request: Request,
     chart_type: ChartType | Literal["boxplot-group"],
@@ -668,21 +432,21 @@ async def random_data(
 ):
     chart_data = None
     if chart_type == ChartType.SCATTER:
-        chart_data = sampler.scatter()
+        chart_data = chart_sampler.scatter()
     elif chart_type == ChartType.LINE:
-        chart_data = sampler.line()
+        chart_data = chart_sampler.line()
     elif chart_type == ChartType.BUBBLE:
-        chart_data = sampler.bubble()
+        chart_data = chart_sampler.bubble()
     elif chart_type == ChartType.PIE:
-        chart_data = sampler.pie()
+        chart_data = chart_sampler.pie()
     elif chart_type == ChartType.BAR:
-        chart_data = sampler.bar()
+        chart_data = chart_sampler.bar()
     elif chart_type == ChartType.BOXPLOT:
-        chart_data = sampler.boxplot()
+        chart_data = chart_sampler.boxplot()
     elif chart_type == "boxplot-group":
-        chart_data = sampler.boxplot(group=True)
+        chart_data = chart_sampler.boxplot(group=True)
     elif chart_type == ChartType.HISTOGRAM:
-        chart_data = sampler.histogram()
+        chart_data = chart_sampler.histogram()
     else:
         return f"Invalid chart type '{chart_type}'"
 
@@ -725,7 +489,7 @@ async def random_data(
         return RedirectResponse(url=url)
 
 
-@app.get("/data", summary="List available sample data files")
+@router.get("/data", summary="List available sample data files")
 async def data_files():
 
     sample_data_dir = "data"
@@ -750,7 +514,7 @@ async def data_files():
     return HTMLResponse(content=response_content, status_code=200)
 
 
-@app.get("/data/{filename}", summary="Render a chart from JSON data")
+@router.get("/data/{filename}", summary="Render a chart from JSON data")
 async def chart_file(
     request: Request,
     filename: str,
@@ -787,7 +551,7 @@ async def chart_file(
 # Bar chart
 # - - -
 # https://plotly.com/javascript/bar-charts/
-@app.get("/chart/bar", summary="Render a bar chart from URL data")
+@router.get("/chart/bar", summary="Render a bar chart from URL data")
 async def chart_bar(
     request: Request,
     data_json: str = Query(..., alias="data"),
@@ -845,7 +609,7 @@ async def chart_bar(
 # Line chart
 # - - -
 # https://plotly.com/javascript/line-charts/
-@app.get("/chart/line", summary="Render a line chart from URL data")
+@router.get("/chart/line", summary="Render a line chart from URL data")
 async def chart_line(
     request: Request,
     data_json: str = Query(..., alias="data"),
@@ -901,7 +665,7 @@ async def chart_line(
 # Scatter chart
 # - - -
 # https://plotly.com/javascript/line-and-scatter/
-@app.get("/chart/scatter", summary="Render a line chart from URL data")
+@router.get("/chart/scatter", summary="Render a line chart from URL data")
 async def chart_scatter(
     request: Request,
     data_json: str = Query(..., alias="data"),
@@ -944,7 +708,7 @@ async def chart_scatter(
 # Bubble chart
 # - - -
 # https://plotly.com/javascript/bubble-charts/
-@app.get("/chart/bubble", summary="Render a bubble chart from URL data")
+@router.get("/chart/bubble", summary="Render a bubble chart from URL data")
 async def chart_bubble(
     request: Request,
     data_json: str = Query(..., alias="data"),
@@ -988,7 +752,7 @@ async def chart_bubble(
 # Pie chart
 # - - -
 # https://plotly.com/javascript/pie-charts/
-@app.get("/chart/pie", summary="Render a pie chart from URL data")
+@router.get("/chart/pie", summary="Render a pie chart from URL data")
 async def chart_pie(
     request: Request,
     data_json: str = Query(..., alias="data"),
@@ -1029,7 +793,7 @@ async def chart_pie(
 # Box plot chart
 # - - -
 # https://plotly.com/javascript/box-plots/
-@app.get("/chart/boxplot", summary="Render a box plot chart from URL data")
+@router.get("/chart/boxplot", summary="Render a box plot chart from URL data")
 async def chart_boxplot(
     request: Request,
     data_json: str = Query(..., alias="data"),
@@ -1110,7 +874,7 @@ async def chart_boxplot(
 # Histogram chart
 # - - -
 # https://plotly.com/javascript/histograms/
-@app.get("/chart/histogram", summary="Render a histogram chart from URL data")
+@router.get("/chart/histogram", summary="Render a histogram chart from URL data")
 async def chart_histogram(
     request: Request,
     data_json: str = Query(..., alias="data"),
@@ -1167,31 +931,3 @@ async def chart_histogram(
 
 # endregion
 # ------------------------------------
-
-
-#
-#
-#
-#
-#
-#
-
-
-# @app.get("/chart/png", summary="Return a PNG image of a chart from JSON data.")
-# async def chart_png(
-#     data: str,
-#     width: int = 1000,
-#     height: int = 750,
-#     title: str = None,
-#     #
-#     # PNG parameters
-#     scale: int = 1,
-# ):
-#     data = quote(data)
-#     html_url = f"http://localhost:8034/chart?width={width}&height={height}&title={title}&data={data}"
-#     png_bytes = await screenshot(html_url, scale=scale)
-
-#     return StreamingResponse(
-#         BytesIO(png_bytes),
-#         media_type="image/png",
-#     )

@@ -1,3 +1,7 @@
+"""
+SVG rendering function for 2D molecular structures.
+"""
+
 from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
 

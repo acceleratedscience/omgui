@@ -1,3 +1,7 @@
+"""
+SVG rendering function for 3D molecular structures.
+"""
+
 import re
 import time
 import logging

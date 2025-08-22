@@ -1,4 +1,6 @@
-# Generator functions to create sample data for various chart types
+"""
+Generator functions to create sample data for various chart types.
+"""
 
 import random
 from datetime import datetime, timedelta
