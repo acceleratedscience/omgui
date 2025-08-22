@@ -25,7 +25,7 @@ import plotly.graph_objects as go
 
 # Tools
 from ..workers import chart_sampler
-from ..workers.util import deep_merge
+from ..workers.util import deep_merge, is_dates
 
 
 # Setup
@@ -106,7 +106,9 @@ def chart_options(
     }
 
 
-def compile_layout(chart_type: ChartType, options: dict = None):
+def compile_layout(
+    chart_type: ChartType, chart_data: dict = None, options: dict = None
+):
     """
     Compile the Plotly layout dictionary for all charts.
     """
@@ -202,7 +204,6 @@ def compile_layout(chart_type: ChartType, options: dict = None):
                 "family": family,
                 "weight": weight,
             },
-            "hoverformat": "%d %b, %Y",
             "tickprefix": options.get("x_prefix"),
             "ticksuffix": options.get("x_suffix"),
         },
@@ -248,6 +249,20 @@ def compile_layout(chart_type: ChartType, options: dict = None):
         },
     }
 
+    # Hover box
+    layout_hover = {
+        "hovermode": "x unified",  # Show hover information for all traces at a single x-coordinate
+        "hoverlabel": {
+            "bordercolor": "#CCC",
+            "font": {
+                "color": "#777",
+            },
+        },
+        "modebar": {
+            "bgcolor": "red",
+        },
+    }
+
     # Margins
     # Default for x/y charts has optical correction for ticks and labels
     layout_margin = {
@@ -287,6 +302,13 @@ def compile_layout(chart_type: ChartType, options: dict = None):
             layout_margin,
         )
 
+        # Detect & format date x-axis
+        x_values = chart_data[0].get("x", []) or []
+        is_date_axis = is_dates(x_values[:20]) if chart_data else False
+        if is_date_axis:
+            layout["xaxis"]["type"] = "date"
+            layout["xaxis"]["hoverformat"] = "%d %b, %Y"
+
     # Set barmode for bar charts & histograms
     if chart_type in [ChartType.BAR]:
         layout["barmode"] = options.get("barmode", "group") or "group"
@@ -313,6 +335,13 @@ def compile_layout(chart_type: ChartType, options: dict = None):
         layout = deep_merge(
             layout,
             layout_legend,
+        )
+
+    # Merge hover options
+    if chart_type == ChartType.LINE:
+        layout = deep_merge(
+            layout,
+            layout_hover,
         )
 
     # print("\n", json.dumps(layout, indent=2), "\n")
@@ -535,7 +564,7 @@ async def chart_file(
         return PlainTextResponse(json_string)
     else:
         # Compile Plotly layout dict
-        layout = compile_layout(ChartType.BAR, options)
+        layout = compile_layout(ChartType.BAR, chart_data, options)
 
         # Response
         return compile_response(
@@ -593,7 +622,7 @@ async def chart_bar(
             )
 
     # Compile Plotly layout dict
-    layout = compile_layout(ChartType.BAR, options)
+    layout = compile_layout(ChartType.BAR, chart_data, options)
 
     # Response
     return compile_response(
@@ -649,7 +678,7 @@ async def chart_line(
             )
 
     # Compile Plotly layout dict
-    layout = compile_layout(ChartType.LINE, options)
+    layout = compile_layout(ChartType.LINE, chart_data, options)
 
     # Response
     return compile_response(
@@ -692,7 +721,7 @@ async def chart_scatter(
         )
 
     # Compile Plotly layout dict
-    layout = compile_layout(ChartType.SCATTER, options)
+    layout = compile_layout(ChartType.SCATTER, chart_data, options)
 
     # Response
     return compile_response(
@@ -736,7 +765,7 @@ async def chart_bubble(
         )
 
     # Compile Plotly layout dict
-    layout = compile_layout(ChartType.BUBBLE, options)
+    layout = compile_layout(ChartType.BUBBLE, chart_data, options)
 
     # Response
     return compile_response(
@@ -777,7 +806,7 @@ async def chart_pie(
         )
 
     # Compile Plotly layout dict
-    layout = compile_layout(ChartType.PIE, options)
+    layout = compile_layout(ChartType.PIE, chart_data, options)
 
     # Response
     return compile_response(
@@ -858,7 +887,7 @@ async def chart_boxplot(
     options["boxmode"] = "group" if "groups" in data_json else "overlay"
 
     # Compile Plotly layout dict
-    layout = compile_layout(ChartType.BOXPLOT, options)
+    layout = compile_layout(ChartType.BOXPLOT, chart_data, options)
 
     # Response
     return compile_response(
@@ -916,7 +945,7 @@ async def chart_histogram(
             )
 
     # Compile Plotly layout dict
-    layout = compile_layout(ChartType.HISTOGRAM, options)
+    layout = compile_layout(ChartType.HISTOGRAM, chart_data, options)
 
     # Response
     return compile_response(
