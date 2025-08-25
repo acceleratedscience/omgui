@@ -64,7 +64,12 @@ def is_dates(strings: list[str]) -> bool:
 def hash_data(data: dict) -> str:
     """
     Hashes a dictionary to create a deterministic ID.
-    The keys are sorted to ensure a consistent hash for the same data.
     """
+
     data_string = json.dumps(data, sort_keys=True)
-    return hashlib.sha256(data_string.encode("utf-8")).hexdigest()
+    full_hash = hashlib.sha256(data_string.encode("utf-8")).hexdigest()
+
+    # For a 8 character hash, you need 23.7 million items to have
+    # a 50% chance of collision, which is acceptable considering
+    # this is not a multi-user high volume application.
+    return full_hash[:8]

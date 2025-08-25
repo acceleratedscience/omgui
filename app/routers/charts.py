@@ -7,6 +7,7 @@ import os
 import json
 from enum import Enum
 from typing import Literal
+from urllib.parse import urlencode
 from urllib.parse import quote, unquote
 
 
@@ -68,7 +69,7 @@ def query_params(
     width: int | Literal['auto'] | None = Query(None, description="Width of the chart"),
     height: int | Literal['auto'] | None = Query(None, description="Height of the chart"),
     scale: int | None = Query(None, description="PNG scale factor"),
-    legend: bool | None = Query(False, description="Include the legend in the chart"),
+    omit_legend: bool | None = Query(False, description="Omit the legend from the chart"),
     title: str | None = Query(None, description="Chart title"),
     subtitle: str | None = Query(None, description="Chart subtitle"),
     body: str | None = Query(None, description="Paragraph displayed in the HTML page only"),
@@ -103,7 +104,7 @@ def query_params(
         "y_prefix": y_prefix,
         "x_suffix": x_suffix,
         "y_suffix": y_suffix,
-        "legend": legend,
+        "omit_legend": omit_legend,
         "barmode": barmode,
         "boxmode": boxmode,
     }
@@ -390,7 +391,7 @@ def compile_layout(
             layout["margin"]["t"] = 120
 
     # Merge legend options
-    if options.get("legend") is False:
+    if options.get("omit_legend") is True:
         layout["legend"] = {"visible": False}
     else:
         layout = deep_merge(
@@ -531,7 +532,10 @@ def compile_response(
 # ------------------------------------
 
 
-@router.get("/r/{chart_type}", summary="Generate random data for various chart types")
+@router.get(
+    "/generate/{chart_type}",
+    summary="Generate random dummy data for various chart types",
+)
 async def random_data(
     request: Request,
     chart_type: ChartType | Literal["boxplot-group"],
@@ -558,26 +562,29 @@ async def random_data(
     else:
         return f"Invalid chart type '{chart_type}'"
 
+    return chart_data
+
     # Convert the dictionary to a URL-encode JSON string
     json_string = json.dumps(chart_data)
     encoded_data = quote(json_string)
 
     # Get additional query parameters (excluding the ones we already handle)
-    additional_params = {}
+    optional_params = {}
     for key, value in request.query_params.items():
         if key not in ["raw", "display"]:
-            additional_params[key] = value
+            optional_params[key] = value
 
     # Build additional parameters string for URL
-    additional_params_str = ""
-    if additional_params:
-        additional_params_str = "&" + "&".join(
-            [f"{k}={v}" for k, v in additional_params.items()]
-        )
+    optional_params_str = ""
+    if optional_params:
+        optional_params_str = urlencode(optional_params)
+        # optional_params_str = "&".join(
+        #     [f"{k}={urlencode(v)}" for k, v in optional_params.items()]
+        # )
 
     # Compile URL
     chart_type = ChartType.BOXPLOT if chart_type == "boxplot-group" else chart_type
-    url = f"http://localhost:8034/chart/{chart_type.value}?data={encoded_data}{additional_params_str}"
+    url = f"http://localhost:8034/chart/{chart_type.value}?{optional_params_str}&data={encoded_data}"
 
     #
     #
@@ -699,8 +706,6 @@ async def chart_bar(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
-
-    print(444, options)
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)

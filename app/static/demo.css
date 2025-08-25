@@ -133,14 +133,29 @@ button.tense {
 	flex-direction: column;
 	gap: 3px;
 }
-.url-preview {
+#url-preview {
 	padding: 10px;
 	border-radius: 3px;
-	background-color: #f2f2f7;
+	background-color: #fff;
 	word-break: break-all;
 	font-family: monospace;
 	font-size: 0.8rem;
 	position: relative;
+	border: 1px solid #d1d1d1;
+}
+pre#url-preview-text {
+	margin: 0;
+	white-space: break-spaces;
+}
+pre#url-preview-text:empty::after {
+	content: "URL will appear here";
+	color: #ccc;
+}
+#data-preview {
+	margin: 10px 0;
+	height: 200px;
+	font-size: 0.7rem;
+	font-family: monospace;
 }
 .copy-btn {
 	position: absolute;

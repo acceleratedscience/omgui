@@ -112,11 +112,6 @@
 			{{ ('<h2>' + subtitle + '</h2>') | safe if subtitle else '' }}
 			{{ ('<p>' + body + '</p>') | safe if body else '' }}
 
-			<div class="btn-wrap">
-				<a href="#" onclick="openImage('svg')"><button>SVG</button></a>
-				<a href="#" onclick="openImage('png')"><button>PNG</button></a>
-			</div>
-
 			{# <small id="params">
 				Width: {{ width }}<br />
 				Height: {{ height }}<br />
@@ -136,6 +131,14 @@
 
 			<div id="the-chart-wrap" style="width: {% if width %}{{ width_plus_border }}px{% else %}auto{% endif %}; height: {% if height %}{{ height_plus_border }}px{% else %}auto{% endif %}; margin-left: {% if width %}{{ (width_plus_border - 900) / -2 }}px{% else %}auto{% endif %}">
 				<div id="the-chart"></div>
+			</div>
+
+			<br>
+			<br>
+
+			<div class="btn-wrap">
+				<a href="#" onclick="openImage('svg')"><button>SVG</button></a>
+				<a href="#" onclick="openImage('png')"><button>PNG</button></a>
 			</div>
 
 			<br>
