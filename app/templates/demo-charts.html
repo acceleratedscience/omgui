@@ -127,18 +127,20 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="output">Render Type:</label>
+                        <label for="legend">Legend:</label>
+                        <select id="legend" name="legend">
+                            <option value="1">Include</option>
+                            <option value="0">Exclude</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="output">Output:</label>
                         <select id="output" name="output">
                             <option value="" selected>HTML</option>
                             <option value="png">PNG</option>
                             <option value="svg">SVG</option>
                         </select>
-                    </div>
-
-                    <!-- Added hide_legend checkbox -->
-                    <div class="form-group">
-                        <label for="hide_legend">Hide legend:</label>
-                        <input type="checkbox" id="hide_legend" name="hide_legend" />
                     </div>
 
                     <div class="form-group" id="scale-option" style="display:none">
@@ -189,11 +191,7 @@
                 qParams.height = document.getElementById("height").value || 'auto';
                 qParams.output = document.getElementById("output").value || undefined;
                 qParams.scale = document.getElementById("scale").value;
-
-                // hide_legend only include when checked
-                if (document.getElementById("hide_legend").checked) {
-                    qParams.hide_legend = 1;
-                }
+                qParams.legend = document.getElementById("legend").value;
 
                 // Filter out empty values
                 for (const key in qParams) {
@@ -252,6 +250,7 @@
             openBtn1.addEventListener("click", openUrl)
             openBtn2.addEventListener("click", openUrl)
             function openUrl(e) {
+                updatePreview();
                 const url = urlPreview.textContent.replace("Copy", "").trim()
                 window.open(url)
             }

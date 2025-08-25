@@ -68,7 +68,7 @@ def query_params(
     width: int | Literal['auto'] | None = Query(None, description="Width of the chart"),
     height: int | Literal['auto'] | None = Query(None, description="Height of the chart"),
     scale: int | None = Query(None, description="PNG scale factor"),
-    hide_legend: bool | None = Query(False, description="Hide the legend in the chart"),
+    legend: bool | None = Query(False, description="Include the legend in the chart"),
     title: str | None = Query(None, description="Chart title"),
     subtitle: str | None = Query(None, description="Chart subtitle"),
     body: str | None = Query(None, description="Paragraph displayed in the HTML page only"),
@@ -103,7 +103,7 @@ def query_params(
         "y_prefix": y_prefix,
         "x_suffix": x_suffix,
         "y_suffix": y_suffix,
-        "hide_legend": hide_legend,
+        "legend": legend,
         "barmode": barmode,
         "boxmode": boxmode,
     }
@@ -390,7 +390,7 @@ def compile_layout(
             layout["margin"]["t"] = 120
 
     # Merge legend options
-    if options.get("hide_legend") is True:
+    if options.get("legend") is False:
         layout["legend"] = {"visible": False}
     else:
         layout = deep_merge(
