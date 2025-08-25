@@ -1,4 +1,7 @@
 # Standard
+import os
+import logging
+from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 
 # Fast API
@@ -18,6 +21,41 @@ from .routers import charts, molecules
 # Setup
 # ------------------------------------
 
+# Load .env variables
+load_dotenv()
+
+
+# Logger
+class ColoredFormatter(logging.Formatter):
+    LEVEL_COLORS = {
+        logging.DEBUG: "\x1b[90m",  # bright black / gray
+        logging.INFO: "\x1b[32m",  # green
+        logging.WARNING: "\x1b[33m",  # yellow
+        logging.ERROR: "\x1b[31m",  # red
+        logging.CRITICAL: "\x1b[1;31m",  # bold red
+    }
+
+    def format(self, record):
+        color = self.LEVEL_COLORS.get(record.levelno, "\x1b[0m")
+        # decorate the levelname only (keeps rest unchanged)
+        record.levelname = f"{color}{record.levelname}\x1b[0m"
+        return super().format(record)
+
+
+# Configure root logger with a colored stream handler
+root = logging.getLogger()
+root.setLevel(logging.INFO)
+
+# remove existing handlers if any (avoid duplicate logs)
+if root.handlers:
+    root.handlers.clear()
+
+handler = logging.StreamHandler()
+fmt = "\x1b[90m---------\x1b[0m %(levelname)s \x1b[90m%(name)s\x1b[0m %(message)s"
+handler.setFormatter(ColoredFormatter(fmt))
+root.addHandler(handler)
+logger = logging.getLogger(__name__)
+
 
 # Lifespan Event Handler
 @asynccontextmanager
@@ -26,16 +64,29 @@ async def lifespan(app: FastAPI):
     Manages the lifecycle of the application, including Redis connection.
     """
 
-    # Logic to run on startup
-    app.state.redis = aioredis.from_url(
-        "redis://localhost:6379", encoding="utf-8", decode_responses=True
-    )
+    # Read redis URL from environment; do not assume localhost in production
+    redis_url = os.getenv("REDIS_URL")
+
+    if redis_url:
+        app.state.redis = aioredis.from_url(
+            redis_url, encoding="utf-8", decode_responses=True
+        )
+        logger.info("✅ Connected to Redis")
+    else:
+        # No redis configured => set to None and use in-memory fallback where appropriate
+        app.state.redis = None
+        # simple in-memory cache for development/demo (not shared across processes)
+        app.state.in_memory_cache = {}
+        logger.info(
+            "❌ Redis not available, defaulting to in-memory cache for demo purpose only"
+        )
 
     # The application will run from here
     yield
 
     # Logic to run on shutdown
-    await app.state.redis.close()
+    if getattr(app.state, "redis", None):
+        await app.state.redis.close()
 
 
 # Initialize FastAPI
@@ -62,7 +113,6 @@ templates = Jinja2Templates(directory="app/templates")
 
 # Mount static files directory if needed
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
 
 # Routes
 # ------------------------------------

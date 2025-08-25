@@ -116,19 +116,32 @@ async def parse_input_data(
     data_id: str,  # Data stored in Redis
 ):
     """
-    Parse the input data from the URL or from Redis.
+    Parse the input data from the URL or from Redis (or in-memory fallback).
     """
 
-    # From Redis
+    # From Redis or in-memory fallback
     if data_id:
         redis_client = request.app.state.redis
-        input_data = await redis_client.get(f"input_data:{data_id}")
-        input_data = json.loads(input_data)
-        if not input_data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Chart data with ID '{data_id}' not found. It may have expired.",
-            )
+        key = f"input_data:{data_id}"
+
+        if redis_client:
+            input_data_raw = await redis_client.get(key)
+            if not input_data_raw:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Chart data with ID '{data_id}' not found. It may have expired.",
+                )
+            input_data = json.loads(input_data_raw)
+        else:
+            # in-memory fallback (only for dev/demo; volative and not shared between processes)
+            cache = getattr(request.app.state, "in_memory_cache", {})
+            input_data_raw = cache.get(key)
+            if not input_data_raw:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Chart data with ID '{data_id}' not found (no Redis configured).",
+                )
+            input_data = json.loads(input_data_raw)
 
     # From URL
     elif data_json:
@@ -138,6 +151,13 @@ async def parse_input_data(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="The 'data_json' query parameter cannot be empty.",
             )
+
+    else:
+        # Nothing provided
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No chart data provided (use 'data' param or post data to /chart to get an id).",
+        )
 
     return input_data
 
@@ -678,17 +698,32 @@ async def post_chart_data(
     data: list[dict] = Body(...),
 ):
     """
-    Takes chart data from the request body, stores it in Redis,
+    Takes chart data from the request body, stores it in Redis (or in-memory fallback),
     and returns a unique ID for the data.
     """
 
     unique_id = hash_data(data)
+    key = f"input_data:{unique_id}"
 
-    # Store data in Redis with a 24-hour expiration
     redis_client = request.app.state.redis
-    await redis_client.set(f"input_data:{unique_id}", json.dumps(data), ex=86400)
 
-    return {"id": unique_id, "url": f"/chart/{chart_type.value}/{unique_id}"}
+    # Use Redis when available
+    if redis_client:
+        await redis_client.set(key, json.dumps(data), ex=86400)
+        return {"id": unique_id, "url": f"/chart/{chart_type.value}/{unique_id}"}
+
+    # In-memory fallback
+    cache = getattr(request.app.state, "in_memory_cache", None)
+    if cache is None:
+        request.app.state.in_memory_cache = {}
+        cache = request.app.state.in_memory_cache
+
+    cache[key] = json.dumps(data)
+    return {
+        "id": unique_id,
+        "url": f"/chart/{chart_type.value}/{unique_id}",
+        "note": "Data stored in in-memory cache (no expiry, not persistent). Configure REDIS_URL to enable Redis storage.",
+    }
 
 
 # Bar chart
