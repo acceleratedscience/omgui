@@ -13,54 +13,54 @@
             <div id="control-panel" class="control-panel">
                 <h1>Chart Visualization API Demo</h1>
 
+                <h3>Examples</h3>
+                <div class="example-section">
+                    <label for="example-select">Choose/edit sample data:</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <select id="example-select" name="example-select">
+                            <optgroup label="Bar Charts">
+                                <option data-url="/generate/bar" data-chart-type="bar" data-params="{}">Bar chart</option>
+                                <option data-url="/generate/bar" data-chart-type="bar" data-params='{"h":1}'>Bar chart horizontal</option>
+                                <option data-url="/generate/bar" data-chart-type="bar" data-params='{"barmode":"stack"}'>Bar chart stacked</option>
+                            </optgroup>
+                            <optgroup label="Line Charts">
+                                <option data-url="/generate/line" data-chart-type="line" data-params="{}">Line chart</option>
+                                <option data-url="/generate/line" data-chart-type="line" data-params='{"h":1}'>Line chart horizontal</option>
+                            </optgroup>
+                            <optgroup label="Scatter Plots">
+                                <option data-url="/generate/scatter" data-chart-type="scatter" data-params="{}">Scatter plot</option>
+                            </optgroup>
+                            <optgroup label="Bubble Charts">
+                                <option data-url="/generate/bubble" data-chart-type="bubble" data-params="{}">Bubble chart</option>
+                            </optgroup>
+                            <optgroup label="Pie Charts">
+                                <option data-url="/generate/pie" data-chart-type="pie" data-params="{}">Pie chart</option>
+                            </optgroup>
+                            <optgroup label="Box Plots">
+                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params="{}">Box plot basic</option>
+                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"group":1}'>Box plot grouped</option>
+                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"h":1}'>Box plot horizontal</option>
+                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"show_points":1}'>Box plot + data points</option>
+                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"boxmean":1}'>Box plot + mean deviation</option>
+                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"boxmean":"sd"}'>Box plot + standard deviation</option>
+                            </optgroup>
+                            <optgroup label="Histogram Charts">
+                                <option data-url="/generate/histogram" data-chart-type="histogram" data-params="{}">Histogram chart</option>
+                                <option data-url="/generate/histogram" data-chart-type="histogram" data-params='{"h":1}'>Histogram chart horizontal</option>
+                                <option data-url="/generate/histogram" data-chart-type="histogram" data-params='{"barmode":"stack"}'>Histogram chart stacked</option>
+                            </optgroup>
+                        </select>
+                        <!-- Apply button removed: example is generated when dropdown changes (and on initial load) -->
+                    </div>
+
+                    <textarea id="data-preview"></textarea>
+                    
+                    <!-- changed to type="button" so it doesn't trigger the form submit handler -->
+                    <button type="button" id="generate-chart-btn">Generate chart</button>
+
+                </div>
+                
                 <form id="chart-form">
-                    <h3>Examples</h3>
-					<div class="example-section">
-						<label for="exampleSelect">Choose/edit sample data:</label>
-						<div style="display:flex; gap:8px; align-items:center;">
-							<select id="exampleSelect" name="exampleSelect">
-								<optgroup label="Bar Charts">
-									<option data-url="/generate/bar" data-chart-type="bar" data-params="{}">Bar chart</option>
-									<option data-url="/generate/bar" data-chart-type="bar" data-params='{"h":1}'>Bar chart horizontal</option>
-									<option data-url="/generate/bar" data-chart-type="bar" data-params='{"barmode":"stack"}'>Bar chart stacked</option>
-								</optgroup>
-								<optgroup label="Line Charts">
-									<option data-url="/generate/line" data-chart-type="line" data-params="{}">Line chart</option>
-									<option data-url="/generate/line" data-chart-type="line" data-params='{"h":1}'>Line chart horizontal</option>
-								</optgroup>
-								<optgroup label="Scatter Plots">
-									<option data-url="/generate/scatter" data-chart-type="scatter" data-params="{}">Scatter plot</option>
-								</optgroup>
-								<optgroup label="Bubble Charts">
-									<option data-url="/generate/bubble" data-chart-type="bubble" data-params="{}">Bubble chart</option>
-								</optgroup>
-								<optgroup label="Pie Charts">
-									<option data-url="/generate/pie" data-chart-type="pie" data-params="{}">Pie chart</option>
-								</optgroup>
-								<optgroup label="Box Plots">
-									<option data-url="/generate/boxplot" data-chart-type="boxplot" data-params="{}">Box plot basic</option>
-									<option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"group":1}'>Box plot grouped</option>
-									<option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"h":1}'>Box plot horizontal</option>
-									<option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"show_points":1}'>Box plot + data points</option>
-									<option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"boxmean":1}'>Box plot + mean deviation</option>
-									<option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"boxmean":"sd"}'>Box plot + standard deviation</option>
-								</optgroup>
-								<optgroup label="Histogram Charts">
-									<option data-url="/generate/histogram" data-chart-type="histogram" data-params="{}">Histogram chart</option>
-									<option data-url="/generate/histogram" data-chart-type="histogram" data-params='{"h":1}'>Histogram chart horizontal</option>
-									<option data-url="/generate/histogram" data-chart-type="histogram" data-params='{"barmode":"stack"}'>Histogram chart stacked</option>
-								</optgroup>
-							</select>
-							<!-- Apply button removed: example is generated when dropdown changes (and on initial load) -->
-						</div>
-
-                        <textarea id="data-preview"></textarea>
-                        
-                        <!-- changed to type="button" so it doesn't trigger the form submit handler -->
-                        <button type="button" id="generate-chart-btn">Generate chart</button>
-
-					</div>
- 
                     <div id="url-preview">
                         <pre id="url-preview-text"></pre>
                         <button class="copy-btn" id="copy-url-btn" type="button">Copy</button>
@@ -294,7 +294,7 @@
             // updatePreview();
 
 			// Example dropdown
-			const exampleSelect = document.getElementById("exampleSelect");
+			const exampleSelect = document.getElementById("example-select");
 			// Fetch example JSON from /generate/{chart_type} and display it in #url-preview (inside <pre>)
  			async function fetchAndShowExample(opt) {
  				if (!opt) return;
@@ -321,7 +321,11 @@
  			// Trigger fetch when dropdown changes
  			exampleSelect.addEventListener('change', () => {
  				const opt = exampleSelect.options[exampleSelect.selectedIndex];
- 				fetchAndShowExample(opt);
+ 				// Clear previous URL preview and hide open buttons when selecting a new example
+				if (urlPreviewText) urlPreviewText.textContent = '';
+				if (openBtn1) openBtn1.style.display = 'none';
+				if (openBtn2) openBtn2.style.display = 'none';
+				fetchAndShowExample(opt);
  			});
 
  			// Execute once on initial load for the first (default) option
