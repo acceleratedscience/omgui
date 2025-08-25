@@ -71,14 +71,14 @@ async def lifespan(app: FastAPI):
         app.state.redis = aioredis.from_url(
             redis_url, encoding="utf-8", decode_responses=True
         )
-        logger.info("✅ Connected to Redis")
+        logger.info("📀 redis_url: %s", redis_url)
     else:
         # No redis configured => set to None and use in-memory fallback where appropriate
         app.state.redis = None
         # simple in-memory cache for development/demo (not shared across processes)
         app.state.in_memory_cache = {}
         logger.info(
-            "❌ Redis not available, defaulting to in-memory cache for demo purpose only"
+            "❌ redis_url not available, defaulting to in-memory cache for demo purpose only"
         )
 
     # The application will run from here
