@@ -66,14 +66,14 @@
                 <h3>Generate Chart Data</h3>
                 <div id="generate-data-section">
                     <select id="chart-type-dropdown">
-                        <option value="1" data-url="/generate/bar" data-chart-type="bar">Bar chart</option>
-                        <option value="2" data-url="/generate/line" data-chart-type="line">Line chart</option>
-                        <option value="3" data-url="/generate/scatter" data-chart-type="scatter">Scatter plot</option>
-                        <option value="4" data-url="/generate/bubble" data-chart-type="bubble">Bubble chart</option>
-                        <option value="5" data-url="/generate/pie" data-chart-type="pie">Pie chart</option>
-                        <option value="6" data-url="/generate/boxplot" data-chart-type="boxplot">Box plot basic</option>
-                        <option value="7" data-url="/generate/boxplot-group" data-chart-type="boxplot">Box plot grouped</option>
-                        <option value="8" data-url="/generate/histogram" data-chart-type="histogram" data-params="{}">Histogram chart</option>
+                        <option data-url="/generate/bar" data-chart-type="bar">Bar chart</option>
+                        <option data-url="/generate/line" data-chart-type="line">Line chart</option>
+                        <option data-url="/generate/scatter" data-chart-type="scatter">Scatter plot</option>
+                        <option data-url="/generate/bubble" data-chart-type="bubble">Bubble chart</option>
+                        <option data-url="/generate/pie" data-chart-type="pie">Pie chart</option>
+                        <option data-url="/generate/boxplot" data-chart-type="boxplot">Box plot basic</option>
+                        <option data-url="/generate/boxplot-group" data-chart-type="boxplot-group">Box plot grouped</option>
+                        <option data-url="/generate/histogram" data-chart-type="histogram">Histogram</option>
                     </select>
 
                     <label id="bar-options" style="display:none">
@@ -110,6 +110,13 @@
                             <option value='{"boxmean":null}'>Exclude deviation (default)</option>
                             <option value='{"boxmean":1}'>Include mean deviation</option>
                             <option value='{"boxmean":"sd"}'>Include mean & standard deviation</option>
+                        </select>
+                    </label>
+                    <label id="histogram-options" style="display:none">
+                        Histogram options
+                        <select class="chart-option">
+                            <option value='{"h":null}'>Vertical (default)</option>
+                            <option value='{"h":1}'>Horizontal</option>
                         </select>
                     </label>
                     <!-- Apply button removed: example is generated when dropdown changes (and on initial load) -->
@@ -156,13 +163,13 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="y_prefix">Y axis prefix:</label>
-                        <input type="text" id="y_prefix" name="y_prefix" value="" />
-                    </div>
-
-                    <div class="form-group">
                         <label for="x_suffix">X axis suffix:</label>
                         <input type="text" id="x_suffix" name="x_suffix" value="" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="y_prefix">Y axis prefix:</label>
+                        <input type="text" id="y_prefix" name="y_prefix" value="" />
                     </div>
 
                     <div class="form-group">
@@ -261,9 +268,9 @@
  				// Derive chart type from data-url (e.g. "/generate/bar" -> "bar")
  				const urlPath = opt.dataset.url;
  				const parts = urlPath.split('/').filter(Boolean);
- 				const chartType = parts.length ? parts.pop() : 'bar';
+ 				const chartType = opt.dataset.chartType
 
-                // update visibility of option panels for this chart type
+                // Update visibility of option panels for this chart type
                 _toggleChartOptions(chartType);
 
                 // Compose URL
@@ -288,11 +295,13 @@
 				const barOpts = document.getElementById('bar-options');
 				const lineOpts = document.getElementById('line-options');
 				const boxOpts = document.getElementById('boxplot-options');
+                const histOption = document.getElementById('histogram-options');
 				// If elements missing, do nothing
-				if (!barOpts || !lineOpts || !boxOpts) return;
+				if (!barOpts || !lineOpts || !boxOpts || !histOption) return;
 				barOpts.style.display = (chartType === 'bar') ? 'block' : 'none';
 				lineOpts.style.display = (chartType === 'line') ? 'block' : 'none';
 				boxOpts.style.display = (chartType === 'boxplot' || chartType === 'boxplot-group') ? 'block' : 'none';
+                histOption.style.display = (chartType === 'histogram') ? 'block' : 'none';
 			}
 
             /**
@@ -305,78 +314,14 @@
             const chartOptionDropdowns = document.querySelectorAll('#bar-options select, #line-options select, #boxplot-options select')
             Array.from(chartOptionDropdowns).forEach((optDropdown) => initOptDropdown(optDropdown))
 			function initOptDropdown(optDropdown) {
-				optDropdown.addEventListener('change', () => {
-                    // Show "Update" buttons (only if preview URL present)
-                    if (urlPreviewText.textContent) {
-                        btnUpdate.disabled = false
-                    }
-
-					const val = (optDropdown.value || '').trim();
-					// Do nothing if no value or no preview URL
-					if (!val) return;
-					const currentUrl = urlPreviewText && urlPreviewText.textContent ? urlPreviewText.textContent.trim() : '';
-					if (!currentUrl) return;
-
-					// Parse JSON from the select value
-					let json;
-					try {
-						json = JSON.parse(val);
-					} catch (err) {
-						console.error('Invalid JSON in select value', err);
-						return;
-					}
-
-					// Parse current preview URL and merge query params
-					try {
-						const url = new URL(currentUrl);
-						const qParams = new URLSearchParams(url.search);
-						for (const k in json) {
-							// Convert value to string, ignore empty/null values
-                            const v = json[k] ? String(json[k]) : undefined
-                            if (json[k]) {
-							    qParams.set(k, String(json[k]));
-                            } else {
-                                qParams.delete(k)
-                            }
-						}
-						url.search = qParams.toString();
-						urlPreviewText.textContent = url.toString();
-						if (!urlPreview.contains(btnCopyUrl)) urlPreview.appendChild(btnCopyUrl);
-					} catch (err) {
-						console.error('Invalid URL in preview, cannot apply params', err);
-						return;
-					}
-				});
-			}
-
-            // Gather option select params (bar/line/boxplot) and return as plain object with string values
-			function _gatherOptionParams() {
-				const ids = ['bar-options', 'line-options', 'boxplot-options'];
-				const out = {};
-				for (const id of ids) {
-					const el = document.getElementById(id);
-					if (!el) continue;
-					const v = (el.value || '').trim();
-					if (!v) continue;
-					try {
-						const obj = JSON.parse(v);
-						for (const k in obj) {
-							// ensure it's a string for URLSearchParams
-							out[k] = String(obj[k]);
-						}
-					} catch (err) {
-						// invalid JSON in select value — ignore that select
-						console.error(`Invalid JSON in ${id}:`, err);
-					}
-				}
-				return out;
+				optDropdown.addEventListener('change', () => updateUrl());
 			}
 
             /**
              * Display & Rendering options
              */
             
-            // Input: 
+            // Input: any 
             // --> Enable 'Update' button on edit
             form.addEventListener('input', () => {
                 // Toggle PNG scale only if output is 'png'
@@ -389,11 +334,81 @@
  					scaleOption.style.display = 'none';
  				}
 
+                updateUrl()
+            })
+
+            // Update URL
+            // --> Consolidate all options
+            // --> Generate & display URL
+            function updateUrl(path = null, enableUpdateBtn = true) {
                 // Show shaking "Update" buttons
-                if (urlPreviewText.textContent) {
+                if (enableUpdateBtn && urlPreviewText.textContent) {
                     btnUpdate.disabled = false
                 }
-            })
+
+                // If no URL is passed, create base URL
+                if (!path) {
+                    let currentUrl = urlPreviewText.textContent.trim()
+                    if (!currentUrl) return
+                    try {
+                        currentUrl = new URL(currentUrl);
+                        path = currentUrl.pathname;
+                    } catch(err) {
+                        alert('Current URL is invalid, please regenerate chart')
+                        return false
+                    }
+                }
+
+                let qParams = {}
+
+                // Display options
+                qParams.title = document.getElementById('title').value;
+                qParams.subtitle = document.getElementById('subtitle').value;
+                qParams.body = document.getElementById('body').value;
+                qParams.x_title = document.getElementById('x_title').value;
+                qParams.y_title = document.getElementById('y_title').value;
+                qParams.x_prefix = document.getElementById('x_prefix').value;
+                qParams.y_prefix = document.getElementById('y_prefix').value;
+                qParams.x_suffix = document.getElementById('x_suffix').value;
+                qParams.y_suffix = document.getElementById('y_suffix').value;
+
+                // Render options
+                qParams.width = document.getElementById('width').value;
+                qParams.height = document.getElementById('height').value;
+                qParams.output = document.getElementById('output').value;
+                if (qParams.output == 'png') qParams.scale = document.getElementById('scale').value;
+                qParams.omit_legend = document.getElementById('omit_legend').value;
+
+                // Chart-specific options
+                const optionDropdowns = document.getElementsByClassName('chart-option')
+                Array.from(optionDropdowns).forEach(dd => {
+                    if (dd.parentNode.style.display != 'none') {
+                        if (dd.value) {
+                            const valueDict = JSON.parse(dd.value)
+                            for (const key of Object.keys(valueDict)) {
+                                qParams[key] = valueDict[key]
+                            }
+                        }
+                    }
+                })
+
+                // Filter out empty/null values
+                for (const key in qParams) {
+                    if (!qParams[key]) delete qParams[key]
+                }
+
+                // Compile URL
+                qParams = new URLSearchParams(qParams)
+                qParamsStr = qParams.toString()
+                if (qParamsStr) {
+                    path += `?${qParamsStr}`
+                }
+
+                // Update preview URL (displayed in the <pre> to preserve indentation)
+                urlPreviewText.textContent = window.location.origin + path;
+                // ensure copy button remains inside container
+                if (!urlPreview.contains(btnCopyUrl)) urlPreview.appendChild(btnCopyUrl);
+            }
 
             /**
              * URL preview
@@ -441,7 +456,8 @@
             async function generateChart(e) {
 				// get selected option and chart type (prefer data-chart-type)
 				const opt = chartTypeDropdown.options[chartTypeDropdown.selectedIndex];
-				const chartType = (opt && opt.dataset && opt.dataset.chartType) ? opt.dataset.chartType : (opt && opt.dataset && opt.dataset.url ? opt.dataset.url.split('/').filter(Boolean).pop() : 'bar');
+				let chartType = opt.dataset.chartType
+                if (chartType == 'boxplot-group') chartType = 'boxplot' // Group is defined in data, /chart/ endpoint only knows boxplot
 
 				// read payload from textarea
 				const payloadStr = (dataPreview && dataPreview.value) ? dataPreview.value.trim() : '';
@@ -461,6 +477,9 @@
 				}
 
 				// POST to /chart/{chart_type}
+                // --> Create chart, store it in Redis
+                // --> return URL path with Redis ID
+                // --> Update URL + preview
 				try {
 					const resp = await fetch(`/chart/${encodeURIComponent(chartType)}`, {
 						method: 'POST',
@@ -473,10 +492,8 @@
 					}
 					const json = await resp.json();
 					if (json && json.url) {
-						// include option dropdown params when updating preview for the generated chart
-						const optionParams = _gatherOptionParams(); // <-- NEW: merge option selects into qParams
-						// reuse updatePreview to show the returned url and update iframe
-						updatePreview(json.url, optionParams);
+                        updateUrl(json.url, false)
+						updatePreview();
                         generateBtn.style.display = 'none'
 					} else {
 						throw new Error('Invalid response from server');
@@ -489,74 +506,14 @@
 			}
             
             // Update URL & iframe with new chart 
-            function updatePreview(path=null, qParams={}) {
-                // If no URL is passed, create base URL
-                if (!path) {
-                    let currentUrl = urlPreviewText.textContent.trim()
-                    try {
-                        currentUrl = new URL(currentUrl);
-                        path = currentUrl.pathname;
-                    } catch(err) {
-                        alert('Current URL is invalid, please regenerate chart')
-                        return false
-                    }
-                }
-
-                // Chart input
-                qParams.title = document.getElementById('title').value;
-                qParams.subtitle = document.getElementById('subtitle').value;
-                qParams.body = document.getElementById('body').value;
-                qParams.x_title = document.getElementById('x_title').value;
-                qParams.y_title = document.getElementById('y_title').value;
-                qParams.x_prefix = document.getElementById('x_prefix').value;
-                qParams.y_prefix = document.getElementById('y_prefix').value;
-                qParams.x_suffix = document.getElementById('x_suffix').value;
-                qParams.y_suffix = document.getElementById('y_suffix').value;
-
-                // Render options
-                qParams.width = document.getElementById('width').value;
-                qParams.height = document.getElementById('height').value;
-                qParams.output = document.getElementById('output').value;
-                if (qParams.output == 'png') {
-                    qParams.scale = document.getElementById('scale').value;
-                }
-                qParams.omit_legend = document.getElementById('omit_legend').value;
-
-                // Chart-specific options
-                const optionDropdowns = document.getElementsByClassName('chart-option')
-                Array.from(optionDropdowns).forEach(dd => {
-                    if (dd.parentNode.style.display != 'none') {
-                        if (dd.value) {
-                            const valueDict = JSON.parse(dd.value)
-                            for (const key of Object.keys(valueDict)) {
-                                qParams[key] = valueDict[key]
-                            }
-                        }
-                    }
-                })
-
-                // Filter out empty/null values
-                for (const key in qParams) {
-                    if (!qParams[key]) delete qParams[key]
-                }
-
-                // Compile URL
-                qParams = new URLSearchParams(qParams)
-                qParamsStr = qParams.toString()
-                if (qParamsStr) {
-                    path += `?${qParamsStr}`
-                }
-
-                // Update preview URL (displayed in the <pre> to preserve indentation)
-                urlPreviewText.textContent = window.location.origin + path;
-                // ensure copy button remains inside container
-                if (!urlPreview.contains(btnCopyUrl)) urlPreview.appendChild(btnCopyUrl);
-
+            function updatePreview(path=null) {
                 // Update the iframe src
-                previewFrame.src = path;
+                previewFrame.src = urlPreviewText.textContent.trim();
 
                 // Enable open button
                 btnOpen.disabled = false
+
+                console.clear()
 
                 return true
             }
