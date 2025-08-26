@@ -6,6 +6,42 @@
     <title>Chart Visualization API Demo</title>
     <link rel="stylesheet" href="/static/animations.css">
     <link rel="stylesheet" href="/static/demo.css">
+    <style>
+        #link-preview-wrap {
+            position: sticky;
+            top: -20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: white;
+            padding: 20px;
+            margin: -20px;
+            border-bottom: solid 1px #ddd;
+        }
+        #link-preview-wrap .btn-wrap {
+            margin-top: 0;
+        }
+
+        #generate-data-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0;
+        }
+        #generate-data-section label {
+            margin: 10px 0 15px 0;
+
+        }
+        #generate-data-section select {
+            margin-top: 5px;
+        }
+
+        #data-preview {
+            height: 200px;
+            font-size: 0.7rem;
+            font-family: monospace;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -13,65 +49,82 @@
             <div id="control-panel" class="control-panel">
                 <h1>Chart Visualization API Demo</h1>
 
-                <h3>Examples</h3>
-                <div class="example-section">
-                    <label for="example-select">Choose/edit sample data:</label>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <select id="example-select" name="example-select">
-                            <optgroup label="Bar Charts">
-                                <option data-url="/generate/bar" data-chart-type="bar" data-params="{}">Bar chart</option>
-                                <option data-url="/generate/bar" data-chart-type="bar" data-params='{"h":1}'>Bar chart horizontal</option>
-                                <option data-url="/generate/bar" data-chart-type="bar" data-params='{"barmode":"stack"}'>Bar chart stacked</option>
-                            </optgroup>
-                            <optgroup label="Line Charts">
-                                <option data-url="/generate/line" data-chart-type="line" data-params="{}">Line chart</option>
-                                <option data-url="/generate/line" data-chart-type="line" data-params='{"h":1}'>Line chart horizontal</option>
-                            </optgroup>
-                            <optgroup label="Scatter Plots">
-                                <option data-url="/generate/scatter" data-chart-type="scatter" data-params="{}">Scatter plot</option>
-                            </optgroup>
-                            <optgroup label="Bubble Charts">
-                                <option data-url="/generate/bubble" data-chart-type="bubble" data-params="{}">Bubble chart</option>
-                            </optgroup>
-                            <optgroup label="Pie Charts">
-                                <option data-url="/generate/pie" data-chart-type="pie" data-params="{}">Pie chart</option>
-                            </optgroup>
-                            <optgroup label="Box Plots">
-                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params="{}">Box plot basic</option>
-                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"group":1}'>Box plot grouped</option>
-                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"h":1}'>Box plot horizontal</option>
-                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"show_points":1}'>Box plot + data points</option>
-                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"boxmean":1}'>Box plot + mean deviation</option>
-                                <option data-url="/generate/boxplot" data-chart-type="boxplot" data-params='{"boxmean":"sd"}'>Box plot + standard deviation</option>
-                            </optgroup>
-                            <optgroup label="Histogram Charts">
-                                <option data-url="/generate/histogram" data-chart-type="histogram" data-params="{}">Histogram chart</option>
-                                <option data-url="/generate/histogram" data-chart-type="histogram" data-params='{"h":1}'>Histogram chart horizontal</option>
-                                <option data-url="/generate/histogram" data-chart-type="histogram" data-params='{"barmode":"stack"}'>Histogram chart stacked</option>
-                            </optgroup>
-                        </select>
-                        <!-- Apply button removed: example is generated when dropdown changes (and on initial load) -->
+                <div id="link-preview-wrap">
+                    <div id="url-preview">
+                        <pre id="url-preview-text"></pre>
+                        <button class="copy-btn" id="copy-url-btn" type="button" style="display:none">Copy</button>
                     </div>
+                    
+                    <div class="btn-wrap">
+                        <button id="open-btn" type="button" disabled>Open URL</button>
+                        <button type="submit" id="update-btn" class="shake" disabled>Update</button>
+                    </div>
+                </div>
 
-                    <textarea id="data-preview"></textarea>
+                {# <div class="example-section"></div> #}
+
+                <h3>Generate Chart Data</h3>
+                <div id="generate-data-section">
+                    <select id="example-select">
+                        <option disabled selected>- Select chart type -</option>
+                        <option data-url="/generate/bar" data-chart-type="bar">Bar chart</option>
+                        <option data-url="/generate/line" data-chart-type="line">Line chart</option>
+                        <option data-url="/generate/scatter" data-chart-type="scatter">Scatter plot</option>
+                        <option data-url="/generate/bubble" data-chart-type="bubble">Bubble chart</option>
+                        <option data-url="/generate/pie" data-chart-type="pie">Pie chart</option>
+                        <option data-url="/generate/boxplot" data-chart-type="boxplot">Box plot basic</option>
+                        <option data-url="/generate/boxplot-group" data-chart-type="boxplot">Box plot grouped</option>
+                        <option data-url="/generate/histogram" data-chart-type="histogram" data-params="{}">Histogram chart</option>
+                    </select>
+
+                    <label id="bar-options" style="display:none">
+                        Bar chart options
+                        <select class="chart-option">
+                            <option value='{"h":null}'>Vertical (default)</option>
+                            <option value='{"h":1}'>Horizontal</option>
+                        </select>
+                        <select class="chart-option">
+                            <option value='{"barmode":null}'>Group (default)</option>
+                            <option value='{"barmode":"stack"}'>Stacked</option>
+                            <option value='{"barmode":"overlay"}'>Overlay</option>
+                            <option value='{"barmode":"relative"}'>Relative</option>
+                        </select>
+                    </label>
+                    <label id="line-options" style="display:none">
+                        Line chart options
+                        <select class="chart-option">
+                            <option value='{"h":null}'>Vertical (default)</option>
+                            <option value='{"h":1}'>Horizontal</option>
+                        </select>
+                    </label>
+                    <label id="boxplot-options" style="display:none">
+                        Boxplot options
+                        <select class="chart-option">
+                            <option value='{"h":null}'>Vertical (default)</option>
+                            <option value='{"h":1}'>Horizontal</option>
+                        </select>
+                        <select class="chart-option">
+                            <option value='{"show_points":null}'>Exclude data points (default)</option>
+                            <option value='{"show_points":1}'>Show data points</option>
+                        </select>
+                        <select class="chart-option">
+                            <option value='{"boxmean":null}'>Exclude deviation (default)</option>
+                            <option value='{"boxmean":1}'>Include mean deviation</option>
+                            <option value='{"boxmean":"sd"}'>Include mean & standard deviation</option>
+                        </select>
+                    </label>
+                    <!-- Apply button removed: example is generated when dropdown changes (and on initial load) -->
+                
+
+                    <textarea id="data-preview">Data will appear here</textarea>
                     
                     <!-- changed to type="button" so it doesn't trigger the form submit handler -->
-                    <button type="button" id="generate-chart-btn">Generate chart</button>
+                    <button type="submit" id="generate-chart-btn" style="width:100%; display:none">Generate chart</button>
 
                 </div>
                 
                 <form id="chart-form">
-                    <div id="url-preview">
-                        <pre id="url-preview-text"></pre>
-                        <button class="copy-btn" id="copy-url-btn" type="button">Copy</button>
-                    </div>
- 					
- 					<div class="btn-wrap">
- 						<button id="open-btn-1" type="button" style="display:none">Open URL</button>
- 						<button type="submit" id="update-btn-1" class="tense" style="display:none">Update</button>
- 					</div>
- 
- 					<h3>Display Options</h3>
+                    <h3>Display Options</h3>
  					<div class="form-group">
                         <label for="title">Title:</label>
                         <input type="text" id="title" name="title" value="Demo Chart" />
@@ -150,11 +203,6 @@
                         <label for="scale">PNG Scale:</label>
                         <input type="number" id="scale" name="scale" value="2" min="1" />
                     </div>
-
-                    <div class="btn-wrap">
-                        <button id="open-btn-2">Open URL</button>
-                        <button type="submit" id="update-btn-2" class="tense" style="display:none">Update</button>
-                    </div>
                 </form>
             </div>
 
@@ -165,18 +213,17 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const form = document.getElementById("chart-form");
-            const previewFrame = document.getElementById("preview-frame");
-            const dataPreview = document.getElementById("data-preview");
-            const urlPreview = document.getElementById("url-preview");
-            const urlPreviewText = document.getElementById("url-preview-text");
-            const copyUrlBtn = document.getElementById("copy-url-btn");
-            const scaleOption = document.getElementById("scale-option");
-            const updateBtn1 = document.getElementById("update-btn-1");
-            const updateBtn2 = document.getElementById("update-btn-2");
-            const openBtn1 = document.getElementById("open-btn-1");
-            const openBtn2 = document.getElementById("open-btn-2");
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('chart-form');
+            const previewFrame = document.getElementById('preview-frame');
+            const dataPreview = document.getElementById('data-preview');
+            const urlPreview = document.getElementById('url-preview');
+            const urlPreviewText = document.getElementById('url-preview-text');
+            const copyUrlBtn = document.getElementById('copy-url-btn');
+            const scaleOption = document.getElementById('scale-option');
+            const generateBtn = document.getElementById('generate-chart-btn');
+            const updateBtn = document.getElementById('update-btn');
+            const openBtn = document.getElementById('open-btn');
 
             // Function to update the iframe with chart data
             function updatePreview(path=null, qParams={}) {
@@ -187,34 +234,46 @@
                         currentUrl = new URL(currentUrl);
                         path = currentUrl.pathname;
                     } catch(err) {
-                        alert("Current URL is invalid, please regenerate chart")
+                        alert('Current URL is invalid, please regenerate chart')
                         return false
                     }
                 }
 
                 // Chart input
-                qParams.title = document.getElementById("title").value;
-                qParams.subtitle = document.getElementById("subtitle").value;
-                qParams.body = document.getElementById("body").value;
-                qParams.x_title = document.getElementById("x_title").value;
-                qParams.y_title = document.getElementById("y_title").value;
-                qParams.x_prefix = document.getElementById("x_prefix").value;
-                qParams.y_prefix = document.getElementById("y_prefix").value;
-                qParams.x_suffix = document.getElementById("x_suffix").value;
-                qParams.y_suffix = document.getElementById("y_suffix").value;
+                qParams.title = document.getElementById('title').value;
+                qParams.subtitle = document.getElementById('subtitle').value;
+                qParams.body = document.getElementById('body').value;
+                qParams.x_title = document.getElementById('x_title').value;
+                qParams.y_title = document.getElementById('y_title').value;
+                qParams.x_prefix = document.getElementById('x_prefix').value;
+                qParams.y_prefix = document.getElementById('y_prefix').value;
+                qParams.x_suffix = document.getElementById('x_suffix').value;
+                qParams.y_suffix = document.getElementById('y_suffix').value;
 
                 // Render options
-                qParams.width = document.getElementById("width").value;
-                qParams.height = document.getElementById("height").value;
-                qParams.output = document.getElementById("output").value;
+                qParams.width = document.getElementById('width').value;
+                qParams.height = document.getElementById('height').value;
+                qParams.output = document.getElementById('output').value;
                 if (qParams.output == 'png') {
-                    qParams.scale = document.getElementById("scale").value;
+                    qParams.scale = document.getElementById('scale').value;
                 }
-                qParams.omit_legend = document.getElementById("omit_legend").value;
+                qParams.omit_legend = document.getElementById('omit_legend').value;
 
-                // Filter out empty values
+                // Chart-specific options
+                const optionDropdowns = document.getElementsByClassName('chart-option')
+                Array.from(optionDropdowns).forEach(dd => {
+                    if (dd.parentNode.style.display != 'none') {
+                        if (dd.value) {
+                            valueDict = JSON.parse(dd.value)
+                            for (key of Object.keys(valueDict)) {
+                                qParams[key] = valueDict[key]
+                            }
+                        }
+                    }
+                })
+
+                // Filter out empty/null values
                 for (const key in qParams) {
-                    console.log(key, qParams[key], !qParams[key])
                     if (!qParams[key]) delete qParams[key]
                 }
 
@@ -233,18 +292,18 @@
                 // Update the iframe src
                 previewFrame.src = path;
 
-                openBtn1.style.display = "inline-block"
-                openBtn2.style.display = "inline-block"
+                // Enable open button
+                openBtn.disabled = false
 
                 return true
             }
 
             // Copy URL button
-            copyUrlBtn.addEventListener("click", () => {
+            copyUrlBtn.addEventListener('click', () => {
                 const url = (urlPreviewText && urlPreviewText.textContent) ? urlPreviewText.textContent.trim() : ''
                 navigator.clipboard.writeText(url).then(() => {
                     const originalText = copyUrlBtn.textContent
-                    copyUrlBtn.textContent = "✅ Copied"
+                    copyUrlBtn.textContent = '✅ Copied'
                     setTimeout(() => {
                         copyUrlBtn.textContent = originalText
                     }, 2000)
@@ -252,36 +311,32 @@
             })
 
             // Shake update button when inputs change (for real-time preview)
-            form.addEventListener("input", () => {
+            form.addEventListener('input', () => {
                 // Toggle PNG scale only if output is 'png'
- 				const controlPanel = document.getElementById("control-panel")
- 				const output = document.getElementById("output").value;
- 				if (output === "png") {
- 					scaleOption.style.display = "block";
+ 				const controlPanel = document.getElementById('control-panel')
+ 				const output = document.getElementById('output').value;
+ 				if (output === 'png') {
+ 					scaleOption.style.display = 'block';
  					controlPanel.scrollTo(0, controlPanel.scrollHeight);
  				} else {
- 					scaleOption.style.display = "none";
+ 					scaleOption.style.display = 'none';
  				}
 
-                // Show "Update" buttons
+                // Show shaking "Update" buttons
                 if (urlPreviewText.textContent) {
-                    updateBtn1.style.display = "inline-block"
-                    updateBtn2.style.display = "inline-block"
+                    updateBtn.disabled = false
                 }
                 
             })
 
             // Update preview buttons
-            form.addEventListener("submit", (e) => {
-                e.preventDefault();
-                updateBtn1.style.display = "none"
-                updateBtn2.style.display = "none"
+            updateBtn.addEventListener('click', (e) => {
+                updateBtn.disabled = true
                 updatePreview();
             });
 
             // Open URL buttons
-            openBtn1.addEventListener("click", openUrl)
-            openBtn2.addEventListener("click", openUrl)
+            openBtn.addEventListener('click', openUrl)
             function openUrl(e) {
                 const success = updatePreview();
                 if (success) {
@@ -294,25 +349,116 @@
             // updatePreview();
 
 			// Example dropdown
-			const exampleSelect = document.getElementById("example-select");
-			// Fetch example JSON from /generate/{chart_type} and display it in #url-preview (inside <pre>)
- 			async function fetchAndShowExample(opt) {
+			const exampleSelect = document.getElementById('example-select');
+
+			// Show/hide option panels based on chart type
+			function updateOptionsVisibility(chartType) {
+				const barOpts = document.getElementById('bar-options');
+				const lineOpts = document.getElementById('line-options');
+				const boxOpts = document.getElementById('boxplot-options');
+				// If elements missing, do nothing
+				if (!barOpts || !lineOpts || !boxOpts) return;
+				barOpts.style.display = (chartType === 'bar') ? 'block' : 'none';
+				lineOpts.style.display = (chartType === 'line') ? 'block' : 'none';
+				boxOpts.style.display = (chartType === 'boxplot' || chartType === 'boxplot-group') ? 'block' : 'none';
+			}
+
+			// Apply a select's JSON value into the preview URL as query params
+            const chartOptionDropdowns = document.querySelectorAll('#bar-options select, #line-options select, #boxplot-options select')
+            Array.from(chartOptionDropdowns).forEach((optDropdown) => initOptDropdown(optDropdown))
+			function initOptDropdown(optDropdown) {
+				optDropdown.addEventListener('change', () => {
+                    console.log('change')
+                    // Show "Update" buttons (only if preview URL present)
+                    if (urlPreviewText.textContent) {
+                        updateBtn.disabled = false
+                    }
+
+					const val = (optDropdown.value || '').trim();
+					// Do nothing if no value or no preview URL
+					if (!val) return;
+					const currentUrl = urlPreviewText && urlPreviewText.textContent ? urlPreviewText.textContent.trim() : '';
+					if (!currentUrl) return;
+
+					// Parse JSON from the select value
+					let json;
+					try {
+						json = JSON.parse(val);
+					} catch (err) {
+						console.error('Invalid JSON in select value', err);
+						return;
+					}
+
+					// Parse current preview URL and merge query params
+					try {
+						const url = new URL(currentUrl);
+						const qParams = new URLSearchParams(url.search);
+						for (const k in json) {
+							// Convert value to string, ignore empty/null values
+                            const v = json[k] ? String(json[k]) : undefined
+                            if (json[k]) {
+							    qParams.set(k, String(json[k]));
+                            } else {
+                                qParams.delete(k)
+                            }
+						}
+						url.search = qParams.toString();
+						urlPreviewText.textContent = url.toString();
+						// ensure copy button remains available
+						if (!urlPreview.contains(copyUrlBtn)) urlPreview.appendChild(copyUrlBtn);
+					} catch (err) {
+						console.error('Invalid URL in preview, cannot apply params', err);
+						return;
+					}
+				});
+			}
+
+			// Gather option select params (bar/line/boxplot) and return as plain object with string values
+			function gatherOptionParams() {
+				const ids = ['bar-options', 'line-options', 'boxplot-options'];
+				const out = {};
+				for (const id of ids) {
+					const el = document.getElementById(id);
+					if (!el) continue;
+					const v = (el.value || '').trim();
+					if (!v) continue;
+					try {
+						const obj = JSON.parse(v);
+						for (const k in obj) {
+							// ensure it's a string for URLSearchParams
+							out[k] = String(obj[k]);
+						}
+					} catch (err) {
+						// invalid JSON in select value — ignore that select
+						console.error(`Invalid JSON in ${id}:`, err);
+					}
+				}
+				return out;
+			}
+
+ 			async function fetchAndShowExampleData(opt) {
  				if (!opt) return;
+                
  				// Derive chart type from data-url (e.g. "/generate/bar" -> "bar")
- 				const urlPath = opt.dataset.url || '/generate/bar';
+ 				const urlPath = opt.dataset.url;
  				const parts = urlPath.split('/').filter(Boolean);
  				const chartType = parts.length ? parts.pop() : 'bar';
 
+                // update visibility of option panels for this chart type
+                updateOptionsVisibility(chartType);
+
+                // Compose URL
+                let url = `/generate/${encodeURIComponent(chartType)}`
+
  				// Fetch generated example JSON
  				try {
- 					const resp = await fetch(`/generate/${encodeURIComponent(chartType)}`);
+ 					const resp = await fetch(url);
  					const json = await resp.json();
  					// Display JSON with indent=2
                     dataPreview.value = JSON.stringify(json, null, 2);
-					
  				} catch (err) {
 					const errMsg = `Error fetching example for "${chartType}": ${err.message || err}`;
-					if (urlPreviewText) urlPreviewText.textContent = errMsg; else urlPreview.textContent = errMsg;
+					if (urlPreviewText) urlPreviewText.textContent = errMsg; else urlPreviewText.textContent = errMsg;
  				}
  				// Ensure copy button remains available
 				if (!urlPreview.contains(copyUrlBtn)) urlPreview.appendChild(copyUrlBtn);
@@ -322,19 +468,14 @@
  			exampleSelect.addEventListener('change', () => {
  				const opt = exampleSelect.options[exampleSelect.selectedIndex];
  				// Clear previous URL preview and hide open buttons when selecting a new example
-				if (urlPreviewText) urlPreviewText.textContent = '';
-				if (openBtn1) openBtn1.style.display = 'none';
-				if (openBtn2) openBtn2.style.display = 'none';
-				fetchAndShowExample(opt);
+				urlPreviewText.textContent = ''
+				openBtn.disabled = true
+                generateBtn.style.display = 'inline-block'
+				fetchAndShowExampleData(opt);
  			});
 
- 			// Execute once on initial load for the first (default) option
- 			const initialOpt = exampleSelect.options[exampleSelect.selectedIndex] || exampleSelect.options[0];
- 			fetchAndShowExample(initialOpt);
-
 			// Generate chart button - POST JSON from data-preview to /chart/{chart_type}
-			const generateBtn = document.getElementById("generate-chart-btn");
-			generateBtn.addEventListener("click", async (e) => {
+			generateBtn.addEventListener('click', async (e) => {
 				e.preventDefault();
 				// get selected option and chart type (prefer data-chart-type)
 				const opt = exampleSelect.options[exampleSelect.selectedIndex];
@@ -370,8 +511,11 @@
 					}
 					const json = await resp.json();
 					if (json && json.url) {
+						// include option dropdown params when updating preview for the generated chart
+						const optionParams = gatherOptionParams(); // <-- NEW: merge option selects into qParams
 						// reuse updatePreview to show the returned url and update iframe
-						updatePreview(json.url, {});
+						updatePreview(json.url, optionParams);
+                        generateBtn.style.display = 'none'
 					} else {
 						throw new Error('Invalid response from server');
 					}
