@@ -12,3 +12,4 @@ cairosvg
 
 # Chart rendering
 plotly
+kaleido
