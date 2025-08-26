@@ -23,6 +23,7 @@ from fastapi.responses import (
 )
 
 # Modules
+import kaleido
 import plotly.graph_objects as go
 
 # Tools
