@@ -3,7 +3,7 @@ FROM python:3.11-slim-bookworm
 
 # Install system dependencies for keleido
 # This is needed to be able to download PNG/SVG charts
-RUN apt update && apt-get install \
+RUN apt update && apt-get install -y \
     libnss3 \
     libatk-bridge2.0-0 \
     libcups2 \
