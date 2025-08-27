@@ -1,10 +1,8 @@
-# Use a Python base image with a standard Debian distribution
+# Use a Python base image with a Debian distribution
 FROM python:3.11-bookworm
 
-# Set the working directory
-WORKDIR /app
-
-# Install all required system dependencies for Kaleido's bundled browser
+# Install system dependencies for keleido
+# This is needed to be able to download PNG/SVG charts
 RUN apt-get update && apt-get install -y \
     libnss3 \
     libatk-bridge2.0-0 \
@@ -17,20 +15,17 @@ RUN apt-get update && apt-get install -y \
     libxkbcommon0 \
     libpango-1.0-0 \
     libcairo2 \
-    libasound2 \
-    yes
+    libasound2
+
+# Set the working directory
+WORKDIR /app
 
 # Copy the requirements file and install Python dependencies
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# Install Kaleido's bundled browser
-# This is a key step. It downloads a browser guaranteed to be compatible with Kaleido.
+# Install chromium for SVG/PNG charts
 RUN yes | plotly_get_chrome
-
-# Crucial missing step: Tell Kaleido where to find the executable at runtime.
-# plotly_get_chrome installs the browser here, but it's not on the system's PATH.
-ENV KALEIDO_CHROMIUM_EXECUTABLE /usr/local/bin/kaleido_get_chrome
 
 # Copy the rest of the application code
 COPY . .
