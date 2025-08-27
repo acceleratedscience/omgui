@@ -577,7 +577,7 @@ async def random_data(
     elif chart_type == ChartType.BOXPLOT:
         chart_data = chart_sampler.boxplot()
     elif chart_type == "boxplot-group":
-        chart_data = chart_sampler.boxplot(group=True)
+        chart_data = chart_sampler.boxplot(group_count=3)
     elif chart_type == ChartType.HISTOGRAM:
         chart_data = chart_sampler.histogram()
     else:
@@ -995,9 +995,11 @@ async def chart_boxplot(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
+    print(data_json)
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)
+    print(111)
 
     # fmt: off
     # Parse boxmean
@@ -1038,12 +1040,14 @@ async def chart_boxplot(
                 "boxmean": boxmean,
             }
         )
+    print(222)
 
     # Determine boxmode
     options["boxmode"] = "group" if "groups" in input_data[0] else "overlay"
 
     # Compile Plotly layout dict
     layout = compile_layout(ChartType.BOXPLOT, chart_data, options)
+    print(333)
 
     # Response
     return compile_response(

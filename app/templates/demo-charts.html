@@ -41,6 +41,27 @@
             font-size: 0.7rem;
             font-family: monospace;
         }
+        #generate-chart-btns {
+            display: flex;
+            gap: 10px;
+            margin: 0;
+        }
+        #generate-chart-btns button {
+            flex: 50% 1 1;
+            margin: 0;
+        }
+        
+        #about-generating-chart {
+            font-size: 12px;
+            color: #777;
+        }
+        #about-generating-chart summary {
+            cursor: pointer;
+            user-select: none;
+        }
+        #about-generating-chart ul {
+            padding-inline-start: 13px;
+        }
     </style>
 </head>
 <body>
@@ -52,7 +73,7 @@
                 <div id="link-preview-wrap">
                     <div id="url-preview">
                         <pre id="url-preview-text"></pre>
-                        <button class="copy-btn" id="copy-url-btn" type="button" style="display:none">Copy</button>
+                        <button class="copy-btn" id="copy-url-btn" type="button">Copy</button>
                     </div>
                     
                     <div class="btn-wrap">
@@ -124,8 +145,18 @@
 
                     <textarea id="data-preview">Data will appear here</textarea>
                     
-                    <!-- changed to type="button" so it doesn't trigger the form submit handler -->
-                    <button type="submit" id="generate-chart-btn" style="width:100%; display:none">Generate chart</button>
+                    <div id="generate-chart-btns" class="btn-wrap">
+                        <button id="generate-chart-direct-btn">Generate chart directly</button>
+                        <button id="generate-chart-post-btn">Generate chart via POST</button>
+
+                    </div>
+                    <details id="about-generating-chart">
+                        <summary>What's the difference?</summary>
+                        <ul>
+                            <li><b>Direct generation:</b> For small datasets, you can pass data directly to the URL with the <i>data</i> parameter.</li>
+                            <li><b>POST generation:</b> For larger datasets, you can POST the data which stored the data in memory and returns an ID, which is then used to see the chart</li>
+                        </ul>
+                    </details>
 
                 </div>
                 
@@ -229,7 +260,9 @@
             
             const chartTypeDropdown = document.getElementById('chart-type-dropdown');
             const dataPreview = document.getElementById('data-preview');
-            const generateBtn = document.getElementById('generate-chart-btn');
+            const generateBtns = document.getElementById('generate-chart-btns');
+            const generateBtnPost = document.getElementById('generate-chart-post-btn');
+            const generateBtnDirect = document.getElementById('generate-chart-direct-btn');
             
             const form = document.getElementById('chart-form');
             const scaleOption = document.getElementById('scale-option');
@@ -243,7 +276,7 @@
             async function displayDefaultChart() {
                 const selectedOption = chartTypeDropdown.children[0];
                 await fetchDummyData(selectedOption)
-                generateChart()
+                generateChartPost()
             }
 
             /**
@@ -258,7 +291,9 @@
 				urlPreviewText.textContent = ''
 				btnOpen.disabled = true
                 btnUpdate.disabled = true
-                generateBtn.style.display = 'inline-block'
+                // generateBtns.style.display = 'flex'
+                generateBtnPost.type = 'submit'
+                generateBtnDirect.type = 'submit'
 				fetchDummyData(opt);
  			});
 
@@ -341,11 +376,14 @@
             // Update URL
             // --> Consolidate all options
             // --> Generate & display URL
-            function updateUrl(path = null, enableUpdateBtn = true) {
+            function updateUrl(path = null, enableUpdateBtn = true, data=null) {
+                console.log(path)
                 // Show shaking "Update" buttons
                 if (enableUpdateBtn && urlPreviewText.textContent) {
                     btnUpdate.disabled = false
                 }
+
+                let qParams = {}
 
                 // If no URL is passed, create base URL
                 if (!path) {
@@ -354,13 +392,20 @@
                     try {
                         currentUrl = new URL(currentUrl);
                         path = currentUrl.pathname;
+
+                        // If data parameter is present, pass it on to the new query parameters
+                        if (currentUrl.search) {
+                            const _qParams = new URLSearchParams(currentUrl.search)
+                            if (_qParams.get('data')) {
+                                qParams.data = _qParams.get('data')
+                            }
+                        }
                     } catch(err) {
                         alert('Current URL is invalid, please regenerate chart')
                         return false
                     }
                 }
-
-                let qParams = {}
+                
 
                 // Display options
                 qParams.title = document.getElementById('title').value;
@@ -392,6 +437,12 @@
                         }
                     }
                 })
+
+                // Add data if defined
+                // This is when you generata a chart directly, passing the data in the URL
+                if (data) {
+                    qParams.data = JSON.stringify(data)
+                }
 
                 // Filter out empty/null values
                 for (const key in qParams) {
@@ -450,32 +501,13 @@
              * Display chart
              */
 
-            // Button: Generate chart
+            // Button: Generate chart via POST
             // --> POST data to /chart/{chart_type}
             // --> Fetch & display returned URL
-			generateBtn.addEventListener('click', generateChart);
-            async function generateChart(e) {
-				// get selected option and chart type (prefer data-chart-type)
-				const opt = chartTypeDropdown.options[chartTypeDropdown.selectedIndex];
-				let chartType = opt.dataset.chartType
-                if (chartType == 'boxplot-group') chartType = 'boxplot' // Group is defined in data, /chart/ endpoint only knows boxplot
-
-				// read payload from textarea
-				const payloadStr = (dataPreview && dataPreview.value) ? dataPreview.value.trim() : '';
-				if (!payloadStr) {
-					// throw an error as requested (also show an alert for UX)
-					alert('No data present in the data-preview textarea.');
-					throw new Error('No data present in data-preview');
-				}
-
-				// validate JSON
-				let payload;
-				try {
-					payload = JSON.parse(payloadStr);
-				} catch (err) {
-					alert('Invalid JSON in data-preview textarea.');
-					return;
-				}
+			generateBtnPost.addEventListener('click', generateChartPost);
+            async function generateChartPost(e) {
+				const chartType = _getChartType()
+				const payload = _getPayload()
 
 				// POST to /chart/{chart_type}
                 // --> Create chart, store it in Redis
@@ -495,7 +527,9 @@
 					if (json && json.url) {
                         updateUrl(json.url, false)
 						updatePreview();
-                        generateBtn.style.display = 'none'
+                        // generateBtns.style.display = 'none'
+                        generateBtnPost.type = 'button'
+                        generateBtnDirect.type = 'button'
 					} else {
 						throw new Error('Invalid response from server');
 					}
@@ -505,6 +539,48 @@
 					console.error(err);
 				}
 			}
+
+            // Button: Generate chart directly
+            generateBtnDirect.addEventListener('click', generateChartDirectly);
+            async function generateChartDirectly(e) {
+                const chartType = _getChartType()
+				const payload = _getPayload()
+                updateUrl(`/chart/${chartType}`, false, payload)
+                updatePreview()
+                // generateBtns.style.display = 'none'
+                generateBtnPost.type = 'button'
+                generateBtnDirect.type = 'button'
+            }
+
+            // Read chartType from selected dropdown
+            function _getChartType() {
+				const opt = chartTypeDropdown.options[chartTypeDropdown.selectedIndex];
+				let chartType = opt.dataset.chartType
+                if (chartType == 'boxplot-group') chartType = 'boxplot' // Group is defined in data, /chart/ endpoint only knows boxplot
+                return chartType
+            }
+
+            // Read payload from textarea
+            function _getPayload() {
+				const payloadStr = (dataPreview && dataPreview.value) ? dataPreview.value.trim() : '';
+				if (!payloadStr) {
+                    const msg = 'No data present in the data-preview textarea'
+					alert(msg);
+					throw new Error(msg);
+				}
+
+				// Validate JSON
+				let payload;
+				try {
+					payload = JSON.parse(payloadStr);
+				} catch (err) {
+                    msg = 'Invalid JSON in data-preview textarea'
+					alert(msg);
+                    throw new Error(msg);
+				}
+                
+                return payload
+            }
             
             // Update URL & iframe with new chart 
             function updatePreview(path=null) {

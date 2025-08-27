@@ -152,16 +152,18 @@ button:not([disabled]).shake {
 pre#url-preview-text {
 	margin: 0;
 	white-space: break-spaces;
+	max-height: 130px;
+	overflow: scroll;
 }
 pre#url-preview-text:empty::after {
 	content: "URL will appear here";
 	color: #ccc;
 }
-.copy-btn {
+button.copy-btn {
 	position: absolute;
 	right: 7px;
 	top: 7px;
-	background: #e0e0e0;
+	background: #eee;
 	color: #333;
 	border: none;
 	border-radius: 3px;
@@ -172,8 +174,8 @@ pre#url-preview-text:empty::after {
 	padding: 0 8px;
 	cursor: pointer;
 }
-.copy-btn:hover {
-	background: #d0d0d0;
+button.copy-btn:hover {
+	background: #ddd;
 }
 
 /* Radio buttons */

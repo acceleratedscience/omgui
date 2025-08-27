@@ -2,6 +2,7 @@
 Generator functions to create sample data for various chart types.
 """
 
+import string
 import random
 from datetime import datetime, timedelta
 
@@ -39,7 +40,7 @@ names = [
 ]
 
 
-def line(trace_count=5):
+def line(trace_count=5, datapoints=30):
     """
     Generate sample data for a line chart
     """
@@ -50,7 +51,7 @@ def line(trace_count=5):
         _date = datetime.now()
         _y = 100
 
-        for _ in range(0, 30):
+        for _ in range(0, datapoints):
             _y += (random.randint(0, 100) - 50) * (random.randint(0, 100) - 50)
             trace["x"].append(_date.strftime("%Y-%m-%d"))
             trace["y"].append(_y)
@@ -61,7 +62,7 @@ def line(trace_count=5):
     return datasets
 
 
-def scatter(trace_count=10):
+def scatter(trace_count=10, datapoints=30):
     """
     Generate sample data for a scatter plot chart
     """
@@ -70,7 +71,7 @@ def scatter(trace_count=10):
     for i in range(0, trace_count):
         trace = {"x": [], "y": [], "name": names[i]}
 
-        for i in range(0, 30):
+        for i in range(0, datapoints):
             trace["x"].append(
                 (random.randint(0, 100))
                 * (random.randint(0, 100))
@@ -137,12 +138,11 @@ def bar(trace_count=5, groups=3):
     return datasets
 
 
-def boxplot(trace_count=4, group=False):
+def boxplot(trace_count=4, group_count=0, datapoints=10):
     """
     Generate sample data for a box plot chart.
     """
     datasets = []
-    datapoints = 10
 
     for i in range(0, trace_count):
         trace = {"name": names[i], "data": []}
@@ -152,22 +152,25 @@ def boxplot(trace_count=4, group=False):
             trace["data"].append(random.random())
 
         # Add group for each data point
-        if group:
+        if group_count:
+            group_names = list(string.ascii_uppercase)
             trace["groups"] = []
-            for i in range(0, datapoints):
-                trace["groups"].append("Group A" if i <= 5 else "Group B")
+            group_unit = datapoints / group_count
+            # Compute group index and clamp to last group
+            for j in range(0, datapoints):
+                idx = min(int(j / group_unit), group_count - 1)
+                trace["groups"].append(group_names[idx])
 
         datasets.append(trace)
 
     return datasets
 
 
-def histogram(trace_count=2):
+def histogram(trace_count=2, datapoints=100):
     """
     Generate sample data for a histogram chart
     """
     datasets = []
-    datapoints = 100
 
     for i in range(0, trace_count):
         trace = {"values": [], "name": names[i]}
