@@ -1,31 +1,25 @@
-# Use a Python base image with a Debian distribution
-FROM plotly/python-kaleido:latest
-
-# Install system dependencies for keleido
-# This is needed to be able to download PNG/SVG charts
-RUN apt update && apt-get install -y \
-    libnss3 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libxkbcommon0 \
-    libpango-1.0-0 \
-    libcairo2 \
-    libasound2
+# Use a Python base image with a standard Debian distribution
+FROM python:3.11-bookworm
 
 # Set the working directory
 WORKDIR /app
 
+# Install system dependencies needed for adding the repository
+RUN apt-get update && apt-get install -y wget gnupg unzip
+
+# Add the Google Chrome GPG key and repository to the system
+RUN wget -O- https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
+
+# Update the apt-get package list to include the new repository
+RUN apt-get update
+
+# Install google-chrome-stable and all of its dependencies
+RUN apt-get install -y google-chrome-stable
+
 # Copy the requirements file and install Python dependencies
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-
-# Install chromium for SVG/PNG charts
-RUN yes | plotly_get_chrome
 
 # Copy the rest of the application code
 COPY . .
