@@ -1,5 +1,5 @@
 # Use a Python base image with a Debian distribution
-FROM plotly/python-plotly:latest
+FROM plotly/python-kaleido:latest
 
 # Install system dependencies for keleido
 # This is needed to be able to download PNG/SVG charts
