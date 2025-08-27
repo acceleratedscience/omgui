@@ -1,5 +1,5 @@
 # Use a Python base image with a Debian distribution
-FROM python:3.11-slim-bookworm
+FROM python:3.11-bookworm
 
 # Install system dependencies for keleido
 # This is needed to be able to download PNG/SVG charts
