@@ -1,17 +1,21 @@
 # Use a Python base image with a Debian distribution
 FROM python:3.11-slim-bookworm
 
-# Install system dependencies for Playwright
-RUN apt-get update && apt-get install -y \
-    libgtk-4-1 \
-    libgraphene-1.0-0 \
-    libgstreamer-gl1.0-0 \
-    libgstreamer-plugins-base1.0-0 \
-    libenchant-2-2 \
-    libsecret-1-0 \
-    libmanette-0.2-0 \
-    libgles2 \
-    && rm -rf /var/lib/apt/lists/*
+# Install system dependencies for keleido
+# This is needed to be able to download PNG/SVG charts
+RUN apt update && apt-get install \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libxkbcommon0 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libasound2
 
 # Set the working directory
 WORKDIR /app
@@ -20,11 +24,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# Install Playwright's browsers
-RUN playwright install
+# Install chromium for SVG/PNG charts
+RUN yes | plotly_get_chrome
 
 # Copy the rest of the application code
 COPY . .
 
-# Set the command to run your application
-CMD ["python", "main.py"]
+# Set the command to run your application with uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

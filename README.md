@@ -2,8 +2,10 @@
 
 # Data Visualization
 
-Application to visualize data on the fly.  
-See it in action: [molvis.onrender.com/demo/charts](https://molvis.onrender.com/demo/charts)
+Application to visualize data on the fly.
+
+-   [Charting API](https://molvis.onrender.com/demo/charts) to turn JSON into charts on the fly
+-   [Molecules API](https://molvis.onrender.com/demo) to visualize SMILES in 2D and 3D
 
 <br>
 
