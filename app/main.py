@@ -13,6 +13,7 @@ from fastapi.responses import Response, HTMLResponse
 
 # Redis
 import redis.asyncio as aioredis
+from redis.exceptions import ConnectionError
 
 # Routers
 from .routers import charts, molecules
@@ -21,11 +22,15 @@ from .routers import charts, molecules
 # Setup
 # ------------------------------------
 
+
 # Load .env variables
 load_dotenv()
 
 
-# Logger
+# -- Logger -- #
+
+
+# Logger: define format
 class ColoredFormatter(logging.Formatter):
     LEVEL_COLORS = {
         logging.DEBUG: "\x1b[90m",  # bright black / gray
@@ -33,28 +38,35 @@ class ColoredFormatter(logging.Formatter):
         logging.WARNING: "\x1b[33m",  # yellow
         logging.ERROR: "\x1b[31m",  # red
         logging.CRITICAL: "\x1b[1;31m",  # bold red
+        "RESET": "\x1b[0m",  # reset color
     }
 
     def format(self, record):
-        color = self.LEVEL_COLORS.get(record.levelno, "\x1b[0m")
-        # decorate the levelname only (keeps rest unchanged)
-        record.levelname = f"{color}{record.levelname}\x1b[0m"
-        return super().format(record)
+        color_start = self.LEVEL_COLORS.get(record.levelno, self.LEVEL_COLORS["RESET"])
+        color_end = self.LEVEL_COLORS["RESET"]
+        log_message = super().format(record)
+        placeholder = f" {record.levelname} "
+        colored_levelname = f"{color_start}{record.levelname}{color_end}"
+        return log_message.replace(placeholder, f" {colored_levelname} ")
 
 
-# Configure root logger with a colored stream handler
+# Logger: Configure
 root = logging.getLogger()
 root.setLevel(logging.INFO)
 
-# remove existing handlers if any (avoid duplicate logs)
+# Logger: Avoid duplicate logs
 if root.handlers:
     root.handlers.clear()
 
+# Logger: Initialize
 handler = logging.StreamHandler()
-fmt = "\x1b[90m---------\x1b[0m %(levelname)s \x1b[90m%(name)s\x1b[0m %(message)s"
+fmt = "\x1b[90m---------\x1b[0m %(levelname)-8s \x1b[90m%(name)s\x1b[0m %(message)s"
 handler.setFormatter(ColoredFormatter(fmt))
 root.addHandler(handler)
 logger = logging.getLogger(__name__)
+
+
+# -- FastAPI -- #
 
 
 # Lifespan Event Handler
@@ -63,25 +75,27 @@ async def lifespan(app: FastAPI):
     """
     Manages the lifecycle of the application, including Redis connection.
     """
-
-    # Read redis URL from environment; do not assume localhost in production
     redis_url = os.getenv("REDIS_URL")
 
     if redis_url:
-        app.state.redis = aioredis.from_url(
-            redis_url, encoding="utf-8", decode_responses=True
-        )
-        logger.info("📀 redis_url: %s", redis_url)
+        try:
+            app.state.redis = aioredis.from_url(
+                redis_url, encoding="utf-8", decode_responses=True
+            )
+            await app.state.redis.ping()
+            logger.info("📀 Redis connection successful at %s", redis_url)
+        except ConnectionError:
+            logger.error("❌ Failed to connect to Redis at %s", redis_url)
+            app.state.redis = None
+            app.state.in_memory_cache = {}
+            logger.info("Falling back to in-memory cache")
     else:
-        # No redis configured => set to None and use in-memory fallback where appropriate
+        # No Redis URL provided, default to in-memory cache
         app.state.redis = None
-        # simple in-memory cache for development/demo (not shared across processes)
         app.state.in_memory_cache = {}
-        logger.info(
-            "❌ redis_url not available, defaulting to in-memory cache for demo purpose only"
-        )
+        logger.info("❌ REDIS_URL not available, defaulting to in-memory cache.")
 
-    # The application will run from here
+    # Application will run from here
     yield
 
     # Logic to run on shutdown
@@ -98,8 +112,8 @@ app = FastAPI(
 )
 
 # Include routers
-app.include_router(molecules.router, prefix="", tags=["molecules"])
-app.include_router(charts.router, prefix="", tags=["charts"])
+app.include_router(molecules.router, prefix="/raw", tags=["Raw Molecules"])
+app.include_router(charts.router, prefix="/raw", tags=["Raw Charts"])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -113,6 +127,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 # Mount static files directory if needed
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 
 # Routes
 # ------------------------------------

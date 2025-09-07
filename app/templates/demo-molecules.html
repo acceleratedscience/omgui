@@ -279,7 +279,7 @@
 						params.append("d3_rot_random", "false");
 					}
 
-					const url = `/molecule/${smiles}?${params.toString()}`
+					const url = `/raw/molecule/${smiles}?${params.toString()}`
 					urlPreview.textContent = window.location.origin + url;
 					urlPreview.appendChild(copyUrlBtn);
 

@@ -502,19 +502,19 @@
              */
 
             // Button: Generate chart via POST
-            // --> POST data to /chart/{chart_type}
+            // --> POST data to /raw/chart/{chart_type}
             // --> Fetch & display returned URL
 			generateBtnPost.addEventListener('click', generateChartPost);
             async function generateChartPost(e) {
 				const chartType = _getChartType()
 				const payload = _getPayload()
 
-				// POST to /chart/{chart_type}
+				// POST to /raw/chart/{chart_type}
                 // --> Create chart, store it in Redis
                 // --> return URL path with Redis ID
                 // --> Update URL + preview
 				try {
-					const resp = await fetch(`/chart/${encodeURIComponent(chartType)}`, {
+					const resp = await fetch(`/raw/chart/${encodeURIComponent(chartType)}`, {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify(payload)
@@ -545,7 +545,7 @@
             async function generateChartDirectly(e) {
                 const chartType = _getChartType()
 				const payload = _getPayload()
-                updateUrl(`/chart/${chartType}`, false, payload)
+                updateUrl(`/raw/chart/${chartType}`, false, payload)
                 updatePreview()
                 // generateBtns.style.display = 'none'
                 generateBtnPost.type = 'button'
@@ -556,7 +556,7 @@
             function _getChartType() {
 				const opt = chartTypeDropdown.options[chartTypeDropdown.selectedIndex];
 				let chartType = opt.dataset.chartType
-                if (chartType == 'boxplot-group') chartType = 'boxplot' // Group is defined in data, /chart/ endpoint only knows boxplot
+                if (chartType == 'boxplot-group') chartType = 'boxplot' // Group is defined in data, /raw/chart/ endpoint only knows boxplot
                 return chartType
             }
 
