@@ -16,8 +16,7 @@ from helpers.molecules import create_molset_response
 
 class DataframeApi:
     """
-    All the API endpoints related to dataframes referred to in Jupyter magic commands.
-    The API endpoints are called from gui_routes.py.
+    Dataframe functions for OMGUI API endpoints.
     """
 
     def __init__(self, cmd_pointer):

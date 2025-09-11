@@ -1,6 +1,6 @@
 class GeneralApi:
     """
-    General API endpoints.
+    General functions for OMGUI API endpoints.
     """
 
     def __init__(self, cmd_pointer):

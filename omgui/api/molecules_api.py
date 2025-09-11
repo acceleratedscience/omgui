@@ -46,7 +46,7 @@ from exceptions import (
 
 class MoleculesApi:
     """
-    API endpoints related to molecules.
+    Molecule functions for OMGUI API endpoints.
     """
 
     def __init__(self, cmd_pointer):

@@ -9,7 +9,7 @@ from openad.helpers.output import output_success
 
 class FileSystemApi:
     """
-    API endpoints related to the file system.
+    File system functions for OMGUI API endpoints.
     """
 
     def __init__(self, cmd_pointer):

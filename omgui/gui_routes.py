@@ -17,7 +17,7 @@ from api.result_api import ResultApi
 from api.dataframe_api import DataframeApi
 
 # Various
-from cmd_pointer import CmdPointerTemp, cmd_pointer
+from cmd_pointer import CmdPointerTemp
 
 
 def create_router(cmd_pointer: CmdPointerTemp):

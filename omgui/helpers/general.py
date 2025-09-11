@@ -1,3 +1,4 @@
+import time
 import socket
 
 
@@ -26,3 +27,23 @@ def next_avail_port(port=8024, host="127.0.0.1"):
     while not _is_port_open(host, port):
         port += 1
     return host, port
+
+
+def wait_for_port(host, port, timeout=5.0, interval=0.1):
+    """
+    Pauses the process until a given port
+    starts accepting TCP connections.
+
+    timeout & interval are expressed in seconds.
+    """
+
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            with socket.create_connection((host, port), timeout=interval):
+                return True
+        except OSError:
+            # Keep retrying until the deadline is reached
+            time.sleep(interval)
+    # Timed out
+    return False
