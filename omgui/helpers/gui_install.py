@@ -15,10 +15,10 @@ def ensure():
     """
 
     # Root directory of the repo
-    root_dir = Path(__file__).resolve().parents[2]
+    app_dir = Path(__file__).resolve().parents[1]
 
-    if not os.path.exists(root_dir / "gui-build"):
-        install(root_dir)
+    if not os.path.exists(app_dir / "dist"):
+        install(app_dir)
 
 
 def install(destination_dir: Path, v: str = "0.2"):
@@ -27,10 +27,10 @@ def install(destination_dir: Path, v: str = "0.2"):
     """
     output_text("<soft>Installing GUI...</soft>", return_val=False)
 
-    download_url = f"https://github.com/acceleratedscience/openad-gui/releases/download/v{v}/gui-build.tar.gz"
+    download_url = f"https://github.com/acceleratedscience/openad-gui/releases/download/v{v}/dist.tar.gz"
 
     # Download the tarball
-    tarball_path = os.path.join(destination_dir, "gui-build.tar.gz")
+    tarball_path = os.path.join(destination_dir, "dist.tar.gz")
     urllib.request.urlretrieve(download_url, tarball_path)
 
     # Unzip & remove the tarball

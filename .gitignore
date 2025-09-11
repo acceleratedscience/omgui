@@ -3,9 +3,7 @@ __pycache__
 _*
 !__init__.py
 .venv
+.env
+**/dist/
 test*
 todo.txt
-data_files/*
-!data_files/sample-*
-!data_files/README.md
-.env

@@ -14,7 +14,7 @@ from fastapi.responses import Response, HTMLResponse
 
 # Redis
 import redis.asyncio as aioredis
-from redis.exceptions import ConnectionError
+import redis.exceptions
 
 # Routers
 from .routers import charts, molecules
@@ -88,7 +88,7 @@ async def lifespan(app: FastAPI):
             )
             await app.state.redis.ping()
             logger.info("📀 Redis connection successful")
-        except ConnectionError:
+        except redis.exceptions.ConnectionError:
             logger.error(
                 "❌ Failed to connect to Redis --> Falling back to in-memory cache"
             )

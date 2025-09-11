@@ -133,7 +133,7 @@ def _launch(cmd_pointer=None, path=None, query="", hash="", silent=False):
         return
 
     # Initialize Flask app
-    gui_build_dir = Path(__file__).resolve().parents[1] / "gui-build"
+    gui_build_dir = Path(__file__).resolve() / "dist"
 
     # Initialize FastAPI app
     app = FastAPI(title="OpenAD")
