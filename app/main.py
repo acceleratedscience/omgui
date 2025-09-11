@@ -1,6 +1,7 @@
 # Standard
 import os
-import logging
+
+# import logging
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 
@@ -18,6 +19,8 @@ from redis.exceptions import ConnectionError
 # Routers
 from .routers import charts, molecules
 
+from helpers import logger
+
 
 # Setup
 # ------------------------------------
@@ -27,43 +30,43 @@ from .routers import charts, molecules
 load_dotenv()
 
 
-# -- Logger -- #
+# # -- Logger -- #
 
 
-# Logger: define format
-class ColoredFormatter(logging.Formatter):
-    LEVEL_COLORS = {
-        logging.DEBUG: "\x1b[90m",  # bright black / gray
-        logging.INFO: "\x1b[32m",  # green
-        logging.WARNING: "\x1b[33m",  # yellow
-        logging.ERROR: "\x1b[31m",  # red
-        logging.CRITICAL: "\x1b[1;31m",  # bold red
-        "RESET": "\x1b[0m",  # reset color
-    }
+# # Logger: define format
+# class ColoredFormatter(logging.Formatter):
+#     LEVEL_COLORS = {
+#         logging.DEBUG: "\x1b[90m",  # bright black / gray
+#         logging.INFO: "\x1b[32m",  # green
+#         logging.WARNING: "\x1b[33m",  # yellow
+#         logging.ERROR: "\x1b[31m",  # red
+#         logging.CRITICAL: "\x1b[1;31m",  # bold red
+#         "RESET": "\x1b[0m",  # reset color
+#     }
 
-    def format(self, record):
-        color_start = self.LEVEL_COLORS.get(record.levelno, self.LEVEL_COLORS["RESET"])
-        color_end = self.LEVEL_COLORS["RESET"]
-        log_message = super().format(record)
-        placeholder = f" {record.levelname} "
-        colored_levelname = f"{color_start}{record.levelname}{color_end}"
-        return log_message.replace(placeholder, f" {colored_levelname} ")
+#     def format(self, record):
+#         color_start = self.LEVEL_COLORS.get(record.levelno, self.LEVEL_COLORS["RESET"])
+#         color_end = self.LEVEL_COLORS["RESET"]
+#         log_message = super().format(record)
+#         placeholder = f" {record.levelname} "
+#         colored_levelname = f"{color_start}{record.levelname}{color_end}"
+#         return log_message.replace(placeholder, f" {colored_levelname} ")
 
 
-# Logger: Configure
-root = logging.getLogger()
-root.setLevel(logging.INFO)
+# # Logger: Configure
+# root = logging.getLogger()
+# root.setLevel(logging.INFO)
 
-# Logger: Avoid duplicate logs
-if root.handlers:
-    root.handlers.clear()
+# # Logger: Avoid duplicate logs
+# if root.handlers:
+#     root.handlers.clear()
 
-# Logger: Initialize
-handler = logging.StreamHandler()
-fmt = "\x1b[90m---------\x1b[0m %(levelname)-8s \x1b[90m%(name)s\x1b[0m %(message)s"
-handler.setFormatter(ColoredFormatter(fmt))
-root.addHandler(handler)
-logger = logging.getLogger(__name__)
+# # Logger: Initialize
+# handler = logging.StreamHandler()
+# fmt = "\x1b[90m---------\x1b[0m %(levelname)-8s \x1b[90m%(name)s\x1b[0m %(message)s"
+# handler.setFormatter(ColoredFormatter(fmt))
+# root.addHandler(handler)
+# logger = logging.getLogger(__name__)
 
 
 # -- FastAPI -- #
@@ -79,21 +82,23 @@ async def lifespan(app: FastAPI):
 
     if redis_url:
         try:
+            logger.info("REDIS_URL: %s", redis_url)
             app.state.redis = aioredis.from_url(
                 redis_url, encoding="utf-8", decode_responses=True
             )
             await app.state.redis.ping()
-            logger.info("📀 Redis connection successful at %s", redis_url)
+            logger.info("📀 Redis connection successful")
         except ConnectionError:
-            logger.error("❌ Failed to connect to Redis at %s", redis_url)
+            logger.error(
+                "❌ Failed to connect to Redis --> Falling back to in-memory cache"
+            )
             app.state.redis = None
             app.state.in_memory_cache = {}
-            logger.info("Falling back to in-memory cache")
     else:
         # No Redis URL provided, default to in-memory cache
         app.state.redis = None
         app.state.in_memory_cache = {}
-        logger.info("❌ REDIS_URL not available, defaulting to in-memory cache.")
+        logger.info("REDIS_URL not available, defaulting to in-memory cache")
 
     # Application will run from here
     yield
