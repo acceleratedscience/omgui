@@ -368,7 +368,7 @@ def write_dataframe2csv(df, destination_path):
 
 
 # Return molset from SMILES file
-def smiles_path2molset(path_absolute):
+def smiles_path2molset(path_absolute) -> list[dict] | None:
     """
     Takes the content of a .smi file and returns a molset dictionary.
     Specs for .smi files: http://opensmiles.org/opensmiles.html - 4.5
@@ -377,9 +377,10 @@ def smiles_path2molset(path_absolute):
     """
 
     # Read file's content
-    data, err_code = open_file(path_absolute, return_err="code")
-    if err_code:
-        return None, err_code
+    with open(path_absolute, "r", encoding="utf-8") as file:
+        data = json.load(file)
+    if not data:
+        return None
 
     # Parse SMILES
     smiles_list = data.splitlines()
@@ -397,7 +398,7 @@ def smiles_path2molset(path_absolute):
         mol["index"] = i + 1
         molset.append(mol)
 
-    return molset, None
+    return molset
 
 
 def sdf_path2molset(sdf_path):
@@ -428,9 +429,9 @@ def sdf_path2molset(sdf_path):
             mol_dict = smol_functions.new_smol(mol_rdkit=mol_rdkit)
             mol_dict["index"] = i + 1
             molset.append(mol_dict)
-        return molset, None
-    except Exception as err:
-        return None, err
+        return molset
+    except Exception as err:  # pylint: disable=broad-except
+        return None
 
 
 def csv_path2molset(csv_path):
@@ -445,9 +446,9 @@ def csv_path2molset(csv_path):
         df = pd.read_csv(csv_path)
         # Convert to molset
         molset = dataframe2molset(df)
-        return molset, None
+        return molset
     except Exception as err:
-        return None, err
+        return None
 
 
 def mdl_path2smol(mdl_path):

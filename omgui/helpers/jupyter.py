@@ -1,7 +1,6 @@
-def is_running_in_jupyter():
+def nb_mode() -> bool:
     """
     Checks if the script is running inside a Jupyter Notebook or Lab.
-    Returns True if in a Jupyter environment, False otherwise.
     """
     try:
         # Import the kernel app, which is unique to Jupyter

@@ -1,3 +1,18 @@
+Metadata-Version: 2.4
+Name: omgui
+Version: 0.0.1
+Summary: OMGUI is a library to visualize small molecules, macromolecules and various types of data on the fly.
+Author-email: Moenen Erbuer / IBM Research <moenen.erbuer@ibm.com>
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/acceleratedscience/omgui
+Project-URL: Bug Tracker, https://github.com/acceleratedscience/omgui/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
 <!-- source ../agenv/bin/activate -->
 
 OMGUI / Open Modular Graphical User Interface

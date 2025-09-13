@@ -7,6 +7,7 @@ Usage:
 """
 
 import logging
+from helpers.jupyter import nb_mode
 
 
 # Define format
@@ -27,12 +28,26 @@ class ColoredFormatter(logging.Formatter):
     # fmt: on
 
     def format(self, record):
+        # print(record.__dict__)
+
+        # Define colors
         color_start = self.LEVEL_COLORS.get(record.levelno, self.LEVEL_COLORS["RESET"])
         color_end = self.LEVEL_COLORS["RESET"]
+
+        # ERROR/CRITICAL --> also color message
+        if record.levelname in ["ERROR", "CRITICAL"]:
+            record.msg = f"{color_start}{record.msg}{color_end}"
+
         log_message = super().format(record)
-        placeholder = f" {record.levelname} "
+
+        # Find-and-replace hack to color level name after formatting
+        # This is needed to have -8s spacing work correctly with ansi codes
+        # See fmt below, and for further reading:
+        # https://docs.python.org/3/howto/logging-cookbook.html#formatting-styles
+        levelname_placeholder = record.levelname
         colored_levelname = f"{color_start}{record.levelname}{color_end}"
-        return log_message.replace(placeholder, f" {colored_levelname} ")
+
+        return log_message.replace(levelname_placeholder, colored_levelname)
 
 
 # Configure
@@ -44,9 +59,16 @@ if root.handlers:
     root.handlers.clear()
 
 # Initialize
-handler = logging.StreamHandler()
-fmt = "\x1b[90m---------\x1b[0m %(levelname)-8s \x1b[90m%(name)s\x1b[0m %(message)s"
-handler.setFormatter(ColoredFormatter(fmt))
+if nb_mode():
+    # In Jupyter show only the message (no colors, no level/name)
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(message)s"))
+else:
+    handler = logging.StreamHandler()
+    # fmt = "\x1b[90m---------\x1b[0m %(levelname)-8s \x1b[90m%(name)s\x1b[0m %(message)s"
+    fmt = "%(levelname)-8s \x1b[90m%(name)s\x1b[0m %(message)s"
+    handler.setFormatter(ColoredFormatter(fmt))
+
 root.addHandler(handler)
 
 # Import this:

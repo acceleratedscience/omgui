@@ -13,8 +13,6 @@ from workers.smol_functions import (
     assemble_cache_path,
     read_molset_from_cache,
     find_smol,
-    mws_add,
-    mws_remove,
     get_smol_from_mws,
     get_best_available_identifier,
     get_best_available_smiles,
@@ -33,8 +31,9 @@ from workers.mmol_functions import mmol_from_identifier
 from workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
 
 # Various
-from helpers import logger, JSONDecimalEncoder
-from helpers.molecules import create_molset_response
+from helpers import logger
+from helpers import JSONDecimalEncoder
+from helpers.mol_utils import create_molset_response
 from helpers.exceptions import (
     InvalidMoleculeInput,
     InvalidMolset,
@@ -43,14 +42,21 @@ from helpers.exceptions import (
     CacheFileNotFound,
 )
 
+from openad.helpers.output import (
+    output_error,
+    output_warning,
+    output_success,
+    output_text,
+)
+
 
 class GUIMoleculesApiService:
     """
     Molecule functions for OMGUI API endpoints.
     """
 
-    def __init__(self, cmd_pointer):
-        self.cmd_pointer = cmd_pointer
+    def __init__(self, ctx):
+        self.ctx = ctx
 
     # ------------------------------------
     # region - Small molecules
@@ -61,7 +67,7 @@ class GUIMoleculesApiService:
         Get molecule data, plus MDL and SVG.
         Used when requesting a molecule by its identifier.
         """
-        smol = find_smol(self.cmd_pointer, identifier)
+        smol = find_smol(self.ctx, identifier, enrich=True)
 
         # Fail
         if not smol:
@@ -94,7 +100,7 @@ class GUIMoleculesApiService:
         """
         Get a molecule from a molset file.
         """
-        cache_path = assemble_cache_path(self.cmd_pointer, "molset", cache_id)
+        cache_path = assemble_cache_path(self.ctx, "molset", cache_id)
 
         with open(cache_path, "r", encoding="utf-8") as f:
             molset = json.load(f)
@@ -103,43 +109,65 @@ class GUIMoleculesApiService:
 
     ##
 
-    def add_mol_to_mws(self, smol):
+    def add_mol_to_mws(
+        self,
+        identifier: str = None,
+        smol: dict = None,
+        enrich: bool = None,
+    ) -> bool:
         """
         Add a molecule to the molecule working set.
 
         Takes either an identifier or a mol object.
-        Identifier is slow because the molecule data has to be loaded from PubChem.
         """
-        # Get best available identifier
-        _, identifier = get_best_available_identifier(smol)
+        if not smol and not identifier:
+            raise InvalidMoleculeInput(
+                "Either a molecule object or an identifier must be provided."
+            )
 
-        # Enrich molecule with PubChem data
-        smol_enriched = find_smol(self.cmd_pointer, identifier, basic=True)
-        if smol_enriched:
-            smol = merge_smols(smol, smol_enriched)
+        # Default enrich to True for identifiers and False for smol objects
+        enrich = (smol is None) if enrich is None else enrich
 
-        # Add it to the working set
-        success = mws_add(self.cmd_pointer, smol, force=True)
+        # Smol object -> enrich if requested
+        if smol:
+            # Maybe enrich with PubChem data
+            if enrich:
+                _, identifier = get_best_available_identifier(smol)
+                smol_enriched = find_smol(self.ctx, identifier, enrich=True)
+                if smol_enriched:
+                    smol = merge_smols(smol, smol_enriched)
 
-        if not success:
-            raise FailedOperation("Failed to add molecule to your working set.")
+        # Identifier -> enrich by default
         else:
-            return True
+            smol = find_smol(self.ctx, identifier, enrich=enrich)
 
-    def remove_mol_from_mws(self, smol):
+        # Add to working set
+        if smol:
+            success = self.ctx.mws_add(smol)
+            return success
+        else:
+            return False
+
+    def remove_mol_from_mws(self, identifier: str = None, smol: dict = None):
         """
         Remove a molecule from your molecule working set.
 
         Takes either an identifier or a mol object.
         Identifier is slow because the molecule data has to be loaded from PubChem.
         """
-        # Remove it from the working set
-        success = mws_remove(self.cmd_pointer, smol, force=True)
+        if not smol and not identifier:
+            raise InvalidMoleculeInput(
+                "Either a molecule object or an identifier must be provided."
+            )
 
-        if not success:
-            raise FailedOperation("Failed to remove molecule from your working set.")
-        else:
-            return True
+        # Create molecule object if only identifier is provided
+        if not smol:
+            smol = get_smol_from_mws(self.ctx, identifier)
+
+        success: bool = self.ctx.mws_remove(smol)
+        return success
+
+        #
 
     def check_mol_in_mws(self, smol):
         """
@@ -150,7 +178,7 @@ class GUIMoleculesApiService:
         _, identifier = get_best_available_identifier(smol)
 
         # Check if it's in the working set
-        present = bool(get_smol_from_mws(self.cmd_pointer, identifier))
+        present = bool(get_smol_from_mws(self.ctx, identifier))
         return present
 
     def enrich_smol(self, smol):
@@ -222,7 +250,7 @@ class GUIMoleculesApiService:
             raise InvalidMoleculeInput
 
         # Compile path
-        workspace_path = self.cmd_pointer.workspace_path()
+        workspace_path = self.ctx.workspace_path()
         file_path = workspace_path + "/" + path
 
         # Throw error when detination file (does not) exist(s).
@@ -297,30 +325,29 @@ class GUIMoleculesApiService:
         Get a cached molset, filtered by the query.
         Note: opening molset files is handled by fs_attach_file_data() in workers/file_system.py
         """
-        # Read molset from cache.
-        molset = read_molset_from_cache(self.cmd_pointer, cache_id)
+        # Read molset from cache
+        molset = read_molset_from_cache(self.ctx, cache_id)
 
-        # Formulate response object.
+        # Formulate response object
         return create_molset_response(molset, query, cache_id)
 
     def get_molset_mws(self, query=None):
         """
         Get the list of molecules currently stored in the molecule working set.
         """
-        if len(self.cmd_pointer.molecule_list) > 0:
-            # Compile molset.
-            molset = []
-            for i, smol in enumerate(self.cmd_pointer.molecule_list):
+        if len(self.ctx.mws()) > 0:
+            # Add index
+            molset = self.ctx.mws()
+            for i, smol in enumerate(molset):
                 smol["index"] = i + 1
-                molset.append(smol)
 
-            # Create cache working copy.
-            cache_id = create_molset_cache_file(self.cmd_pointer, molset)
+            # Create cache working copy
+            cache_id = create_molset_cache_file(self.ctx, molset)
 
-            # Read molset from cache.
-            molset = read_molset_from_cache(self.cmd_pointer, cache_id)
+            # Read molset from cache
+            molset = read_molset_from_cache(self.ctx, cache_id)
 
-            # Formulate response object.
+            # Formulate response object
             return create_molset_response(molset, query, cache_id)
 
         else:
@@ -337,7 +364,7 @@ class GUIMoleculesApiService:
             raise ValueError("No indices provided")
 
         # Compile path
-        cache_path = assemble_cache_path(self.cmd_pointer, "molset", cache_id)
+        cache_path = assemble_cache_path(self.ctx, "molset", cache_id)
 
         # Read file from cache
         with open(cache_path, "r", encoding="utf-8") as f:
@@ -357,7 +384,7 @@ class GUIMoleculesApiService:
         """
         Clear a molset's cached working copy.
         """
-        cache_path = assemble_cache_path(self.cmd_pointer, "molset", cache_id)
+        cache_path = assemble_cache_path(self.ctx, "molset", cache_id)
 
         if os.path.exists(cache_path):
             os.remove(cache_path)
@@ -388,9 +415,9 @@ class GUIMoleculesApiService:
 
         """
         # Compile path
-        workspace_path = self.cmd_pointer.workspace_path()
+        workspace_path = self.ctx.workspace_path()
         file_path = workspace_path + "/" + path
-        cache_path = assemble_cache_path(self.cmd_pointer, "molset", cache_id)
+        cache_path = assemble_cache_path(self.ctx, "molset", cache_id)
 
         # Throw error when destination file (does not) exist(s)
         if path:
@@ -444,7 +471,7 @@ class GUIMoleculesApiService:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(smiles_list))
 
-        elif format_as == "my-mols":
+        elif format_as == "mws":
             # Read file from cache
             with open(cache_path, "r", encoding="utf-8") as f:
                 molset = json.load(f)
@@ -454,7 +481,7 @@ class GUIMoleculesApiService:
             for mol in molset:
                 molecule_list.append(mol)
 
-            self.cmd_pointer.molecule_list = molecule_list
+            self.ctx.set_mws(molecule_list)
 
         return True
 
@@ -466,7 +493,7 @@ class GUIMoleculesApiService:
         changes to the actual molset file, or to the molecule working set.
         """
         # Compile path
-        cache_path = assemble_cache_path(self.cmd_pointer, "molset", cache_id)
+        cache_path = assemble_cache_path(self.ctx, "molset", cache_id)
 
         # Read file from cache.
         with open(cache_path, "r", encoding="utf-8") as f:
@@ -482,60 +509,6 @@ class GUIMoleculesApiService:
 
         # Now the working copy is updated, we also update the molset.
         return self.save_molset(cache_id, path, new_file=False, format_as=format_as)
-
-    # endregion
-    # ------------------------------------
-    # region - Helpers
-    # ------------------------------------
-
-    def _sort_mol(self, mol, sort_key):
-        """
-        Sorter function for a molset.
-
-        Parameters
-        ----------
-        mol: dict
-            A molecule object.
-        sort_key: str
-            The key of the category whose value we'll sort by.
-            Eg. 'name' (identifier) or 'molecular_weight' (property).
-        """
-        if sort_key == "index":
-            value = mol.get(sort_key)
-        elif sort_key == "name":
-            value = (mol.get("identifiers") or {}).get(sort_key)
-        else:
-            value = (mol.get("properties") or {}).get(sort_key)
-
-        value = self.__prep_sort_value(value)
-
-        # Returning a tuple will sort by the first value, then the
-        # second, etc. This lets us group all none values on top.
-        return (value is None, value)
-
-    def __prep_sort_value(self, value):
-        """
-        Prepare a value for sorting by:
-        - Converting strings to lowercase
-        - Converting number strings to floats
-
-        Parameters
-        ----------
-        value: str, int, float
-            The value to prepare.
-        """
-
-        # Convert number strings to floats
-        try:
-            return float(value)
-        except ValueError:
-            pass
-
-        # Convert strings to lowercase
-        if isinstance(value, str):
-            return value.lower()
-
-        return value
 
     # endregion
     # ------------------------------------

@@ -10,25 +10,34 @@ from urllib.parse import unquote
 from fastapi import APIRouter, Request, status
 
 # API modules
-from omgui.gui_services.general import GUIGeneralApiService
-from omgui.gui_services.file_system import GUIFileSystemService
-from omgui.gui_services.molecules import GUIMoleculesApiService
-from omgui.gui_services.results import GUIResultApiService
-from omgui.gui_services.dataframes import GUIDataframeService
+from gui_services.general import GUIGeneralApiService
+from gui_services.file_system import GUIFileSystemService
+from gui_services.molecules import GUIMoleculesApiService
+from gui_services.results import GUIResultApiService
+from gui_services.dataframes import GUIDataframeService
 
 # Various
-from cmd_pointer import CmdPointerTemp
+from context import Context
+
+from helpers import logger
+from helpers.exceptions import (
+    InvalidMoleculeInput,
+    InvalidMolset,
+    NoResult,
+    FailedOperation,
+    CacheFileNotFound,
+)
 
 
-def create_router(cmd_pointer: CmdPointerTemp):
+def create_router(ctx: Context):
 
     router = APIRouter()
 
-    general_srv = GUIGeneralApiService(cmd_pointer)
-    file_system_srv = GUIFileSystemService(cmd_pointer)
-    molecules_srv = GUIMoleculesApiService(cmd_pointer)
-    result_srv = GUIResultApiService(cmd_pointer)
-    dataframe_srv = GUIDataframeService(cmd_pointer)
+    general_srv = GUIGeneralApiService(ctx)
+    file_system_srv = GUIFileSystemService(ctx)
+    molecules_srv = GUIMoleculesApiService(ctx)
+    result_srv = GUIResultApiService(ctx)
+    dataframe_srv = GUIDataframeService(ctx)
 
     api_v1 = "/api/v1"
 
@@ -44,6 +53,10 @@ def create_router(cmd_pointer: CmdPointerTemp):
     async def health():
         return general_srv.health()
 
+    @router.get(f"{api_v1}/settings")
+    async def settings():
+        return general_srv.ctx
+
     @router.post(f"{api_v1}/exec-command")
     async def exec_command(request: Request):
         body = await request.json()
@@ -52,28 +65,39 @@ def create_router(cmd_pointer: CmdPointerTemp):
 
     # endregion
     # ------------------------------------
-    # region - File system
+    # region - Context
     # ------------------------------------
+
+    @router.get(f"{api_v1}/get-workspace-name")
+    async def get_workspace_name():
+        return ctx.workspace
 
     @router.get(f"{api_v1}/get-workspaces")
     async def get_workspaces():
-        return file_system_srv.get_workspaces()
-
-    @router.get(f"{api_v1}/get-workspace")
-    async def get_workspace():
-        return file_system_srv.get_workspace()
+        return ctx.workspaces()
 
     @router.post(f"{api_v1}/set-workspace")
     async def set_workspace(request: Request):
         body = await request.json()
         workspace_name = body.get("workspace", "")
-        return file_system_srv.set_workspace(workspace_name)
+        return ctx.set_workspace(workspace_name)
 
-    @router.post(f"{api_v1}/get-workspace-files")
-    async def get_workspace_files(request: Request):
+    @router.post(f"{api_v1}/create-workspace")
+    async def create_workspace(request: Request):
+        body = await request.json()
+        workspace_name = body.get("workspace", "")
+        return ctx.create_workspace(workspace_name)
+
+    # endregion
+    # ------------------------------------
+    # region - File system
+    # ------------------------------------
+
+    @router.post(f"{api_v1}/get-files")
+    async def get_files(request: Request):
         body = await request.json()
         path = unquote(body.get("path", ""))
-        return file_system_srv.get_workspace_files(path)
+        return file_system_srv.get_files(path)
 
     @router.post(f"{api_v1}/get-file")
     async def get_file(request: Request):
@@ -114,28 +138,9 @@ def create_router(cmd_pointer: CmdPointerTemp):
     @router.post(f"{api_v1}/get-mol-data-from-molset")
     async def get_mol_data_from_molset(request: Request):
         body = await request.json()
-        cache_id = body("cacheId")
-        index = body("index", 1)
+        cache_id = body.get("cacheId")
+        index = body.get("index", 1)
         return molecules_srv.get_mol_data_from_molset(cache_id, index)
-
-    @router.post(f"{api_v1}/add-mol-to-mws")
-    async def add_mol_to_mws(request: Request):
-        body = await request.json()
-        smol = body.get("mol")
-        return molecules_srv.add_mol_to_mws(smol)
-
-    @router.post(f"{api_v1}/remove-mol-from-mws")
-    async def remove_mol_from_mws(request: Request):
-        body = await request.json()
-        smol = body.get("mol")
-        return molecules_srv.remove_mol_from_mws(smol)
-
-    @router.post(f"{api_v1}/check-mol-in-mws")
-    async def check_mol_in_mws(request: Request):
-        body = await request.json()
-        smol = body.get("mol")
-        present = molecules_srv.check_mol_in_mws(smol)
-        return {"status": present}
 
     @router.post(f"{api_v1}/enrich-smol")
     async def enrich_smol(request: Request):
@@ -179,12 +184,6 @@ def create_router(cmd_pointer: CmdPointerTemp):
         query = body.get("query", {})
         return molecules_srv.get_molset(cache_id, query)
 
-    @router.post(f"{api_v1}/get-molset-mws")
-    async def get_molset_mws(request: Request):
-        body = await request.json()
-        query = body.get("query", {})
-        return molecules_srv.get_molset_mws(query)
-
     @router.post(f"{api_v1}/remove-from-molset")
     async def remove_from_molset(request: Request):
         body = await request.json()
@@ -206,15 +205,6 @@ def create_router(cmd_pointer: CmdPointerTemp):
         path = unquote(body.get("path", ""))
         new_file = False
         return molecules_srv.save_molset(cache_id, path, new_file)
-
-    @router.post(f"{api_v1}/update-molset-mws")
-    async def update_molset_mws(request: Request):
-        body = await request.json()
-        cache_id = body.get("cacheId")
-        path = unquote(body.get("path", ""))
-        new_file = False
-        format_as = "my-mols"
-        return molecules_srv.update_molset_mws(cache_id, path, new_file, format_as)
 
     @router.post(f"{api_v1}/save-molset-as-json")
     async def save_molset_as_json(request: Request):
@@ -315,6 +305,53 @@ def create_router(cmd_pointer: CmdPointerTemp):
 
     # endregion
     # ------------------------------------
+    # region - Molecule Working Set
+    # ------------------------------------
+
+    @router.post(f"{api_v1}/get-molset-mws")
+    async def get_molset_mws(request: Request):
+        body = await request.json()
+        query = body.get("query", {})
+        return molecules_srv.get_molset_mws(query)
+
+    @router.post(f"{api_v1}/update-molset-mws")
+    async def update_molset_mws(request: Request):
+        body = await request.json()
+        cache_id = body.get("cacheId")
+        path = unquote(body.get("path", ""))
+        new_file = False
+        format_as = "mws"
+        return molecules_srv.save_molset(cache_id, path, new_file, format_as)
+
+    @router.post(f"{api_v1}/add-mol-to-mws")
+    async def add_mol_to_mws(request: Request):
+        body = await request.json()
+        smol = body.get("mol")
+        success = molecules_srv.add_mol_to_mws(smol=smol)
+        if not success:
+            raise FailedOperation("Failed to add molecule to your working set.")
+        else:
+            return True
+
+    @router.post(f"{api_v1}/remove-mol-from-mws")
+    async def remove_mol_from_mws(request: Request):
+        body = await request.json()
+        smol = body.get("mol")
+        success = molecules_srv.remove_mol_from_mws(smol)
+        if not success:
+            raise FailedOperation("Failed to remove molecule from your working set.")
+        else:
+            return True
+
+    @router.post(f"{api_v1}/check-mol-in-mws")
+    async def check_mol_in_mws(request: Request):
+        body = await request.json()
+        smol = body.get("mol")
+        present = molecules_srv.check_mol_in_mws(smol)
+        return {"status": present}
+
+    # endregion
+    # ------------------------------------
     # region - Dataframes
     # ------------------------------------
 
@@ -327,7 +364,7 @@ def create_router(cmd_pointer: CmdPointerTemp):
     @router.post(f"{api_v1}/update-dataframe-molset/{{df_name}}")
     async def update_dataframe_molset(df_name: str, request: Request):
         body = await request.json()
-        cache_id = body("cacheId")
+        cache_id = body.get("cacheId")
         return dataframe_srv.update_dataframe_molset(df_name, cache_id)
 
     # endregion

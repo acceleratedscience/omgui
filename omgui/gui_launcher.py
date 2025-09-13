@@ -18,26 +18,27 @@ import webbrowser
 import urllib.parse
 from pathlib import Path
 from threading import Thread
-from cmd_pointer import cmd_pointer as cmd_pointer_placeholder
+
 
 # FastAPI
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 
 
 from openad.helpers.output import output_text, output_error, output_success
 
-
+# omgui
+from .context import get
 from gui_routes import create_router
 from helpers import gui_install
-from helpers.jupyter import is_running_in_jupyter
+from helpers.jupyter import nb_mode
 from helpers.general import next_avail_port, wait_for_port
 from helpers.exception_handlers import register_exception_handlers
 
 
 GUI_SERVER = None
-NOTEBOOK_MODE = is_running_in_jupyter()
+NOTEBOOK_MODE = nb_mode()
 
 # Optional BASE_PATH environment variable
 # We always want it w/o leading slash, but with trailing slash
@@ -83,7 +84,7 @@ class GUIThread(Thread):
         _print_shutdown_msg(self.host, self.port)
 
 
-def gui_init(cmd_pointer=None, path=None, data=None, silent=False):
+def gui_init(ctx, path=None, data=None, silent=False):
     """
     Check if the GUI is installed and start the server.
 
@@ -93,8 +94,8 @@ def gui_init(cmd_pointer=None, path=None, data=None, silent=False):
 
     Parameters
     ----------
-    cmd_pointer : object, required
-        The command pointer object.
+    ctx : object, required
+        The context object.
     path : str, optional
         The path to load. If none is provided, the filebrowser is loaded.
     data : dict, optional
@@ -105,22 +106,38 @@ def gui_init(cmd_pointer=None, path=None, data=None, silent=False):
         If True, we'll start the server without opening the browser.
         This is used when restarting the server.
     """
+    # Jupyter: wrap up immediately
+    if NOTEBOOK_MODE:
+        _gui_init(ctx, path, data, silent=True)
+        return
 
-    # Temporary
-    if cmd_pointer is None:
-        cmd_pointer = cmd_pointer_placeholder
+    # Terminal: keep alive main thread
+    # --> allow Ctrl+C to stop it elegantly
+    try:
+        _gui_init(ctx, path, data, silent)
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        # Ctrl+C was pressed --> atexit handles this
+        pass
+    finally:
+        # Redundant, but to be safe
+        cleanup()
 
+
+def _gui_init(ctx, path=None, data=None, silent=False):
     # Install the GUI if needed
     gui_install.ensure()
 
-    # Parse potential data into a URL string.
+    # Parse potential data into a URL string
     query = "?data=" + urllib.parse.quote(json.dumps(data)) if data else ""
+    hash = ""
 
-    # Launch the GUI.
-    _launch(cmd_pointer, path, query, silent=silent)
+    # Launch the GUI
+    _launch(ctx, path, query, hash, silent)
 
 
-def _launch(cmd_pointer=None, path=None, query="", hash="", silent=False):
+def _launch(ctx, path=None, query="", hash="", silent=False):
     """
     Launch the GUI web server in a separate thread.
     """
@@ -131,9 +148,6 @@ def _launch(cmd_pointer=None, path=None, query="", hash="", silent=False):
     if GUI_SERVER and GUI_SERVER.is_running():
         _open_browser(GUI_SERVER.host, GUI_SERVER.port, path, query, hash, silent)
         return
-
-    # Initialize Flask app
-    gui_build_dir = Path(__file__).resolve() / "dist"
 
     # Initialize FastAPI app
     app = FastAPI(title="OpenAD")
@@ -147,7 +161,7 @@ def _launch(cmd_pointer=None, path=None, query="", hash="", silent=False):
     register_exception_handlers(app)
 
     # Include API routes
-    gui_router = create_router(cmd_pointer)
+    gui_router = create_router(ctx)
     app.include_router(gui_router, prefix="", tags=["GUI API"])
 
     # Shutdown route
@@ -161,7 +175,7 @@ def _launch(cmd_pointer=None, path=None, query="", hash="", silent=False):
             GUI_SERVER.shutdown()
 
         Thread(target=delayed_shutdown).start()
-        return "OpenAD GUI shutdown complete"
+        return Response(content="OMGUI shutdown complete", status_code=200)
 
     # Note: we don't serve static assets, because we dynamically
     # replace "__BASE_PATH__/" in all static files:
@@ -175,6 +189,8 @@ def _launch(cmd_pointer=None, path=None, query="", hash="", silent=False):
     @app.get("/{path:path}")
     async def serve(path: str = ""):
         try:
+
+            gui_build_dir = Path(__file__).parents[0].resolve() / "dist"
 
             # Check is the requested path is a static asset
             # and serve it with the BASE_PATH replaced.
@@ -219,9 +235,13 @@ def _launch(cmd_pointer=None, path=None, query="", hash="", silent=False):
 
 def _open_browser(host, port, path, query, hash, silent=False):
     # Compile the URL to be opened in the browser
-    headless = "headless" if NOTEBOOK_MODE else ""
-    module_path = f"{headless}/{path}" if path else ""
+    headless = "headless/" if NOTEBOOK_MODE else ""
+    module_path = f"{headless}{path}" if path else headless
     url = f"http://{host}:{port}/{BASE_PATH}{module_path}{query}{hash}"
+
+    # print("URL:", url)
+    # print("BASE_PATH:", BASE_PATH)
+    # print("module_path:", module_path)
 
     # Jupyter --> Render iframe
     if NOTEBOOK_MODE:
@@ -286,13 +306,13 @@ def _open_browser(host, port, path, query, hash, silent=False):
         _print_launch_msg(url)
 
 
-def gui_shutdown(cmd_pointer=None, ignore_warning=False):
+def gui_shutdown(ctx=None, silent=False):
     """
     Shutdown the GUI server if it is running.
     """
     # Clear all working copy molsets in the /wc_cache folder
-    if cmd_pointer is not None:
-        workspace_path = cmd_pointer.workspace_path(cmd_pointer.settings["workspace"])
+    if ctx is not None:
+        workspace_path = ctx.workspace_path()
         cache_dir = workspace_path + "/._openad/wc_cache"
         if os.path.exists(cache_dir):
             for file in os.listdir(cache_dir):
@@ -301,7 +321,7 @@ def gui_shutdown(cmd_pointer=None, ignore_warning=False):
     # Shutdown the server
     if GUI_SERVER and GUI_SERVER.is_running():
         GUI_SERVER.shutdown()
-    elif not ignore_warning:
+    elif not silent:
         output_error("The GUI server is not running")
 
 
@@ -309,7 +329,8 @@ def cleanup():
     """
     Cleanup function to be called at exit of the main process.
     """
-    gui_shutdown(ignore_warning=True)
+    ctx = get()
+    gui_shutdown(ctx, silent=True)
 
 
 # Stylized launch message for the web server
@@ -332,6 +353,3 @@ def _print_shutdown_msg(host, port):
 
 
 atexit.register(cleanup)
-
-if __name__ == "__main__":
-    gui_init()

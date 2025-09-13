@@ -1,7 +1,5 @@
 <!-- source ../agenv/bin/activate -->
 
-OMGUI / Open Modular Graphical User Interface
-
 # Data Visualization
 
 Application to visualize data on the fly.

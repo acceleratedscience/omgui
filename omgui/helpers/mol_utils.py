@@ -1,4 +1,8 @@
-def create_molset_response(self, molset, query=None, cache_id=None):
+from urllib.parse import unquote
+from helpers import logger
+
+
+def create_molset_response(molset, query=None, cache_id=None):
     """
     Return a filtered and paginated subset of a molset, wrapped into
     a response object that is ready to be consumed by the frontend.
@@ -59,13 +63,13 @@ def create_molset_response(self, molset, query=None, cache_id=None):
             sort_key = sort.lstrip("-")
             results = sorted(
                 results,
-                key=lambda mol: self._sort_mol(mol, sort_key),
+                key=lambda mol: _sort_mol(mol, sort_key),
                 reverse=reverse,
             )
     except TypeError as err:
         # In the edge case where our dataset mixes string and
         # number values, we want to avoid crashing the app.
-        logger.error(f"Error sorting molset: {err}")
+        logger.error("Error sorting molset: %s", err)
 
     # Store all indices - used by 'select all'
     all_indices = [mol.get("index") for mol in molset]
@@ -97,3 +101,54 @@ def create_molset_response(self, molset, query=None, cache_id=None):
         "page": page,
         "pageSize": page_size,
     }
+
+
+def _sort_mol(mol, sort_key):
+    """
+    Sorter function for a molset.
+
+    Parameters
+    ----------
+    mol: dict
+        A molecule object.
+    sort_key: str
+        The key of the category whose value we'll sort by.
+        Eg. 'name' (identifier) or 'molecular_weight' (property).
+    """
+    if sort_key == "index":
+        value = mol.get(sort_key)
+    elif sort_key == "name":
+        value = (mol.get("identifiers") or {}).get(sort_key)
+    else:
+        value = (mol.get("properties") or {}).get(sort_key)
+
+    value = __prep_sort_value(value)
+
+    # Returning a tuple will sort by the first value, then the
+    # second, etc. This lets us group all none values on top.
+    return (value is None, value)
+
+
+def __prep_sort_value(value):
+    """
+    Prepare a value for sorting by:
+    - Converting strings to lowercase
+    - Converting number strings to floats
+
+    Parameters
+    ----------
+    value: str, int, float
+        The value to prepare.
+    """
+
+    # Convert number strings to floats
+    try:
+        return float(value)
+    except ValueError:
+        pass
+
+    # Convert strings to lowercase
+    if isinstance(value, str):
+        return value.lower()
+
+    return value

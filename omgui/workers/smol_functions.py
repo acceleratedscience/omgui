@@ -9,6 +9,7 @@ import time
 import json
 import shutil
 import pandas
+import logging
 import asyncio
 import aiofiles
 import pubchempy as pcy
@@ -16,6 +17,9 @@ from copy import deepcopy
 from rdkit import Chem, rdBase, RDLogger
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.Descriptors import MolWt, ExactMolWt
+
+from helpers import logger
+from context import Context
 
 # OpenAD imports
 from openad.helpers.output_msgs import msg
@@ -45,9 +49,14 @@ from openad.smols.smol_transformers import (
     smiles_path2molset,
 )
 
-# Suppress RDKit errors
+# Silcence RDKit errors
 RDLogger.DisableLog("rdApp.error")
 RDLogger.DisableLog("rdApp.warning")
+
+# Silence pubchempy logger
+logging.getLogger("pubchempy").handlers.clear()
+logging.getLogger("pubchempy").propagate = False
+logging.getLogger("pubchempy").setLevel(logging.WARNING)
 
 # This doesn't seem to work anymore... is upposed to live inside the function scope.
 # rdBase.BlockLogs()  # pylint: disable=c-extension-no-member
@@ -187,10 +196,10 @@ mol_name_cache = {}
 
 
 def find_smol(
-    cmd_pointer: object,
+    ctx: Context,
     identifier: str,
     name: str = None,
-    basic: bool = False,
+    enrich: bool = False,
     show_spinner: bool = False,
 ) -> dict | None:
     """
@@ -199,15 +208,16 @@ def find_smol(
 
     Parameters
     ----------
-    cmd_pointer: object
-        The command pointer object.
+    ctx: Context
+        The context object.
     identifier: str
         The molecule identifier to search for.
         Valid inputs: InChI, SMILES, InChIKey, name, CID.
     name: str
         Optional name for the molecule.
-    basic: bool
-        If True, create a basic molecule dict with RDKit (no API calls).
+    rich: bool
+        If True, fetch molecule data from PubChem, otherwise just
+        create a basic molecule dict with RDKit (no API calls).
     show_spinner: bool
         If True, show a spinner while searching for the molecule.
 
@@ -218,14 +228,10 @@ def find_smol(
     """
 
     # Look for molecule in the working set
-    smol = get_smol_from_mws(cmd_pointer, identifier)
-
-    # Look for molecule in memory
-    if not smol:
-        smol = get_smol_from_memory(cmd_pointer, identifier)
+    smol = get_smol_from_mws(ctx, identifier)
 
     # Look for molecule on PubChem
-    if not smol and not basic:
+    if not smol and enrich:
         smol = get_smol_from_pubchem(identifier, show_spinner)
 
     # Try creating molecule object with RDKit.
@@ -238,13 +244,18 @@ def find_smol(
 
     # Fail - invalid.
     if not smol:
-        output_error(
-            ["Unable to identify molecule", f"Identifier: {identifier}"],
-            return_val=False,
-        )
-        if basic is True:
+        # if rich:
+        #     logger.error(f"Unable to identify molecule: {identifier}")
+        # else:
+        #     logger.error(f"Invalid InChI or SMILES string: {identifier}")
+        if enrich:
             output_error(
-                ["Invalid InChI or SMILES string", f"Identifier: {identifier}"],
+                f"Unable to identify molecule <yellow>{identifier}</yellow>",
+                return_val=False,
+            )
+        else:
+            output_error(
+                f"Invalid InChI or SMILES string <yellow>{identifier}</yellow>",
                 return_val=False,
             )
 
@@ -252,7 +263,7 @@ def find_smol(
 
 
 def get_smol_from_mws(
-    cmd_pointer: object, identifier: str, ignore_synonyms: bool = False
+    ctx: Context, identifier: str, ignore_synonyms: bool = False
 ) -> dict | None:
     """
     Retrieve a molecule from the molecule working set.
@@ -273,29 +284,9 @@ def get_smol_from_mws(
         The OpenAD smol dictionary if found, otherwise None.
     """
 
-    smol = get_smol_from_list(
-        identifier, cmd_pointer.molecule_list, ignore_synonyms=ignore_synonyms
-    )
+    smol = get_smol_from_list(identifier, ctx.mws(), ignore_synonyms=ignore_synonyms)
     if smol is not None:
         return deepcopy(smol)
-    return None
-
-
-def get_smol_from_memory(cmd_pointer: object, identifier: str) -> dict | None:
-    """
-    Retrieve a molecule from memory.
-
-    Parameters
-    ----------
-    cmd_pointer: object
-        The command pointer object.
-    identifier: str
-        The molecule identifier to search for.
-        Valid inputs: InChI, SMILES, InChIKey, name, CID.
-    """
-
-    if cmd_pointer.last_external_molecule is not None:
-        return get_smol_from_list(identifier, [cmd_pointer.last_external_molecule])
     return None
 
 
@@ -709,7 +700,7 @@ def get_human_properties(smol: dict) -> dict:
     return props
 
 
-def get_molset_mols(path_absolute: str):
+def get_molset_mols(path_absolute: str) -> dict | None:
     """
     Return the list of molecules from a molset file,
     with an index added to each molecule.
@@ -728,9 +719,13 @@ def get_molset_mols(path_absolute: str):
     """
 
     # Read file contents
-    molset, err_code = open_file(path_absolute, return_err="code")
+    if path_absolute.exists():
+        with open(path_absolute, "r", encoding="utf-8") as file:
+            molset = json.load(file)
 
-    return molset, err_code
+        return molset
+
+    return None
 
 
 # endregion
@@ -853,53 +848,54 @@ def load_mols_from_file(cmd_pointer, file_path):
     """
 
     file_path = parse_path(cmd_pointer, file_path)
-    source_type = file_path.split(".")[-1] if "." in file_path else "unknown"
     molset = None
-    error = None
 
-    # Molset
-    if file_path.endswith(".molset.json"):
-        # Read file and return the molset
-        source_type = "molset"
-        try:
+    try:
+        # Molset.json
+        if file_path.endswith(".molset.json"):
             with open(file_path, "r", encoding="utf-8") as file:
                 molset = file.read()
             molset = json.loads(molset) if molset else None
-        except Exception as err:  # pylint: disable=broad-except
-            error = err
 
-    # SDF
-    elif file_path.endswith(".sdf"):
-        source_type = "SDF"
-        molset, error = sdf_path2molset(file_path)
+        # SDF
+        elif file_path.endswith(".sdf"):
+            molset = sdf_path2molset(file_path)
 
-    # CSV
-    elif file_path.endswith(".csv"):
-        source_type = "CSV"
-        molset, error = csv_path2molset(file_path)
+        # CSV
+        elif file_path.endswith(".csv"):
+            molset = csv_path2molset(file_path)
 
-    # SMILES
-    elif file_path.endswith(".smi"):
-        source_type = "SMILES"
-        molset, error = smiles_path2molset(file_path)
+        # SMILES
+        elif file_path.endswith(".smi"):
+            molset = smiles_path2molset(file_path)
 
-    # Unsupported file type
-    else:
+        # Unsupported file type
+        else:
+            output_error(
+                [
+                    "Unsupported file type",
+                    "Accepted file extensions are: .molset.json / .sdf / .csv / .smi",
+                ],
+                return_val=False,
+            )
+
+    except (
+        FileNotFoundError,
+        PermissionError,
+        IsADirectoryError,
+        UnicodeDecodeError,
+        IOError,
+    ) as err:
+        filename = file_path.split("/")[-1]
         output_error(
-            [
-                "Unsupported file type",
-                "Accepted file extensions are: .molset.json / .sdf / .csv / .smi",
-            ],
+            [f"Failed to load molecules from file <yellow>{filename}</yellow>", err],
             return_val=False,
         )
-        return
 
     # Return
     if molset:
         return molset
     else:
-        error = error if error else "Unknown error"
-        output_error(msg("err_load", source_type, error), return_val=False)
         return None
 
 
@@ -1148,6 +1144,11 @@ def get_best_available_identifier(smol: dict) -> tuple:
     if not identifiers_dict:
         return None, None
 
+    # InChIKey
+    inchikey = identifiers_dict.get("inchikey")
+    if inchikey:
+        return "inchikey", inchikey
+
     # Canonical SMILES
     canonical_smiles = identifiers_dict.get("canonical_smiles")
     if canonical_smiles:
@@ -1157,11 +1158,6 @@ def get_best_available_identifier(smol: dict) -> tuple:
     inchi = identifiers_dict.get("inchi")
     if inchi:
         return "inchi", inchi
-
-    # InChIKey
-    inchikey = identifiers_dict.get("inchikey")
-    if inchikey:
-        return "inchikey", inchikey
 
     # Isomeric SMILES
     isomeric_smiles = identifiers_dict.get("isomeric_smiles")
@@ -1300,32 +1296,68 @@ def _smiles_to_iupac(smiles):
     return str(match)
 
 
+def get_smol_name(smol: dict) -> str:
+    """
+    Get the best available name for a molecule.
+
+    Parameters
+    ----------
+    smol: dict
+        The small molecule dictionary.
+
+    Returns
+    -------
+    str
+        The best available name.
+    """
+
+    identifiers_dict = smol.get("identifiers", {})
+
+    # Name
+    name = identifiers_dict.get("name")
+    if name:
+        return name
+
+    # Synonyms
+    synonyms = smol.get("synonyms", [])
+    if synonyms and len(synonyms) > 0:
+        return synonyms[0]
+
+    # InChIKey
+    inchikey = identifiers_dict.get("inchikey")
+    if inchikey:
+        return inchikey
+
+    # Fail
+    return "Unknown"
+
+
 # endregion
 
 ############################################################
 # region - GUI operations
 
 
-def assemble_cache_path(cmd_pointer: object, file_type: str, cache_id: str) -> str:
+def assemble_cache_path(ctx: Context, file_type: str, cache_id: str) -> str:
     """
     Compile the file path to a cached working copy of a file.
 
     Parameters
     ----------
-    cmd_pointer: object
-        The command pointer object, used to fetch the workspace path.
+    ctx: Context
+        The context object.
     file_type: 'molset'
         The type of file, used to name the cache file. For now only molset.
     cache_id: str
         The cache ID of the file.
     """
 
-    workspace_path = cmd_pointer.workspace_path()
-    return f"{workspace_path}/._openad/wc_cache/{file_type}-{cache_id}.json"
+    workspace_path = ctx.workspace_path()
+    return workspace_path / "._system" / "wc_cache " / f"{file_type}-{cache_id}.json"
 
 
 def create_molset_cache_file(
-    cmd_pointer: object, molset: dict = None, path_absolute: str = None
+    ctx: Context, molset: dict = None, path_absolute: str = None
 ) -> str:
     """
     Store molset as a cached file so we can manipulate it in the GUI,
@@ -1333,8 +1365,8 @@ def create_molset_cache_file(
 
     Parameters
     ----------
-    cmd_pointer: object
-        The command pointer object.
+    ctx: Context
+        The context object.
     molset: dict
         The molset to cache.
     path_absolute: str
@@ -1347,7 +1379,7 @@ def create_molset_cache_file(
     """
 
     cache_id = str(int(time.time() * 1000))
-    cache_path = assemble_cache_path(cmd_pointer, "molset", cache_id)
+    cache_path = assemble_cache_path(ctx, "molset", cache_id)
 
     # Creaste the /._openad/wc_cache directory if it doesn't exist.
     os.makedirs(os.path.dirname(cache_path), exist_ok=True)
@@ -1361,7 +1393,7 @@ def create_molset_cache_file(
         # Add indices to molecules in our working copy,
         # without blocking the thread.
         # timeit("index_wc")
-        index_molset_file_async(cache_path)
+        # index_molset_file_async(cache_path) # %%%
         # timeit("index_wc", True)
 
     # For all other cases, i.e. other file formats or molset data from memory,
@@ -1375,14 +1407,14 @@ def create_molset_cache_file(
     return cache_id
 
 
-def read_molset_from_cache(cmd_pointer: object, cache_id: str) -> dict:
+def read_molset_from_cache(ctx: Context, cache_id: str) -> dict:
     """
     Read a cached molset file from disk.
 
     Parameters
     ----------
-    cmd_pointer: object
-        The command pointer object, used to fetch the workspace path.
+    ctx: Context
+        The context object.
     cache_id: str
         The cache ID of the molset file.
 
@@ -1393,11 +1425,11 @@ def read_molset_from_cache(cmd_pointer: object, cache_id: str) -> dict:
     """
 
     # Read file from cache.
-    cache_path = assemble_cache_path(cmd_pointer, "molset", cache_id)
-    molset, err_code = get_molset_mols(cache_path)
+    cache_path = assemble_cache_path(ctx, "molset", cache_id)
+    molset = get_molset_mols(cache_path)
 
     # Return error
-    if err_code:
+    if not molset:
         raise ValueError(f"Failed to read molset {cache_id} from cache")
     else:
         return molset
@@ -1411,126 +1443,126 @@ def read_molset_from_cache(cmd_pointer: object, cache_id: str) -> dict:
 # Note: get_smol_from_mws() is listed under Lookup / creation.
 
 
-def mws_add(
-    cmd_pointer: object, smol: dict, force: bool = False, suppress: bool = False
-):
-    """
-    Add a molecule to your molecule working set.
+# def mws_add_trash(
+#     ctx: Context,
+#     identifier: str = None,
+#     smol: dict = None,
+#     force: bool = False,
+#     suppress: bool = False,
+# ):
+#     """
+#     Add a molecule to your molecule working set.
 
-    Parameters
-    ----------
-    cmd_pointer: object
-        The command pointer object.
-    smol: dict
-        The OpenAD molecule object to add.
-    force: bool
-        If True, add without confirming.
-    suppress: bool
-        If True, suppress success output.
-    """
-    # TODO: Instead of ignoring molecules that are already in the list, we should
-    #       update the existing molecule with the new data. See shred_merge_add_df_mols().
+#     Parameters
+#     ----------
+#     ctx: Context
+#         The context object.
+#     smol: dict
+#         The OpenAD molecule object to add.
+#     force: bool
+#         If True, add without confirming.
+#     suppress: bool
+#         If True, suppress success output.
+#     """
+#     # TODO: Instead of ignoring molecules that are already in the list, we should
+#     #       update the existing molecule with the new data. See shred_merge_add_df_mols().
 
-    if not smol:
-        output_error("No molecule provided", return_val=False)
-        return False
+#     # Name
+#     name = get_smol_name(smol)
+#     inchikey = smol.get("identifiers", {}).get("inchikey")
 
-    # Name
-    name = smol["identifiers"].get("name") or smol["identifiers"].get(
-        "canonical_smiles"
-    )
+#     # Fail - already in list
+#     if get_smol_from_mws(ctx, inchikey) is not None:
+#         output_error(
+#             f"Molecule already in list: <yellow>{name}</yellow>", return_val=False
+#         )
+#         return False
 
-    # Fail - already in list.
-    if (
-        get_smol_from_mws(cmd_pointer, smol["identifiers"]["canonical_smiles"])
-        is not None
-    ):
-        output_error(
-            f"Molecule already in list: <yellow>{name}</yellow>", return_val=False
-        )
-        return False
+#     # Add function
+#     def _add_mol():
+#         ctx.molecule_list.append(smol.copy())
+#         if suppress is False:
+#             output_success(
+#                 f"Molecule <yellow>{name}</yellow> was added", return_val=False
+#             )
+#         return True
 
-    # Add function
-    def _add_mol():
-        cmd_pointer.molecule_list.append(smol.copy())
-        if suppress is False:
-            output_success(
-                f"Molecule <yellow>{name}</yellow> was added", pad=0, return_val=False
-            )
-        return True
+#     # Add without confirming.
+#     if force:
+#         return _add_mol()
 
-    # Add without confirming.
-    if force:
-        return _add_mol()
-
-    # Confirm before adding.
-    # smiles = get_best_available_smiles(smol)
-    # smiles_str = f" <reset>{smiles}</reset>" if smiles and name != smiles else ""
-    if confirm_prompt(
-        f"Add molecule <green>{name}</green> to your molecule working set?"
-    ):
-        return _add_mol()
-    else:
-        output_error(
-            f"Molecule <yellow>{name}</yellow> was not added", pad=0, return_val=False
-        )
-        return False
+#     # Confirm before adding.
+#     # smiles = get_best_available_smiles(smol)
+#     # smiles_str = f" <reset>{smiles}</reset>" if smiles and name != smiles else ""
+#     if confirm_prompt(
+#         f"Add molecule <green>{name}</green> to your molecule working set?"
+#     ):
+#         return _add_mol()
+#     else:
+#         output_error(
+#             f"Molecule <yellow>{name}</yellow> was not added", return_val=False
+#         )
+#         return False
 
 
-def mws_remove(
-    cmd_pointer: object, smol: dict, force: bool = False, suppress: bool = False
-):
-    """
-    Remove a molecule from your molecule working set.
+# def mws_remove_trash(
+#     ctx: Context,
+#     identifier: str = None,
+#     smol: dict = None,
+#     force: bool = False,
+#     suppress: bool = False,
+# ):
+#     """
+#     Remove a molecule from your molecule working set.
 
-    Parameters
-    ----------
-    cmd_pointer: object
-        The command pointer object.
-    smol: dict
-        The OpenAD molecule object to remove.
-    force: bool
-        If True, remove without confirming.
-    suppress: bool
-        If True, suppress success output.
-    """
+#     Parameters
+#     ----------
+#     ctx: Context
+#         The context object.
+#     smol: dict
+#         The OpenAD molecule object to remove.
+#     force: bool
+#         If True, remove without confirming.
+#     suppress: bool
+#         If True, suppress success output.
+#     """
 
-    if not smol:
-        output_error("No molecule provided", return_val=False)
-        return False
+#     if not smol:
+#         output_error("No molecule provided", return_val=False)
+#         return False
 
-    # Name
-    name = smol["identifiers"]["name"]
+#     # Name
+#     name = smol["identifiers"]["name"]
 
-    # Remove function.
-    def _remove_mol():
-        i = 0
-        key, identifier_to_delete = get_best_available_identifier(smol)
-        while cmd_pointer.molecule_list[i]["identifiers"][key] != identifier_to_delete:
-            i = i + 1
-        cmd_pointer.molecule_list.pop(i)
-        if suppress is False:
-            output_success(
-                f"Molecule <yellow>{name}</yellow> was removed", pad=0, return_val=False
-            )
-        return True
+#     # Remove function.
+#     def _remove_mol():
+#         i = 0
+#         key, identifier_to_delete = get_best_available_identifier(smol)
+#         while ctx.molecule_list[i]["identifiers"][key] != identifier_to_delete:
+#             i = i + 1
+#         ctx.molecule_list.pop(i)
+#         if suppress is False:
+#             output_success(
+#                 f"Molecule <yellow>{name}</yellow> was removed", return_val=False
+#             )
+#         return True
 
-    # Remove without confirming.
-    if force:
-        return _remove_mol()
+#     # Remove without confirming.
+#     if force:
+#         return _remove_mol()
 
-    # Confirm before removing.
-    smiles = get_best_available_smiles(smol)
-    smiles_str = f" <reset>{smiles}</reset>" if smiles else ""
-    if confirm_prompt(
-        f"Remove molecule <green>{name}</green>{smiles_str} from your working set?"
-    ):
-        return _remove_mol()
-    else:
-        output_error(
-            f"Molecule <yellow>{name}</yellow> was not removed", pad=0, return_val=False
-        )
-        return False
+#     # Confirm before removing.
+#     smiles = get_best_available_smiles(smol)
+#     smiles_str = f" <reset>{smiles}</reset>" if smiles else ""
+#     if confirm_prompt(
+#         f"Remove molecule <green>{name}</green>{smiles_str} from your working set?"
+#     ):
+#         return _remove_mol()
+#     else:
+#         output_error(
+#             f"Molecule <yellow>{name}</yellow> was not removed", return_val=False
+#         )
+#         return False
 
 
 def clear_mws(cmd_pointer: object, force: bool = False):
@@ -1626,9 +1658,12 @@ def merge_smols(smol: dict, merge_smol: dict) -> dict:
 
         # Merge meta information
         elif key == "meta" and isinstance(val, dict):
+            # import json
+            # print(888, json.dumps(smol))
+
             # Merge notes with a separator string
-            notes_1 = smol[key].get("notes", None)
-            notes_2 = merge_smol[key].get("notes", None)
+            notes_1 = smol.get(key, {}).get("notes")
+            notes_2 = merge_smol.get(key, {}).get("notes")
             if notes_1 and notes_2:
                 smol[key]["notes"] = "\n\n- - -\n\n".join([notes_1, notes_2])
             else:
@@ -1836,6 +1871,7 @@ def index_molset_file_async(path_absolute):
     cache_path: str
         The path to the cached working copy of a molset.
     """
+    print(3333)
 
     async def _index_molset_file(cache_path):
         # Read

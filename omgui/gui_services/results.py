@@ -1,16 +1,15 @@
 import pandas as pd
 from openad.helpers.files import open_file
-from openad.helpers.output import output_table
 from openad.app.global_var_lib import MEMORY
-from openad.smols.smol_functions import (
+from workers.smol_functions import (
     df_has_molecules,
     flatten_smol,
     create_molset_cache_file,
     assemble_cache_path,
     read_molset_from_cache,
 )
-from openad.smols.smol_transformers import dataframe2molset
-from helpers.molecules import create_molset_response
+from workers.smol_transformers import dataframe2molset
+from helpers.mol_utils import create_molset_response
 
 
 class GUIResultApiService:
@@ -19,8 +18,8 @@ class GUIResultApiService:
     The API endpoints are called from gui_routes.py.
     """
 
-    def __init__(self, cmd_pointer):
-        self.cmd_pointer = cmd_pointer
+    def __init__(self, ctx):
+        self.ctx = ctx
 
     def get_result(self, query):
         """
@@ -40,11 +39,11 @@ class GUIResultApiService:
                 molset = dataframe2molset(mem_data)
 
                 # Create cache working copy.
-                cache_id = create_molset_cache_file(self.cmd_pointer, molset)
+                cache_id = create_molset_cache_file(self.ctx, molset)
 
                 # Read molset from cache.
                 try:
-                    molset = read_molset_from_cache(self.cmd_pointer, cache_id)
+                    molset = read_molset_from_cache(self.ctx, cache_id)
                 except ValueError as err:
                     return f"get_result() -> {err}", 500
 
@@ -74,7 +73,7 @@ class GUIResultApiService:
             return f"update_result_molset() -> Unrecognized cache_id: {cache_id}", 500
 
         # Read data from cache.
-        cache_path = assemble_cache_path(self.cmd_pointer, "molset", cache_id)
+        cache_path = assemble_cache_path(self.ctx, "molset", cache_id)
         molset, err_code = open_file(cache_path, return_err="code")
         if err_code:
             return err_code, 500

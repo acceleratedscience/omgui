@@ -3,8 +3,8 @@ class GUIGeneralApiService:
     General functions for OMGUI API endpoints.
     """
 
-    def __init__(self, cmd_pointer):
-        self.cmd_pointer = cmd_pointer
+    def __init__(self, ctx):
+        self.ctx = ctx
 
     def landing(self):
         return "This is the OMGUI API"
