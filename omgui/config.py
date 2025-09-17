@@ -1,7 +1,7 @@
 import os
 import yaml
 from pathlib import Path
-from helpers import logger
+from omgui.helpers import logger
 
 
 def load_config():

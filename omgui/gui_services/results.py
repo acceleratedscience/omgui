@@ -1,15 +1,15 @@
 import pandas as pd
 from openad.helpers.files import open_file
 from openad.app.global_var_lib import MEMORY
-from workers.smol_functions import (
+from omgui.workers.smol_functions import (
     df_has_molecules,
     flatten_smol,
     create_molset_cache_file,
     assemble_cache_path,
     read_molset_from_cache,
 )
-from workers.smol_transformers import dataframe2molset
-from helpers.mol_utils import create_molset_response
+from omgui.workers.smol_transformers import dataframe2molset
+from omgui.helpers.mol_utils import create_molset_response
 
 
 class GUIResultService:

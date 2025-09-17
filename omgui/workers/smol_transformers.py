@@ -10,7 +10,7 @@ from rdkit import Chem, RDLogger
 
 from openad.helpers.files import open_file
 from openad.helpers.output import output_error
-import workers.smol_functions as smol_functions
+import omgui.workers.smol_functions as smol_functions
 
 
 # Suppress RDKit errors

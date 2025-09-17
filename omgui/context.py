@@ -24,8 +24,8 @@ Usage:
 import json
 from pathlib import Path
 
-from .config import config
-from helpers import logger
+from omgui.config import config
+from omgui.helpers import logger
 from openad.helpers.output import output_text, output_error, output_success
 
 

@@ -8,7 +8,7 @@ from starlette.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
-from helpers.exceptions import (
+from omgui.helpers.exceptions import (
     InvalidMoleculeInput,
     InvalidMolset,
     NoResult,

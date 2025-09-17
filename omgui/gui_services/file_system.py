@@ -2,12 +2,16 @@ import os
 from pathlib import Path
 
 from openad.helpers.files import open_file, file_stats
-from workers.smol_functions import create_molset_cache_file, get_molset_mols
-from workers.smol_transformers import smiles_path2molset, sdf_path2molset, mdl_path2smol
-from workers.mmol_transformers import cif2mmol, pdb2mmol
-from helpers.mol_utils import create_molset_response
+from omgui.workers.smol_functions import create_molset_cache_file, get_molset_mols
+from omgui.workers.smol_transformers import (
+    smiles_path2molset,
+    sdf_path2molset,
+    mdl_path2smol,
+)
+from omgui.workers.mmol_transformers import cif2mmol, pdb2mmol
+from omgui.helpers.mol_utils import create_molset_response
 
-# from helpers import logger
+# from omgui.helpers import logger
 
 
 class GUIFileSystemService:

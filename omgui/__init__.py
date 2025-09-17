@@ -1,5 +1,5 @@
 import inspect
-from .entrypoint import *
+from omgui.entrypoint import *
 
 __all__ = [
     name

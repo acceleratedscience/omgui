@@ -15,7 +15,7 @@ Usage:
 import urllib
 from typing import Any
 from pathlib import Path
-from . import context
+from omgui import context
 
 from openad.helpers.output import output_text, output_error, output_success
 
@@ -56,7 +56,7 @@ def launch(*args: Any, **kwargs: Any) -> Any:
     """
     Launch the GUI server.
     """
-    from .gui_launcher import gui_init as _gui_init
+    from omgui.gui_launcher import gui_init as _gui_init
 
     ctx = context.get()
     return _gui_init(ctx, *args, **kwargs)
@@ -66,7 +66,7 @@ def shutdown(*args: Any, **kwargs: Any) -> Any:
     """
     Shutdown the GUI server.
     """
-    from .gui_launcher import gui_shutdown as _gui_shutdown
+    from omgui.gui_launcher import gui_shutdown as _gui_shutdown
 
     ctx = context.get()
     return _gui_shutdown(ctx, *args, **kwargs)
@@ -82,7 +82,7 @@ def show_mol(molecule_identifier: str = "") -> None:
     """
     Open the molecule viewer for a given molecule identifier.
     """
-    from .gui_launcher import gui_init as _gui_init
+    from omgui.gui_launcher import gui_init as _gui_init
 
     ctx = context.get()
     path = "mol/" + urllib.parse.quote(molecule_identifier, safe="/")
@@ -93,7 +93,7 @@ def show_molset(path: str = "") -> None:
     """
     Open the molecule set viewer for a given molecule set path.
     """
-    from .gui_launcher import gui_init as _gui_init
+    from omgui.gui_launcher import gui_init as _gui_init
 
     if Path(path).suffix == "":
         path += ".molset.json"
@@ -115,7 +115,7 @@ class MWS:
         """
         Add a molecule to the current workspace's working set.
         """
-        from gui_services.molecules import GUIMoleculesService
+        from omgui.gui_services.molecules import GUIMoleculesService
 
         ctx = context.get()
         molecules_srv = GUIMoleculesService(ctx)
@@ -126,7 +126,7 @@ class MWS:
         """
         Remove a molecule from the current workspace's working set.
         """
-        from gui_services.molecules import GUIMoleculesService
+        from omgui.gui_services.molecules import GUIMoleculesService
 
         ctx = context.get()
         molecules_srv = GUIMoleculesService(ctx)
@@ -136,7 +136,7 @@ class MWS:
         """
         Clear the current molecule working set.
         """
-        from gui_services.molecules import GUIMoleculesService
+        from omgui.gui_services.molecules import GUIMoleculesService
 
         ctx = context.get()
         molecules_srv = GUIMoleculesService(ctx)
@@ -154,7 +154,7 @@ class MWS:
         """
         Get list of molecule names from your working set.
         """
-        from workers.smol_transformers import molset_to_names_list
+        from omgui.workers.smol_transformers import molset_to_names_list
 
         ctx = context.get()
         mws = ctx.mws()
@@ -164,7 +164,7 @@ class MWS:
         """
         Open the current molecule working set in the GUI.
         """
-        from .gui_launcher import gui_init as _gui_init
+        from omgui.gui_launcher import gui_init as _gui_init
 
         ctx = context.get()
         return _gui_init(ctx, path="mws")
@@ -224,7 +224,7 @@ def show_files(*args: Any, **kwargs: Any) -> Any:
     """
     Open the file browser.
     """
-    from .gui_launcher import gui_init as _gui_init
+    from omgui.gui_launcher import gui_init as _gui_init
 
     return _gui_init(*args, **kwargs)
 
@@ -233,7 +233,7 @@ def show_file(path: str = "") -> Any:
     """
     Open the appropriate viewer for a given file path.
     """
-    from .gui_launcher import gui_init as _gui_init
+    from omgui.gui_launcher import gui_init as _gui_init
 
     path = "~/" + urllib.parse.quote(path, safe="/")
     _gui_init(path)

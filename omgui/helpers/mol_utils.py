@@ -1,5 +1,5 @@
 from urllib.parse import unquote
-from helpers import logger
+from omgui.helpers import logger
 
 
 def create_molset_response(molset, query=None, cache_id=None):

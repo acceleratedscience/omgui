@@ -29,12 +29,12 @@ from fastapi.responses import HTMLResponse, Response
 from openad.helpers.output import output_text, output_error, output_success
 
 # omgui
-from .context import get
+from omgui.context import get
 from gui_routes import create_router
-from helpers import gui_install
-from helpers.jupyter import nb_mode
-from helpers.general import next_avail_port, wait_for_port
-from helpers.exception_handlers import register_exception_handlers
+from omgui.helpers import gui_install
+from omgui.helpers.jupyter import nb_mode
+from omgui.helpers.general import next_avail_port, wait_for_port
+from omgui.helpers.exception_handlers import register_exception_handlers
 
 
 GUI_SERVER = None

@@ -12,7 +12,7 @@ class TimeIt:
     Equivalent to console.time / console.timeEnd in JS.
 
     Usage:
-        import helpers.timeit as timeit
+        import omgui.helpers.timeit as timeit
 
         timeit.start()
         # ... operation ...

@@ -7,7 +7,7 @@ import json
 import shutil
 
 # Small molecule functions
-from workers.smol_functions import (
+from omgui.workers.smol_functions import (
     get_smol_from_pubchem,
     create_molset_cache_file,
     get_smol_name,
@@ -19,7 +19,7 @@ from workers.smol_functions import (
     get_best_available_smiles,
     merge_smols,
 )
-from workers.smol_transformers import (
+from omgui.workers.smol_transformers import (
     smol2svg,
     smol2mdl,
     molset2dataframe,
@@ -29,14 +29,14 @@ from workers.smol_transformers import (
 
 
 # Macromolecule functions
-from workers.mmol_functions import mmol_from_identifier
-from workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
+from omgui.workers.mmol_functions import mmol_from_identifier
+from omgui.workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
 
 # Various
-from helpers import logger
-from helpers import JSONDecimalEncoder
-from helpers.mol_utils import create_molset_response
-from helpers.exceptions import (
+from omgui.helpers import logger
+from omgui.helpers import JSONDecimalEncoder
+from omgui.helpers.mol_utils import create_molset_response
+from omgui.helpers.exceptions import (
     InvalidMoleculeInput,
     InvalidMolset,
     NoResult,

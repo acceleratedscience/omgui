@@ -2,12 +2,12 @@
 Logger singleton.
 
 Usage:
-    from helpers import logger
+    from omgui.helpers import logger
     logger.info("Your message")
 """
 
 import logging
-from helpers.jupyter import nb_mode
+from omgui.helpers.jupyter import nb_mode
 
 
 # Define format

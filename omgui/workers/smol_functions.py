@@ -20,8 +20,8 @@ from rdkit import Chem, rdBase, RDLogger
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 
-from helpers import logger
-from .. import context
+from omgui.helpers import logger
+from omgui import context
 
 
 # OpenAD imports
@@ -1908,8 +1908,6 @@ def index_molset_file_async(path_absolute):
 
 # To be orgnanized
 
-# fmt:off
-
 
 def random_smiles(count: int = 10, max_cid=150_000_000):
     """
@@ -1933,6 +1931,7 @@ def random_smiles(count: int = 10, max_cid=150_000_000):
             retries += 1
     return results
 
+
 def _fetch_random_compound(max_cid, max_retries=20, debug=True):
     """
     Fetch a random molecule's CID and Canonical SMILES from PubChem.
@@ -1946,44 +1945,58 @@ def _fetch_random_compound(max_cid, max_retries=20, debug=True):
         tuple: (cid, smiles) if successful, otherwise (None, None).
     """
     pubchem_api_base = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid"
-    headers = {'Accept': 'text/plain'} # Request plain text for SMILES
+    headers = {"Accept": "text/plain"}  # Request plain text for SMILES
+    i = 1
 
     for attempt in range(max_retries):
         random_cid = random.randint(1, max_cid)
         url = f"{pubchem_api_base}/{random_cid}/property/CanonicalSMILES/TXT"
         icon = "❌" if attempt + 1 == max_retries else "🔄"
-        i = 1
 
         try:
             response = requests.get(url, headers=headers, timeout=10)
-            response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
 
             smiles = response.text.strip()
             if smiles:
                 if debug:
-                    print(f"✅ {i} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> SMILES: {smiles}")
-                    i += 1
+                    print(
+                        f"✅ {i} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> SMILES: {smiles}"
+                    )
+                    i = i + 1
                 return random_cid, smiles
             else:
                 if debug:
-                    print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> no result")
+                    print(
+                        f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> no result"
+                    )
 
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
                 if debug:
-                    print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> not found")
+                    print(
+                        f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> not found"
+                    )
             else:
                 if debug:
-                    print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> HTTP error")
+                    print(
+                        f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> HTTP error"
+                    )
         except requests.exceptions.ConnectionError:
             if debug:
-                print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> connection error")
+                print(
+                    f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> connection error"
+                )
         except requests.exceptions.Timeout:
             if debug:
-                print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> timeout error")
+                print(
+                    f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> timeout error"
+                )
         except requests.exceptions.RequestException as e:
             if debug:
-                print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> unexpected error")
+                print(
+                    f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> unexpected error"
+                )
             if debug:
                 print(f"ℹ️ Error details: {e}")
 

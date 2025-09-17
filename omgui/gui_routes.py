@@ -10,17 +10,17 @@ from urllib.parse import unquote
 from fastapi import APIRouter, Request, status
 
 # Service modules
-from gui_services.general import GUIGeneralService
-from gui_services.file_system import GUIFileSystemService
-from gui_services.molecules import GUIMoleculesService
-from gui_services.results import GUIResultService
-from gui_services.dataframes import GUIDataframeService
+from omgui.gui_services.general import GUIGeneralService
+from omgui.gui_services.file_system import GUIFileSystemService
+from omgui.gui_services.molecules import GUIMoleculesService
+from omgui.gui_services.results import GUIResultService
+from omgui.gui_services.dataframes import GUIDataframeService
 
 # Various
-from . import context
+from omgui import context
 
-from helpers import logger
-from helpers.exceptions import (
+from omgui.helpers import logger
+from omgui.helpers.exceptions import (
     InvalidMoleculeInput,
     InvalidMolset,
     NoResult,
