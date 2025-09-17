@@ -20,3 +20,19 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/acceleratedscience/omgui"
 "Bug Tracker" = "https://github.com/acceleratedscience/omgui/issues"
+
+[project.dependencies]
+fastapi = ">=0.115.7"
+uvicorn = ">=0.34.2"
+Jinja2 = ">=3.1.4"
+redis = ">=6.2.0"
+pandas = ">=2.2.3"
+rdkit = ">=2024.9.6"
+cinemol = ">=1.0.2"
+CairoSVG = ">=2.8.2"
+plotly = ">=6.3.0"
+kaleido = ">=1.0.0"
+
+# pip install omgui[dev]
+[project.optional-dependencies]
+dev = []
