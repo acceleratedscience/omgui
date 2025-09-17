@@ -20,9 +20,9 @@ from rdkit import Chem, rdBase, RDLogger
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 
+from omgui import context
 from omgui.helpers import logger
 from omgui.helpers.paths import parse_path
-from omgui import context
 from omgui.workers.smol_transformers import dataframe2molset
 
 
@@ -48,6 +48,9 @@ from openad.smols.smol_transformers import (
     csv_path2molset,
     smiles_path2molset,
 )
+
+# Load context
+ctx = context.get()
 
 
 # Silcence RDKit errors
@@ -197,7 +200,6 @@ mol_name_cache = {}
 
 
 def find_smol(
-    ctx: context.Context,
     identifier: str,
     name: str = None,
     enrich: bool = False,
@@ -209,8 +211,6 @@ def find_smol(
 
     Parameters
     ----------
-    ctx: context.Context
-        The context object.
     identifier: str
         The molecule identifier to search for.
         Valid inputs: InChI, SMILES, InChIKey, name, CID.
@@ -269,8 +269,6 @@ def get_smol_from_mws(identifier: str, ignore_synonyms: bool = False) -> dict | 
 
     Parameters
     ----------
-    ctx: context.Context
-        The context object.
     identifier: str
         The molecule identifier to search for.
         Valid inputs: InChI, SMILES, InChIKey, name, CID.
@@ -283,7 +281,6 @@ def get_smol_from_mws(identifier: str, ignore_synonyms: bool = False) -> dict | 
         The OpenAD smol dictionary if found, otherwise None.
     """
 
-    ctx = context.get()
     smol = get_smol_from_list(identifier, ctx.mws(), ignore_synonyms=ignore_synonyms)
     if smol is not None:
         return deepcopy(smol)
@@ -376,9 +373,9 @@ def get_mol_rdkit(inchi_or_smiles: str, identifier_type: str = None) -> dict | N
         else:
             mol_rdkit = Chem.MolFromInchi(inchi_or_smiles)
             if not mol_rdkit:
-                mol_rdkit = Chem.MolFromSmiles(
+                mol_rdkit = Chem.MolFromSmiles(  # pylint: disable=no-member
                     inchi_or_smiles
-                )  # pylint: disable=no-member
+                )
             if not mol_rdkit:
                 mol_rdkit = Chem.MolFromInchi("InChI=1S/" + inchi_or_smiles)
             if not mol_rdkit:
@@ -615,9 +612,9 @@ def new_smol(inchi_or_smiles: str = None, mol_rdkit: Mol = None, name: str = Non
         try:
             mol_rdkit = Chem.MolFromInchi(inchi_or_smiles)
             if not mol_rdkit:
-                mol_rdkit = Chem.MolFromSmiles(
+                mol_rdkit = Chem.MolFromSmiles(  # pylint: disable=no-member
                     inchi_or_smiles
-                )  # pylint: disable=no-member
+                )
             if not mol_rdkit:
                 mol_rdkit = Chem.MolFromInchi("InChI=1S/" + inchi_or_smiles)
             if not mol_rdkit:
@@ -1447,14 +1444,12 @@ def _fetch_random_compound(max_cid, i, max_retries=20, debug=True):
 # ------------------------------------
 
 
-def assemble_cache_path(ctx: context.Context, file_type: str, cache_id: str) -> str:
+def assemble_cache_path(file_type: str, cache_id: str) -> str:
     """
     Compile the file path to a cached working copy of a file.
 
     Parameters
     ----------
-    ctx: context.Context
-        The context object.
     file_type: 'molset'
         The type of file, used to name the cache file. For now only molset.
     cache_id: str
@@ -1465,17 +1460,13 @@ def assemble_cache_path(ctx: context.Context, file_type: str, cache_id: str) -> 
     return workspace_path / "._system" / "wc_cache " / f"{file_type}-{cache_id}.json"
 
 
-def create_molset_cache_file(
-    ctx: context.Context, molset: dict = None, path_absolute: Path = None
-) -> str:
+def create_molset_cache_file(molset: dict = None, path_absolute: Path = None) -> str:
     """
     Store molset as a cached file so we can manipulate it in the GUI,
     return its cache_id so we can reference it later.
 
     Parameters
     ----------
-    ctx: context.Context
-        The context object.
     molset: dict
         The molset to cache.
     path_absolute: Path
@@ -1488,7 +1479,7 @@ def create_molset_cache_file(
     """
 
     cache_id = str(int(time.time() * 1000))
-    cache_path = assemble_cache_path(ctx, "molset", cache_id)
+    cache_path = assemble_cache_path("molset", cache_id)
 
     # Creaste the /._openad/wc_cache directory if it doesn't exist.
     os.makedirs(os.path.dirname(cache_path), exist_ok=True)
@@ -1516,14 +1507,12 @@ def create_molset_cache_file(
     return cache_id
 
 
-def read_molset_from_cache(ctx: context.Context, cache_id: str) -> dict:
+def read_molset_from_cache(cache_id: str) -> dict:
     """
     Read a cached molset file from disk.
 
     Parameters
     ----------
-    ctx: context.Context
-        The context object.
     cache_id: str
         The cache ID of the molset file.
 
@@ -1534,7 +1523,7 @@ def read_molset_from_cache(ctx: context.Context, cache_id: str) -> dict:
     """
 
     # Read file from cache.
-    cache_path = assemble_cache_path(ctx, "molset", cache_id)
+    cache_path = assemble_cache_path("molset", cache_id)
     molset = get_molset_mols(cache_path)
 
     # Return error
@@ -1728,12 +1717,11 @@ def load_mols_to_mws(inp):
     Load a batch of molecules into the molecule working set.
     """
     # Prevent circular import
-    from omgui.gui_services.molecules import GUIMoleculesService
+    from omgui.gui_services import srv_molecules
 
     molset = None
     df_name = inp.as_dict().get("in_dataframe", None)
     file_path = inp.as_dict().get("moles_file", None)
-    ctx = context.get()
 
     # Load from dataframe
     if df_name:
@@ -1760,8 +1748,7 @@ def load_mols_to_mws(inp):
     added_count = 0
     failed_count = 0
     for smol in molset:
-        molecules_srv = GUIMoleculesService(ctx)
-        success = molecules_srv.add_mol_to_mws(smol=smol, silent=True)
+        success = srv_molecules.add_mol_to_mws(smol=smol, silent=True)
         if success:
             added_count += 1
         else:
@@ -1874,6 +1861,8 @@ def merge_molecule_property_data(inp=None, dataframe=None):
 
     The property values will then be added to each molecule's properties.
     """
+    # Prevent circular import
+    from omgui.gui_services import srv_molecules
 
     if dataframe is None and inp is None:
         return False
@@ -1885,7 +1874,6 @@ def merge_molecule_property_data(inp=None, dataframe=None):
             or "merge_molecules_data_dataframe-DEPRECATED"  # Can be removed once the deprecated syntax has been removed
             in inp.as_dict()
         ):
-            ctx = context.get()
             dataframe = ctx.vars.get(inp.as_dict().get("in_dataframe"))
 
         # Load from file (not yet implemented)
@@ -1965,9 +1953,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
             smol = merge_molecule_properties(row, merge_smol)
             GLOBAL_SETTINGS["grammar_refresh"] = True
             if update_flag is True:
-                molecules_srv = GUIMoleculesService(ctx)
-                molecules_srv.remove_mol_from_mws(smol=merge_smol, silent=True)
-            ctx = context.get()
+                srv_molecules.remove_mol_from_mws(smol=merge_smol, silent=True)
             ctx.mws_add(smol)
 
     output_success("Data merged into your working set", return_val=False)
@@ -1984,10 +1970,10 @@ def _load_mol_data(file_path):
     if file_path.split(".")[-1].lower() == "sdf":
         try:
             name = file_path.split("/")[-1]
-            ctx = context.get()
             sdf_file = ctx.workspace_path() / name
             mol_frame = Chem.PandasTools.LoadSDF(sdf_file)
-        except Exception as err:
+            return mol_frame
+        except Exception as err:  # pylint: disable=broad-except
             output_error(msg("err_load", "SDF", err), return_val=False)
             return None
 
@@ -1995,14 +1981,12 @@ def _load_mol_data(file_path):
     elif file_path.split(".")[-1].lower() == "csv":
         try:
             name = file_path.split("/")[-1]
-            ctx = context.get()
             csv_file = ctx.workspace_path() / name
             mol_frame = pandas.read_csv(csv_file, dtype="string")
+            return mol_frame
         except Exception as err:
             output_error(msg("err_load", "CSV", err), return_val=False)
             return None
-
-    return mol_frame
 
 
 # endregion

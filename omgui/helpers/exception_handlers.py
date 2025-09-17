@@ -8,6 +8,7 @@ from starlette.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+from omgui.helpers import exceptions as omg_exc
 from omgui.helpers.exceptions import (
     InvalidMoleculeInput,
     InvalidMolset,
@@ -27,7 +28,9 @@ async def value_error_handler(request: Request, err: ValueError):
     )
 
 
-async def invalid_mol_input_handler(request: Request, err: InvalidMoleculeInput):
+async def invalid_mol_input_handler(
+    request: Request, err: omg_exc.InvalidMoleculeInput
+):
     return JSONResponse(
         status_code=HTTP_400_BAD_REQUEST,
         content={
@@ -37,7 +40,7 @@ async def invalid_mol_input_handler(request: Request, err: InvalidMoleculeInput)
     )
 
 
-async def invalid_molset_handler(request: Request, err: InvalidMolset):
+async def invalid_molset_handler(request: Request, err: omg_exc.InvalidMolset):
     return JSONResponse(
         status_code=HTTP_400_BAD_REQUEST,
         content={
@@ -47,7 +50,7 @@ async def invalid_molset_handler(request: Request, err: InvalidMolset):
     )
 
 
-async def no_result_handler(request: Request, err: NoResult):
+async def no_result_handler(request: Request, err: omg_exc.NoResult):
     return JSONResponse(
         status_code=HTTP_422_UNPROCESSABLE_ENTITY,
         content={
@@ -57,7 +60,7 @@ async def no_result_handler(request: Request, err: NoResult):
     )
 
 
-async def failed_operation_handler(request: Request, err: FailedOperation):
+async def failed_operation_handler(request: Request, err: omg_exc.FailedOperation):
     return JSONResponse(
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
         content={
@@ -88,7 +91,9 @@ async def save_file_not_found_handler(request: Request, err: FileNotFoundError):
     )
 
 
-async def cache_file_not_found_handler(request: Request, err: CacheFileNotFound):
+async def cache_file_not_found_handler(
+    request: Request, err: omg_exc.CacheFileNotFound
+):
     return JSONResponse(
         status_code=HTTP_400_BAD_REQUEST,
         content={
@@ -113,12 +118,13 @@ async def catch_all_handler(request: Request, err: Exception):
 
 
 def register_exception_handlers(app):
+    app.add_exception_handler(omg_exc.InvalidMoleculeInput, invalid_mol_input_handler)
+    app.add_exception_handler(omg_exc.InvalidMolset, invalid_molset_handler)
+    app.add_exception_handler(omg_exc.NoResult, no_result_handler)
+    app.add_exception_handler(omg_exc.FailedOperation, failed_operation_handler)
+    app.add_exception_handler(omg_exc.CacheFileNotFound, cache_file_not_found_handler)
     app.add_exception_handler(ValueError, value_error_handler)
-    app.add_exception_handler(InvalidMoleculeInput, invalid_mol_input_handler)
-    app.add_exception_handler(NoResult, no_result_handler)
-    app.add_exception_handler(FailedOperation, failed_operation_handler)
     app.add_exception_handler(FileExistsError, save_file_exists_handler)
     app.add_exception_handler(FileNotFoundError, save_file_not_found_handler)
-    app.add_exception_handler(CacheFileNotFound, cache_file_not_found_handler)
     app.add_exception_handler(PermissionError, permission_error_handler)
     app.add_exception_handler(Exception, catch_all_handler)

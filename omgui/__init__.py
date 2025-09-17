@@ -22,6 +22,9 @@ from openad.helpers.output import output_text, output_error, output_success
 # Sub-modules
 from omgui import mws
 
+# Load context
+ctx = context.get()
+
 # ------------------------------------
 # region - General
 # ------------------------------------
@@ -50,7 +53,6 @@ def get_context():
     Returns:
         dict: The context dictionary.
     """
-    ctx = context.get()
     ctx_dict = ctx.get()
     return ctx_dict
 
@@ -61,7 +63,6 @@ def launch(*args: Any, **kwargs: Any) -> Any:
     """
     from omgui.gui_launcher import gui_init as _gui_init
 
-    ctx = context.get()
     return _gui_init(ctx, *args, **kwargs)
 
 
@@ -71,7 +72,6 @@ def shutdown(*args: Any, **kwargs: Any) -> Any:
     """
     from omgui.gui_launcher import gui_shutdown as _gui_shutdown
 
-    ctx = context.get()
     return _gui_shutdown(ctx, *args, **kwargs)
 
 
@@ -87,7 +87,6 @@ def show_mol(molecule_identifier: str = "") -> None:
     """
     from omgui.gui_launcher import gui_init as _gui_init
 
-    ctx = context.get()
     path = "mol/" + urllib.parse.quote(molecule_identifier, safe="/")
     _gui_init(ctx, path)
 
@@ -101,7 +100,6 @@ def show_molset(path: str = "") -> None:
     if Path(path).suffix == "":
         path += ".molset.json"
 
-    ctx = context.get()
     path = "~/" + urllib.parse.quote(path, safe="/")
     _gui_init(ctx, path)
 
@@ -116,8 +114,6 @@ def get_workspace() -> str:
     """
     Get the current workspace.
     """
-
-    ctx = context.get()
     return ctx.workspace
 
 
@@ -125,8 +121,6 @@ def get_workspaces() -> list[str]:
     """
     Get  the list of available workspaces.
     """
-
-    ctx = context.get()
     return ctx.workspaces()
 
 
@@ -134,8 +128,6 @@ def set_workspace(name: str) -> bool:
     """
     Set the current workspace.
     """
-
-    ctx = context.get()
     return ctx.set_workspace(name)
 
 
@@ -143,8 +135,6 @@ def create_workspace(name: str) -> bool:
     """
     Create a new workspace.
     """
-
-    ctx = context.get()
     return ctx.create_workspace(name)
 
 
