@@ -1,5 +1,5 @@
 import os
-
+from pathlib import Path
 
 from openad.helpers.files import open_file, file_stats
 from workers.smol_functions import create_molset_cache_file, get_molset_mols
@@ -13,6 +13,9 @@ class GUIFileSystemService:
     """
     File system functions for OMGUI API endpoints.
     """
+
+    # File and directory names to hide in the file browser.
+    ignore_files = [".DS_Store", "._system"]
 
     def __init__(self, ctx):
         self.ctx = ctx
@@ -56,10 +59,8 @@ class GUIFileSystemService:
             "dirname": "",
             "files": [],
             "filesHidden": [],  # Filenames starting with .
-            # "filesSystem": [],  # Filenames starting with __ #fileSystem A place to hide our own system files out of sight? Will probably implement later, do not delete
             "dirs": [],
             "dirsHidden": [],  # Dir names starting with .
-            # "dirsSystem": [],  # Dir names starting with __ # See #fileSystem
         }
 
         # Organize file & directory names into dictionary.
@@ -69,23 +70,19 @@ class GUIFileSystemService:
             is_file = os.path.isfile(os.path.join(dir_path, filename))
 
             if is_file:
-                if filename == ".DS_Store":
+                if filename in self.ignore_files:
                     continue
                 elif is_hidden:
                     level["filesHidden"].append(filename)
-                # elif is_system:
-                #     level["filesSystem"].append(filename) # See #fileSystem
                 else:
                     level["files"].append(filename)
             else:
                 is_dir = os.path.isdir(os.path.join(dir_path, filename))
                 if is_dir:
-                    if filename == "._openad":
+                    if filename in self.ignore_files:
                         continue
                     if is_hidden:
                         level["dirsHidden"].append(filename)
-                    # elif is_system:
-                    #     level["dirsSystem"].append(filename) # See #fileSystem
                     else:
                         level["dirs"].append(filename)
 
@@ -226,9 +223,9 @@ class GUIFileSystemService:
             file formats in the future.
         """
 
-        path_absolute = file_obj["pathAbsolute"]
-        file_type = file_obj["_meta"]["fileType"]
-        ext = file_obj["_meta"]["ext"]
+        path_absolute = Path(file_obj.get("pathAbsolute"))
+        file_type = file_obj.get("_meta", {}).get("fileType")
+        ext = file_obj.get("_meta", {}).get("ext")
 
         molset = None
         err_code = None
@@ -280,28 +277,25 @@ class GUIFileSystemService:
         elif file_type in ["mdl", "pdb", "cif"]:
             # From MOL file
             if ext == "mol":
-                data, err_code = mdl_path2smol(path_absolute)
+                data = mdl_path2smol(path_absolute)
 
             # From PDB file
             if ext == "pdb":
                 data = pdb2mmol(pdb_path=path_absolute)
-                err_code = None
 
             # From CIF file
             if ext == "cif":
                 data = cif2mmol(cif_path=path_absolute)
-                err_code = None
 
         # Everything else --> Load file content
         else:
             # Read file's content
-            data, err_code = open_file(path_absolute, return_err="code")
+            with open(path_absolute, "r", encoding="utf-8") as file:
+                data = file.read()
 
         # Attach file content or error code
-        if err_code:
-            file_obj["_meta"]["errCode"] = err_code
-        else:
-            file_obj["data"] = data
+        file_obj["_meta"]["errCode"] = err_code
+        file_obj["data"] = data
 
         return file_obj
 

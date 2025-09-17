@@ -13,13 +13,15 @@ import logging
 import asyncio
 import aiofiles
 import pubchempy as pcy
+from pathlib import Path
 from copy import deepcopy
 from rdkit import Chem, rdBase, RDLogger
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 
 from helpers import logger
-from context import Context
+import context
+
 
 # OpenAD imports
 from openad.helpers.output_msgs import msg
@@ -196,7 +198,7 @@ mol_name_cache = {}
 
 
 def find_smol(
-    ctx: Context,
+    ctx: context.Context,
     identifier: str,
     name: str = None,
     enrich: bool = False,
@@ -208,7 +210,7 @@ def find_smol(
 
     Parameters
     ----------
-    ctx: Context
+    ctx: context.Context
         The context object.
     identifier: str
         The molecule identifier to search for.
@@ -263,7 +265,7 @@ def find_smol(
 
 
 def get_smol_from_mws(
-    ctx: Context, identifier: str, ignore_synonyms: bool = False
+    ctx: context.Context, identifier: str, ignore_synonyms: bool = False
 ) -> dict | None:
     """
     Retrieve a molecule from the molecule working set.
@@ -700,7 +702,7 @@ def get_human_properties(smol: dict) -> dict:
     return props
 
 
-def get_molset_mols(path_absolute: str) -> dict | None:
+def get_molset_mols(path_absolute: Path) -> dict | None:
     """
     Return the list of molecules from a molset file,
     with an index added to each molecule.
@@ -1328,6 +1330,16 @@ def get_smol_name(smol: dict) -> str:
     if inchikey:
         return inchikey
 
+    # SMILES
+    smiles = get_best_available_smiles(smol)
+    if smiles:
+        return smiles
+
+    # InChI
+    inchi = identifiers_dict.get("inchi")
+    if inchi:
+        return inchi
+
     # Fail
     return "Unknown"
 
@@ -1338,13 +1350,13 @@ def get_smol_name(smol: dict) -> str:
 # region - GUI operations
 
 
-def assemble_cache_path(ctx: Context, file_type: str, cache_id: str) -> str:
+def assemble_cache_path(ctx: context.Context, file_type: str, cache_id: str) -> str:
     """
     Compile the file path to a cached working copy of a file.
 
     Parameters
     ----------
-    ctx: Context
+    ctx: context.Context
         The context object.
     file_type: 'molset'
         The type of file, used to name the cache file. For now only molset.
@@ -1357,7 +1369,7 @@ def assemble_cache_path(ctx: Context, file_type: str, cache_id: str) -> str:
 
 
 def create_molset_cache_file(
-    ctx: Context, molset: dict = None, path_absolute: str = None
+    ctx: context.Context, molset: dict = None, path_absolute: Path = None
 ) -> str:
     """
     Store molset as a cached file so we can manipulate it in the GUI,
@@ -1365,11 +1377,11 @@ def create_molset_cache_file(
 
     Parameters
     ----------
-    ctx: Context
+    ctx: context.Context
         The context object.
     molset: dict
         The molset to cache.
-    path_absolute: str
+    path_absolute: Path
         The absolute path to the molset file, if it exists.
 
     Returns
@@ -1407,13 +1419,13 @@ def create_molset_cache_file(
     return cache_id
 
 
-def read_molset_from_cache(ctx: Context, cache_id: str) -> dict:
+def read_molset_from_cache(ctx: context.Context, cache_id: str) -> dict:
     """
     Read a cached molset file from disk.
 
     Parameters
     ----------
-    ctx: Context
+    ctx: context.Context
         The context object.
     cache_id: str
         The cache ID of the molset file.
@@ -1444,7 +1456,7 @@ def read_molset_from_cache(ctx: Context, cache_id: str) -> dict:
 
 
 # def mws_add_trash(
-#     ctx: Context,
+#     ctx: context.Context,
 #     identifier: str = None,
 #     smol: dict = None,
 #     force: bool = False,
@@ -1455,7 +1467,7 @@ def read_molset_from_cache(ctx: Context, cache_id: str) -> dict:
 
 #     Parameters
 #     ----------
-#     ctx: Context
+#     ctx: context.Context
 #         The context object.
 #     smol: dict
 #         The OpenAD molecule object to add.
@@ -1506,7 +1518,7 @@ def read_molset_from_cache(ctx: Context, cache_id: str) -> dict:
 
 
 # def mws_remove_trash(
-#     ctx: Context,
+#     ctx: context.Context,
 #     identifier: str = None,
 #     smol: dict = None,
 #     force: bool = False,
@@ -1517,7 +1529,7 @@ def read_molset_from_cache(ctx: Context, cache_id: str) -> dict:
 
 #     Parameters
 #     ----------
-#     ctx: Context
+#     ctx: context.Context
 #         The context object.
 #     smol: dict
 #         The OpenAD molecule object to remove.

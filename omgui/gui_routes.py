@@ -9,15 +9,15 @@ http://0.0.0.0:8024/api/v1/<endpoint>
 from urllib.parse import unquote
 from fastapi import APIRouter, Request, status
 
-# API modules
-from gui_services.general import GUIGeneralApiService
+# Service modules
+from gui_services.general import GUIGeneralService
 from gui_services.file_system import GUIFileSystemService
-from gui_services.molecules import GUIMoleculesApiService
-from gui_services.results import GUIResultApiService
+from gui_services.molecules import GUIMoleculesService
+from gui_services.results import GUIResultService
 from gui_services.dataframes import GUIDataframeService
 
 # Various
-from context import Context
+import context
 
 from helpers import logger
 from helpers.exceptions import (
@@ -29,14 +29,14 @@ from helpers.exceptions import (
 )
 
 
-def create_router(ctx: Context):
+def create_router(ctx: context.Context) -> APIRouter:
 
     router = APIRouter()
 
-    general_srv = GUIGeneralApiService(ctx)
+    general_srv = GUIGeneralService(ctx)
     file_system_srv = GUIFileSystemService(ctx)
-    molecules_srv = GUIMoleculesApiService(ctx)
-    result_srv = GUIResultApiService(ctx)
+    molecules_srv = GUIMoleculesService(ctx)
+    result_srv = GUIResultService(ctx)
     dataframe_srv = GUIDataframeService(ctx)
 
     api_v1 = "/api/v1"
@@ -337,7 +337,7 @@ def create_router(ctx: Context):
     async def remove_mol_from_mws(request: Request):
         body = await request.json()
         smol = body.get("mol")
-        success = molecules_srv.remove_mol_from_mws(smol)
+        success = molecules_srv.remove_mol_from_mws(smol=smol)
         if not success:
             raise FailedOperation("Failed to remove molecule from your working set.")
         else:

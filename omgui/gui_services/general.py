@@ -1,4 +1,4 @@
-class GUIGeneralApiService:
+class GUIGeneralService:
     """
     General functions for OMGUI API endpoints.
     """

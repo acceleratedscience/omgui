@@ -12,7 +12,7 @@ from workers.smol_transformers import dataframe2molset
 from helpers.mol_utils import create_molset_response
 
 
-class GUIResultApiService:
+class GUIResultService:
     """
     All the API endpoints related to the result memory.
     The API endpoints are called from gui_routes.py.

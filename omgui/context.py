@@ -29,12 +29,30 @@ from helpers import logger
 from openad.helpers.output import output_text, output_error, output_success
 
 
+def get():
+    """
+    Get the context singleton instance.
+    """
+    return Context()
+
+
+def set_session(workspace: str):
+    """
+    Set the current context (global or session).
+    """
+    Context(session=True, workspace=workspace)
+
+
 class Context:
     """
     Application context manager for OMGUI.
     """
 
-    # Context
+    # Singleton instance
+    _instance = None
+    _initialized = False
+
+    # Context values
     workspace: str
     temp: bool = False  # Session-only context
     _mws: list
@@ -52,7 +70,16 @@ class Context:
     # region - Initialization
     # ------------------------------------
 
-    def __init__(self, workspace=None):
+    def __new__(cls, *args, session: bool = None, workspace: str = None, **kwargs):
+        """
+        Control singleton instance creation.
+        """
+
+        if cls._instance is None or session is True:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, session: bool = None, workspace: str = None):
         """
         Initializes the context manager.
 
@@ -62,11 +89,16 @@ class Context:
         (e.g., in Jupyter notebooks).
         """
 
+        # Prevent re-initialization of singleton
+        if self._initialized:
+            return
+
         # A: Create virgin session context
-        if workspace:
+        if session:
             _context = self.default_context.copy()
             _context["workspace"] = workspace
             _context["temp"] = True  # Mark as session-only
+            _context["_mws"] = []
 
         # B: Load global context from file
         else:
@@ -80,11 +112,13 @@ class Context:
                 setattr(self, key, value)
 
         # Load molecule working set for current workspace into memory
-        self._mws = self._load_mws()
+        if not session:
+            self._mws = self._load_mws()
 
         # Create virgin context: first time / workspace session
         self._create_workspace_dir(self.workspace)
         self._save()
+        self._initialized = True
 
     def _load_global_context(self):
         """
@@ -125,19 +159,40 @@ class Context:
             return
 
         try:
+            # Save molecule working set
+            mws_path = self.mws_path()
+            with open(mws_path, "w", encoding="utf-8") as file:
+                json.dump(self._mws, file, indent=4)
+
+            # Save context file, without _mws
+            ctx_dict = self.__dict__.copy()
+            if "_mws" in ctx_dict:
+                del ctx_dict["_mws"]
             context_path = Path(config.get("dir")) / "context.json"
             with open(context_path, "w", encoding="utf-8") as file:
-                print("SAVE:", context_path, self.__dict__)
-                json.dump(self.__dict__, file, indent=4)
+                # print("Save ctx:", context_path, _ctx)
+                json.dump(ctx_dict, file, indent=4)
+
         except Exception as err:  # pylint: disable=broad-except
             logger.error(f"An error occurred while saving the context file: {err}")
 
-    def display(self):
+    def get(self):
         """
         Displays the current context, mainly for debugging purposes.
         """
-        print("\n\nCurrent OMGUI Context:\n")
-        print(json.dumps(self.__dict__, indent=4), "\n")
+        ctx_dict = self.__dict__.copy()
+
+        # Replace _mws with summary
+        if "_mws" in ctx_dict:
+            count = len(ctx_dict["_mws"])
+            if count == 0:
+                ctx_dict["_mws"] = "<empty>"
+            elif count == 1:
+                ctx_dict["_mws"] = "<1 molecule>"
+            else:
+                ctx_dict["_mws"] = f"<{count} molecules>"
+
+        return ctx_dict
 
     # endregion
     # ------------------------------------
@@ -209,6 +264,13 @@ class Context:
 
         return Path(config.get("dir")) / "workspaces" / (workspace or self.workspace)
 
+    def mws_path(self, workspace=None):
+        """
+        Returns the current molecule working set path.
+        """
+
+        return self.workspace_path(workspace) / "._system" / "mws.json"
+
     def workspaces(self):
         """
         Returns the list of workspace names.
@@ -229,7 +291,7 @@ class Context:
         Loads the molecule working set for the current workspace into memory.
         """
 
-        mws_path = self.workspace_path() / "._system" / "mws.json"
+        mws_path = self.mws_path()
 
         # Read molecules from file
         if mws_path.exists():
@@ -265,100 +327,19 @@ class Context:
         self._save()
         return True
 
-    def mws_add(self, smol, silent=False):
-        from workers.smol_functions import get_smol_name, get_smol_from_mws
+    def mws_add(self, smol):
+        """
+        Adds a molecule to the current molecule working set.
+        """
+        self._mws.append(smol.copy())
+        self._save()
 
-        try:
-            name = get_smol_name(smol)
-            inchikey = smol.get("identifiers", {}).get("inchikey")
-
-            # Already in mws -> skip
-            if get_smol_from_mws(self, inchikey) is not None:
-                output_success(
-                    f"Molecule <yellow>{name}</yellow> already in working set",
-                    return_val=False,
-                )
-                return True
-
-            # Add to mws
-            self._mws.append(smol.copy())
-            print(999, self._mws)
-            self._save()  # <<
-
-            # Feedback
-            if not silent:
-                output_success(
-                    f"Molecule <yellow>{name}</yellow> was added", return_val=False
-                )
-            return True
-
-        except Exception as err:  # pylint: disable=broad-except
-            if not silent:
-                output_error(
-                    [f"Molecule <yellow>{name}</yellow> failed to be added", err],
-                    return_val=False,
-                )
-            return False
-
-    def mws_remove(self, smol, silent=False):
-        from workers.smol_functions import get_smol_name, get_best_available_identifier
-
-        name = get_smol_name(smol)
-        inchikey = smol.get("identifiers", {}).get("inchikey")
-
-        try:
-            # Find matching molecule
-            for i, item in enumerate(self._mws):
-                if item.get("identifiers", {}).get("inchikey") == inchikey:
-
-                    # Remove from mws
-                    self._mws.pop(i)
-                    self._save()
-
-                    # Feedback
-                    if not silent:
-                        output_success(
-                            f"Molecule <yellow>{name}</yellow> was removed",
-                            return_val=False,
-                        )
-                    return True
-
-            # Not found
-            if not silent:
-                output_error(
-                    f"Molecule <yellow>{name}</yellow> not found in working set",
-                    return_val=False,
-                )
-            return False
-
-        except Exception as err:  # pylint: disable=broad-except
-            if not silent:
-                output_error(
-                    [f"Molecule <yellow>{name}</yellow> failed to be removed", err],
-                    return_val=False,
-                )
-            return False
+    def mws_remove(self, i):
+        """
+        Removes a molecule from the current molecule working set.
+        """
+        self._mws.pop(i)
+        self._save()
 
     # endregion
     # ------------------------------------
-
-
-# Global context
-# ctx = Context()
-
-CURRENT_CONTEXT = Context()
-
-
-def get():
-    """
-    Get the current context (global or session).
-    """
-    return CURRENT_CONTEXT
-
-
-def set_session(workspace: str):
-    """
-    Set the current context (global or session).
-    """
-    global CURRENT_CONTEXT
-    CURRENT_CONTEXT = Context(workspace)

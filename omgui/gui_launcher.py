@@ -189,16 +189,31 @@ def _launch(ctx, path=None, query="", hash="", silent=False):
     @app.get("/{path:path}")
     async def serve(path: str = ""):
         try:
-
             gui_build_dir = Path(__file__).parents[0].resolve() / "dist"
+            file_path = gui_build_dir / path
 
-            # Check is the requested path is a static asset
-            # and serve it with the BASE_PATH replaced.
-            if path != "" and (gui_build_dir / path).exists():
-                content = (gui_build_dir / path).read_text(encoding="utf-8")
-                content = content.replace("__BASE_PATH__/", BASE_PATH)
+            if path != "" and file_path.exists():
                 mime_type, _ = mimetypes.guess_type(path)
-                return Response(content=content, media_type=mime_type)
+
+                # Assets where we may need to replace __BASE_PATH__
+                text_types = {
+                    "html": "text/html",
+                    "css": "text/css",
+                    "js": "text/javascript",
+                }
+                if (
+                    mime_type in text_types.values()
+                    or file_path.suffix in text_types.keys()
+                ):
+                    content = file_path.read_text(encoding="utf-8")
+                    content = content.replace("__BASE_PATH__/", BASE_PATH)
+                    return Response(content=content, media_type=mime_type)
+
+                # Everything else -> read bytes and return as is
+                else:
+                    content = file_path.read_bytes()
+                    media_type = mime_type or "application/octet-stream"
+                    return Response(content=content, media_type=media_type)
 
             # All other paths server index.html --> hand off to Vue router
             index_path = gui_build_dir / "index.html"

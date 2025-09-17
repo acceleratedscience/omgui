@@ -15,20 +15,29 @@ Usage:
 import urllib
 from typing import Any
 from pathlib import Path
-from . import context
+import context
+
+from openad.helpers.output import output_text, output_error, output_success
 
 # ------------------------------------
 # region - General
 # ------------------------------------
 
 
-def set_scope(workspace) -> Any:
+def session(workspace: str = "DEFAULT") -> Any:
     """
     Set the context to a session-only context,
-    with focus on the given workspace.
+    with optional focus on the given workspace.
     """
 
     context.set_session(workspace)
+    output_success(
+        [
+            f"✅ Session-only context created - workspace: {workspace}",
+            "Your molecule working set will reset when you exit this session.",
+        ],
+        return_val=False,
+    )
 
 
 def get_context():
@@ -39,7 +48,8 @@ def get_context():
         dict: The context dictionary.
     """
     ctx = context.get()
-    return ctx.__dict__
+    ctx_dict = ctx.get()
+    return ctx_dict
 
 
 def launch(*args: Any, **kwargs: Any) -> Any:
@@ -93,15 +103,6 @@ def show_molset(path: str = "") -> None:
     _gui_init(ctx, path)
 
 
-def get_molset() -> list[dict[str, Any]]:
-    """
-    Get the current molecule working set.
-    """
-
-    ctx = context.get()
-    return ctx.mws()
-
-
 # endregion
 # ------------------------------------
 # region - Molecule Working Set
@@ -114,10 +115,10 @@ class MWS:
         """
         Add a molecule to the current workspace's working set.
         """
-        from gui_services.molecules import GUIMoleculesApiService
+        from gui_services.molecules import GUIMoleculesService
 
         ctx = context.get()
-        molecules_srv = GUIMoleculesApiService(ctx)
+        molecules_srv = GUIMoleculesService(ctx)
         enrich = not basic
         molecules_srv.add_mol_to_mws(identifier, enrich=enrich)
 
@@ -125,15 +126,43 @@ class MWS:
         """
         Remove a molecule from the current workspace's working set.
         """
-        from gui_services.molecules import GUIMoleculesApiService
+        from gui_services.molecules import GUIMoleculesService
 
         ctx = context.get()
-        molecules_srv = GUIMoleculesApiService(ctx)
+        molecules_srv = GUIMoleculesService(ctx)
         molecules_srv.remove_mol_from_mws(identifier)
 
-    def show(self) -> None:
+    def clear(self) -> None:
+        """
+        Clear the current molecule working set.
+        """
+        from gui_services.molecules import GUIMoleculesService
+
+        ctx = context.get()
+        molecules_srv = GUIMoleculesService(ctx)
+        molecules_srv.clear_mws()
+
+    def get(self) -> list[dict[str, Any]]:
         """
         Get the current molecule working set.
+        """
+
+        ctx = context.get()
+        return ctx.mws()
+
+    def get_names(self) -> list[str]:
+        """
+        Get list of molecule names from your working set.
+        """
+        from workers.smol_transformers import molset_to_names_list
+
+        ctx = context.get()
+        mws = ctx.mws()
+        return molset_to_names_list(mws)
+
+    def open(self) -> None:
+        """
+        Open the current molecule working set in the GUI.
         """
         from .gui_launcher import gui_init as _gui_init
 

@@ -10,6 +10,7 @@ import shutil
 from workers.smol_functions import (
     get_smol_from_pubchem,
     create_molset_cache_file,
+    get_smol_name,
     assemble_cache_path,
     read_molset_from_cache,
     find_smol,
@@ -25,6 +26,7 @@ from workers.smol_transformers import (
     write_dataframe2sdf,
     write_dataframe2csv,
 )
+
 
 # Macromolecule functions
 from workers.mmol_functions import mmol_from_identifier
@@ -50,7 +52,7 @@ from openad.helpers.output import (
 )
 
 
-class GUIMoleculesApiService:
+class GUIMoleculesService:
     """
     Molecule functions for OMGUI API endpoints.
     """
@@ -106,80 +108,6 @@ class GUIMoleculesApiService:
             molset = json.load(f)
 
         return molset[index - 1]
-
-    ##
-
-    def add_mol_to_mws(
-        self,
-        identifier: str = None,
-        smol: dict = None,
-        enrich: bool = None,
-    ) -> bool:
-        """
-        Add a molecule to the molecule working set.
-
-        Takes either an identifier or a mol object.
-        """
-        if not smol and not identifier:
-            raise InvalidMoleculeInput(
-                "Either a molecule object or an identifier must be provided."
-            )
-
-        # Default enrich to True for identifiers and False for smol objects
-        enrich = (smol is None) if enrich is None else enrich
-
-        # Smol object -> enrich if requested
-        if smol:
-            # Maybe enrich with PubChem data
-            if enrich:
-                _, identifier = get_best_available_identifier(smol)
-                smol_enriched = find_smol(self.ctx, identifier, enrich=True)
-                if smol_enriched:
-                    smol = merge_smols(smol, smol_enriched)
-
-        # Identifier -> enrich by default
-        else:
-            smol = find_smol(self.ctx, identifier, enrich=enrich)
-
-        # Add to working set
-        if smol:
-            success = self.ctx.mws_add(smol)
-            return success
-        else:
-            return False
-
-    def remove_mol_from_mws(self, identifier: str = None, smol: dict = None):
-        """
-        Remove a molecule from your molecule working set.
-
-        Takes either an identifier or a mol object.
-        Identifier is slow because the molecule data has to be loaded from PubChem.
-        """
-        if not smol and not identifier:
-            raise InvalidMoleculeInput(
-                "Either a molecule object or an identifier must be provided."
-            )
-
-        # Create molecule object if only identifier is provided
-        if not smol:
-            smol = get_smol_from_mws(self.ctx, identifier)
-
-        success: bool = self.ctx.mws_remove(smol)
-        return success
-
-        #
-
-    def check_mol_in_mws(self, smol):
-        """
-        Check if a molecule is stored in your molecule working set.
-        """
-
-        # Get best available identifier
-        _, identifier = get_best_available_identifier(smol)
-
-        # Check if it's in the working set
-        present = bool(get_smol_from_mws(self.ctx, identifier))
-        return present
 
     def enrich_smol(self, smol):
         """
@@ -323,7 +251,7 @@ class GUIMoleculesApiService:
     def get_molset(self, cache_id, query=None):
         """
         Get a cached molset, filtered by the query.
-        Note: opening molset files is handled by fs_attach_file_data() in workers/file_system.py
+        Note: opening molset files is handled by _attach_file_data() in gui_services/file_system.py
         """
         # Read molset from cache
         molset = read_molset_from_cache(self.ctx, cache_id)
@@ -415,9 +343,13 @@ class GUIMoleculesApiService:
 
         """
         # Compile path
+        print(1)
         workspace_path = self.ctx.workspace_path()
-        file_path = workspace_path + "/" + path
+        file_path = workspace_path / path
         cache_path = assemble_cache_path(self.ctx, "molset", cache_id)
+        print(100, workspace_path)
+        print(101, file_path)
+        print(102, cache_path)
 
         # Throw error when destination file (does not) exist(s)
         if path:
@@ -511,4 +443,128 @@ class GUIMoleculesApiService:
         return self.save_molset(cache_id, path, new_file=False, format_as=format_as)
 
     # endregion
+    # ------------------------------------
+    # region - Molecule working set
+    # ------------------------------------
+
+    def add_mol_to_mws(
+        self,
+        identifier: str = None,
+        smol: dict = None,
+        enrich: bool = None,
+    ) -> bool:
+        """
+        Add a molecule to the molecule working set.
+
+        Takes either an identifier or a mol object.
+        """
+
+        # Todo: add pydantic type for mol and validate
+
+        # Invalid input
+        if not smol and not identifier:
+            raise InvalidMoleculeInput(
+                "Either a molecule object or an identifier must be provided."
+            )
+
+        # Default enrich to True for identifiers and False for smol objects
+        enrich = (smol is None) if enrich is None else enrich
+
+        # Smol object -> enrich if requested
+        if smol:
+            # Maybe enrich with PubChem data
+            if enrich:
+                _, identifier = get_best_available_identifier(smol)
+                smol_enriched = find_smol(self.ctx, identifier, enrich=True)
+                if smol_enriched:
+                    smol = merge_smols(smol, smol_enriched)
+
+        # Identifier -> enrich by default
+        else:
+            smol = find_smol(self.ctx, identifier, enrich=enrich)
+
+        # Fail
+        if not smol:
+            return False
+
+        # -- smol is defined --
+
+        name = get_smol_name(smol)
+        inchikey = smol.get("identifiers", {}).get("inchikey")
+
+        # Already in mws -> skip
+        if get_smol_from_mws(self.ctx, inchikey) is not None:
+            output_success(
+                f"Molecule <yellow>{name}</yellow> already in working set",
+                return_val=False,
+            )
+            return True
+
+        # Add to working set
+        self.ctx.mws_add(smol)
+        output_success(f"Molecule <yellow>{name}</yellow> was added", return_val=False)
+        return True
+
+    def remove_mol_from_mws(self, identifier: str = None, smol: dict = None):
+        """
+        Remove a molecule from your molecule working set.
+
+        Takes either an identifier or a mol object.
+        Identifier is slow because the molecule data has to be loaded from PubChem.
+        """
+        if not smol and not identifier:
+            raise InvalidMoleculeInput(
+                "Either a molecule object or an identifier must be provided."
+            )
+
+        # Create molecule object if only identifier is provided
+        if not smol:
+            smol = get_smol_from_mws(self.ctx, identifier)
+
+        # -- smol is defined --
+
+        name = get_smol_name(smol)
+        inchikey = smol.get("identifiers", {}).get("inchikey")
+
+        try:
+            # Find matching molecule
+            for i, item in enumerate(self.ctx.mws()):
+                if item.get("identifiers", {}).get("inchikey") == inchikey:
+
+                    # Remove from mws
+                    self.ctx.mws_remove(i)
+
+                    # Feedback
+                    output_success(
+                        f"Molecule <yellow>{name}</yellow> was removed",
+                        return_val=False,
+                    )
+                    return True
+
+            # Not found
+            output_error(
+                f"Molecule <yellow>{name}</yellow> not found in working set",
+                return_val=False,
+            )
+            return False
+
+        except Exception as err:  # pylint: disable=broad-except
+            output_error(
+                [f"Molecule <yellow>{name}</yellow> failed to be removed", err],
+                return_val=False,
+            )
+            return False
+
+    def check_mol_in_mws(self, smol):
+        """
+        Check if a molecule is stored in your molecule working set.
+        """
+
+        # Get best available identifier
+        _, identifier = get_best_available_identifier(smol)
+
+        # Check if it's in the working set
+        present = bool(get_smol_from_mws(self.ctx, identifier))
+        return present
+
     # ------------------------------------

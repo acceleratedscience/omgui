@@ -5,11 +5,13 @@ Functions to translate between different molecule and molecule set formats.
 import ast
 import json
 import pandas as pd
+from pathlib import Path
 from rdkit import Chem, RDLogger
 
 from openad.helpers.files import open_file
 from openad.helpers.output import output_error
-import openad.smols.smol_functions as smol_functions
+import workers.smol_functions as smol_functions
+
 
 # Suppress RDKit errors
 RDLogger.DisableLog("rdApp.error")
@@ -368,7 +370,7 @@ def write_dataframe2csv(df, destination_path):
 
 
 # Return molset from SMILES file
-def smiles_path2molset(path_absolute) -> list[dict] | None:
+def smiles_path2molset(path_absolute: Path) -> list[dict] | None:
     """
     Takes the content of a .smi file and returns a molset dictionary.
     Specs for .smi files: http://opensmiles.org/opensmiles.html - 4.5
@@ -378,7 +380,7 @@ def smiles_path2molset(path_absolute) -> list[dict] | None:
 
     # Read file's content
     with open(path_absolute, "r", encoding="utf-8") as file:
-        data = json.load(file)
+        data = file.read()
     if not data:
         return None
 
@@ -401,7 +403,7 @@ def smiles_path2molset(path_absolute) -> list[dict] | None:
     return molset
 
 
-def sdf_path2molset(sdf_path):
+def sdf_path2molset(path_absolute: Path) -> list[dict] | None:
     """
     Takes the content of an .sdf file and returns a molset dictionary.
 
@@ -423,14 +425,14 @@ def sdf_path2molset(sdf_path):
                 return value
 
     try:
-        mols_rdkit = Chem.SDMolSupplier(sdf_path)  # pylint: disable=no-member
+        mols_rdkit = Chem.SDMolSupplier(path_absolute)  # pylint: disable=no-member
         molset = []
         for i, mol_rdkit in enumerate(mols_rdkit):
             mol_dict = smol_functions.new_smol(mol_rdkit=mol_rdkit)
             mol_dict["index"] = i + 1
             molset.append(mol_dict)
         return molset
-    except Exception as err:  # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         return None
 
 
@@ -467,4 +469,16 @@ def mdl_path2smol(mdl_path):
 
     # Translate into OpenAD smol dict
     mol_dict = smol_functions.new_smol(mol_rdkit=mol_rdkit)
-    return mol_dict, None
+    return mol_dict
+
+
+def molset_to_names_list(molset):
+    """
+    Takes a molset and returns a list of molecule names.
+    """
+    names = []
+    for mol in molset:
+        name = smol_functions.get_smol_name(mol)
+        names.append(name)
+
+    return names
