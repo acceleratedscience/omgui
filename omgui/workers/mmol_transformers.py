@@ -22,7 +22,9 @@ def mmol2cif(mmol_dict, path=None):
             with open(path, "w", encoding="utf-8") as f:
                 f.write(cif_data)
     elif mmol_dict["data3DFormat"] == "pdb":
-        cif_data = pdb2cif(mmol_dict["data3D"], dest_path=path)  # Will write to disk if path is set
+        cif_data = pdb2cif(
+            mmol_dict["data3D"], dest_path=path
+        )  # Will write to disk if path is set
 
     # Return the PDB data as a string
     return cif_data
@@ -47,7 +49,9 @@ def mmol2pdb(mmol_dict, path=None):
                 f.write(pdb_data)
 
     elif mmol_dict["data3DFormat"] == "cif":
-        pdb_data = cif2pdb(mmol_dict["data3D"], dest_path=path)  # Will write to disk if path is set
+        pdb_data = cif2pdb(
+            mmol_dict["data3D"], dest_path=path
+        )  # Will write to disk if path is set
 
     # Return the PDB data as a string
     return pdb_data
@@ -191,7 +195,7 @@ def cif2mmol(cif_data=None, cif_path=None):
 
     # Load the CIF file
     elif cif_path:
-        cif_doc = gemmi.cif.read_file(cif_path)
+        cif_doc = gemmi.cif.read_file(str(cif_path))
         # Read the CIF file content
         with open(cif_path, "r", encoding="utf-8") as f:
             cif_data = f.read()
@@ -233,7 +237,7 @@ def pdb2mmol(pdb_data=None, pdb_path=None):
 
     # Load the PDB file
     elif pdb_path:
-        struct = gemmi.read_pdb(pdb_path)
+        struct = gemmi.read_pdb(str(pdb_path))
         # Read the PDB file content
         with open(pdb_path, "r", encoding="utf-8") as f:
             pdb_data = f.read()

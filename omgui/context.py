@@ -111,12 +111,14 @@ class Context:
             else:
                 setattr(self, key, value)
 
+        # Make sure workspace exists
+        self._create_workspace_dir(self.workspace)
+
         # Load molecule working set for current workspace into memory
         if not session:
             self._mws = self._load_mws()
 
-        # Create virgin context: first time / workspace session
-        self._create_workspace_dir(self.workspace)
+        # Save the context to file
         self._save()
         self._initialized = True
 
@@ -136,7 +138,7 @@ class Context:
                     context = json.load(file)
                     return context
 
-            # Fall back to deault
+            # Fall back to default
             else:
                 logger.info("Creating new context file")
                 return self.default_context
@@ -203,6 +205,7 @@ class Context:
         """
         Creates a new workspace with the specified name if it doesn't already exist.
         """
+        print("CREATE")
         # Create the workspace in the context
         workspace_name = workspace_name.strip().replace(" ", "_").upper()
         if workspace_name in self.workspaces():
@@ -245,17 +248,35 @@ class Context:
         Creates the directory for the specified workspace if it doesn't exist.
         """
         workspace_path = self.workspace_path(workspace_name)
-        if not (workspace_path).exists():
+        if not workspace_path.exists():
             try:
                 workspace_path.mkdir(parents=True, exist_ok=True)
+
+                # Add sample files to the DEFAULT workspace
+                # TODO: make optional with config/env var
+                if workspace_name == "DEFAULT":
+                    self._load_sample_files(workspace_path)
+
                 output_success(
                     f"Created new workspace: <yellow>{workspace_path}</yellow>",
                     return_val=False,
                 )
             except Exception as err:  # pylint: disable=broad-except
                 logger.error(
-                    f"An error occurred while creating the '{workspace_name}' workspace directory: {err}"
+                    "An error occurred while creating the '%s' workspace directory: %s",
+                    workspace_name,
+                    err,
                 )
+
+    def _load_sample_files(self, workspace_path):
+        print(3)
+        import tarfile
+        from pathlib import Path
+
+        sample_file = Path(__file__).parent / "samples.tar.gz"
+
+        with tarfile.open(sample_file, "r:gz") as tar_ref:
+            tar_ref.extractall(workspace_path)
 
     def workspace_path(self, workspace=None):
         """

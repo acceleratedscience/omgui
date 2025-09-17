@@ -102,7 +102,9 @@ def create_router(ctx: context.Context) -> APIRouter:
     @router.post(f"{api_v1}/get-file")
     async def get_file(request: Request):
         body = await request.json()
-        path = unquote(body.get("path"), "")
+        print(body.get("path"))
+        print(unquote(body.get("path")))
+        path = unquote(body.get("path", ""))
         query = body.get("query", {})
         return file_system_srv.get_file(path, query)
 

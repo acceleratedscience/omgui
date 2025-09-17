@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 
 from openad.helpers.files import open_file, file_stats
@@ -292,9 +293,13 @@ class GUIFileSystemService:
             if ext == "cif":
                 data = cif2mmol(cif_path=path_absolute)
 
-        # Everything else --> Load file content
+        # JSON files --> Load file content as JSON
+        elif file_type in ["json", "smol", "mmol"]:
+            with open(path_absolute, "r", encoding="utf-8") as file:
+                data = json.load(file)
+
+        # Everything else --> Load file content as text
         else:
-            # Read file's content
             with open(path_absolute, "r", encoding="utf-8") as file:
                 data = file.read()
 

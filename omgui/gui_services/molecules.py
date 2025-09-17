@@ -179,7 +179,7 @@ class GUIMoleculesService:
 
         # Compile path
         workspace_path = self.ctx.workspace_path()
-        file_path = workspace_path + "/" + path
+        file_path = workspace_path / path
 
         # Throw error when detination file (does not) exist(s).
         if path:
