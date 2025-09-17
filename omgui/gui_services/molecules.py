@@ -567,4 +567,15 @@ class GUIMoleculesService:
         present = bool(get_smol_from_mws(self.ctx, identifier))
         return present
 
+    def clear_mws(self):
+        """
+        Clear the molecule working set.
+        """
+        if len(self.ctx.mws()) == 0:
+            output_warning("No molecules to clear", return_val=False)
+            return True
+        self.ctx.mws_clear()
+        output_success("✅ Molecule working set cleared", return_val=False)
+        return True
+
     # ------------------------------------

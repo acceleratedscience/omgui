@@ -17,7 +17,7 @@ from gui_services.results import GUIResultService
 from gui_services.dataframes import GUIDataframeService
 
 # Various
-import context
+from . import context
 
 from helpers import logger
 from helpers.exceptions import (

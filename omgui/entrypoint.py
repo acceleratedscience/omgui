@@ -15,7 +15,7 @@ Usage:
 import urllib
 from typing import Any
 from pathlib import Path
-import context
+from . import context
 
 from openad.helpers.output import output_text, output_error, output_success
 

@@ -4,14 +4,15 @@ Molecule management functions
 
 import os
 import re
-import ast
 import time
 import json
 import shutil
 import pandas
+import random
 import logging
 import asyncio
 import aiofiles
+import requests
 import pubchempy as pcy
 from pathlib import Path
 from copy import deepcopy
@@ -20,7 +21,7 @@ from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 
 from helpers import logger
-import context
+from .. import context
 
 
 # OpenAD imports
@@ -1577,21 +1578,21 @@ def read_molset_from_cache(ctx: context.Context, cache_id: str) -> dict:
 #         return False
 
 
-def clear_mws(cmd_pointer: object, force: bool = False):
-    """
-    Clear the molecule working set.
+# def clear_mws(cmd_pointer: object, force: bool = False):
+#     """
+#     Clear the molecule working set.
 
-    Parameters
-    ----------
-    cmd_pointer: object
-        The command pointer object.
-    force: bool
-        If True, clear without confirming.
-    """
+#     Parameters
+#     ----------
+#     cmd_pointer: object
+#         The command pointer object.
+#     force: bool
+#         If True, clear without confirming.
+#     """
 
-    if force or confirm_prompt("Clear the molecule working set?"):
-        cmd_pointer.molecule_list.clear()
-        output_success("Molecule working set was cleared", return_val=False)
+#     if force or confirm_prompt("Clear the molecule working set?"):
+#         cmd_pointer.molecule_list.clear()
+#         output_success("Molecule working set was cleared", return_val=False)
 
 
 def mws_is_empty(cmd_pointer):
@@ -1903,3 +1904,92 @@ def index_molset_file_async(path_absolute):
 
 
 # endregion
+
+
+# To be orgnanized
+
+# fmt:off
+
+
+def random_smiles(count: int = 10, max_cid=150_000_000):
+    """
+    Fetch a specified number of random molecule SMILES.
+
+    Args:
+        count (int): Number of SMILES to fetch
+
+    Returns:
+        list: List of strings
+    """
+    results = []
+    retries = 0
+    max_retries = 20
+    while len(results) < count and retries < max_retries:
+        cid, smiles = _fetch_random_compound(max_cid)
+        if cid and smiles:
+            results.append(smiles)
+            retries = 0
+        else:
+            retries += 1
+    return results
+
+def _fetch_random_compound(max_cid, max_retries=20, debug=True):
+    """
+    Fetch a random molecule's CID and Canonical SMILES from PubChem.
+
+    Args:
+        max_cid (int): The upper limit for random CID generation. PubChem CIDs go
+                       into the hundreds of millions.
+        max_retries (int): Maximum attempts to find an existing compound.
+
+    Returns:
+        tuple: (cid, smiles) if successful, otherwise (None, None).
+    """
+    pubchem_api_base = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid"
+    headers = {'Accept': 'text/plain'} # Request plain text for SMILES
+
+    for attempt in range(max_retries):
+        random_cid = random.randint(1, max_cid)
+        url = f"{pubchem_api_base}/{random_cid}/property/CanonicalSMILES/TXT"
+        icon = "❌" if attempt + 1 == max_retries else "🔄"
+        i = 1
+
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+
+            smiles = response.text.strip()
+            if smiles:
+                if debug:
+                    print(f"✅ {i} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> SMILES: {smiles}")
+                    i += 1
+                return random_cid, smiles
+            else:
+                if debug:
+                    print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> no result")
+
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                if debug:
+                    print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> not found")
+            else:
+                if debug:
+                    print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> HTTP error")
+        except requests.exceptions.ConnectionError:
+            if debug:
+                print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> connection error")
+        except requests.exceptions.Timeout:
+            if debug:
+                print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> timeout error")
+        except requests.exceptions.RequestException as e:
+            if debug:
+                print(f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> unexpected error")
+            if debug:
+                print(f"ℹ️ Error details: {e}")
+
+        # PubChem API advises max 5 requests per second
+        time.sleep(0.2)
+
+    if debug:
+        print(f"Failed to find a random molecule after {max_retries} attempts.")
+    return None, None

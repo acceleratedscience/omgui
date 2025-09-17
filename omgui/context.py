@@ -341,5 +341,12 @@ class Context:
         self._mws.pop(i)
         self._save()
 
+    def mws_clear(self):
+        """
+        Clears the current molecule working set.
+        """
+        self._mws = []
+        self._save()
+
     # endregion
     # ------------------------------------
