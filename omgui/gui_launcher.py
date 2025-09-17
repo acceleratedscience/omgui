@@ -229,7 +229,9 @@ def _launch(ctx, path=None, query="", hash="", silent=False):
         return Response(content="index.html not found", status_code=404)
 
     # Determine port and host
-    host, port = next_avail_port()
+    host, port = next_avail_port(
+        host="0.0.0.0"
+    )  # todo: use config/env variable for host
 
     # Remove logging of warning & informational messages
     log = logging.getLogger("uvicorn")

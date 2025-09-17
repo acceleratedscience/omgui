@@ -1922,17 +1922,19 @@ def random_smiles(count: int = 10, max_cid=150_000_000):
     results = []
     retries = 0
     max_retries = 20
+    i = 1
     while len(results) < count and retries < max_retries:
-        cid, smiles = _fetch_random_compound(max_cid)
+        cid, smiles = _fetch_random_compound(max_cid, i)
         if cid and smiles:
             results.append(smiles)
+            i += 1
             retries = 0
         else:
             retries += 1
     return results
 
 
-def _fetch_random_compound(max_cid, max_retries=20, debug=True):
+def _fetch_random_compound(max_cid, i, max_retries=20, debug=True):
     """
     Fetch a random molecule's CID and Canonical SMILES from PubChem.
 
@@ -1946,7 +1948,6 @@ def _fetch_random_compound(max_cid, max_retries=20, debug=True):
     """
     pubchem_api_base = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid"
     headers = {"Accept": "text/plain"}  # Request plain text for SMILES
-    i = 1
 
     for attempt in range(max_retries):
         random_cid = random.randint(1, max_cid)
@@ -1961,9 +1962,8 @@ def _fetch_random_compound(max_cid, max_retries=20, debug=True):
             if smiles:
                 if debug:
                     print(
-                        f"✅ {i} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> SMILES: {smiles}"
+                        f"✅ #{i} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> SMILES: {smiles}"
                     )
-                    i = i + 1
                 return random_cid, smiles
             else:
                 if debug:
