@@ -29,7 +29,6 @@ from fastapi.responses import HTMLResponse, Response
 from openad.helpers.output import output_text, output_error, output_success
 
 # omgui
-from omgui.context import get
 from omgui.gui_routes import create_router
 from omgui.helpers import gui_install
 from omgui.helpers.jupyter import nb_mode
@@ -122,7 +121,7 @@ def gui_init(ctx, path=None, data=None, silent=False):
         pass
     finally:
         # Redundant, but to be safe
-        cleanup()
+        cleanup(ctx)
 
 
 def _gui_init(ctx, path=None, data=None, silent=False):
@@ -222,8 +221,8 @@ def _launch(ctx, path=None, query="", hash="", silent=False):
                 html_content = html_content.replace("__BASE_PATH__/", BASE_PATH)
                 return HTMLResponse(content=html_content)
 
-        except Exception as e:  # pylint: disable=broad-except
-            return Response(content=f"An error occurred: {e}", status_code=500)
+        except Exception as err:  # pylint: disable=broad-except
+            return Response(content=f"An error occurred: {err}", status_code=500)
 
         # Oh no
         return Response(content="index.html not found", status_code=404)
@@ -342,11 +341,10 @@ def gui_shutdown(ctx=None, silent=False):
         output_error("The GUI server is not running")
 
 
-def cleanup():
+def cleanup(ctx=None):
     """
     Cleanup function to be called at exit of the main process.
     """
-    ctx = get()
     gui_shutdown(ctx, silent=True)
 
 

@@ -18,16 +18,16 @@ class GUIDataframeService:
     Dataframe functions for OMGUI API endpoints.
     """
 
-    def __init__(self, cmd_pointer):
-        self.cmd_pointer = cmd_pointer
+    def __init__(self, ctx):
+        self.ctx = ctx
 
     def get_dataframe(self, df_name, query):
         """
         Fetch the data from a dataframe referred to in a magic command.
         """
 
-        if self.cmd_pointer.api_variables:
-            df = self.cmd_pointer.api_variables.get(df_name)
+        if self.ctx.vars:
+            df = self.ctx.vars.get(df_name)
             if df is not None and not df.empty:
                 # Dataframe has molecules -> load as molset
                 if df_has_molecules(df):
@@ -35,11 +35,11 @@ class GUIDataframeService:
                     molset = dataframe2molset(df)
 
                     # Create cache working copy
-                    cache_id = create_molset_cache_file(self.cmd_pointer, molset)
+                    cache_id = create_molset_cache_file(self.ctx, molset)
 
                     # Read molset from cache
                     try:
-                        molset = read_molset_from_cache(self.cmd_pointer, cache_id)
+                        molset = read_molset_from_cache(self.ctx, cache_id)
                     except ValueError as err:
                         return f"get_result() -> {err}", 500
 
@@ -74,7 +74,7 @@ class GUIDataframeService:
             )
 
         # Read data from cache.
-        cache_path = assemble_cache_path(self.cmd_pointer, "molset", cache_id)
+        cache_path = assemble_cache_path(self.ctx, "molset", cache_id)
         molset, err_code = open_file(cache_path, return_err="code")
         if err_code:
             return err_code, 500
@@ -84,7 +84,7 @@ class GUIDataframeService:
 
         # Store the columns of the current result table,
         # so we can recreate them when overwriting the result.
-        df = self.cmd_pointer.api_variables.get(df_name)
+        df = self.ctx.vars.get(df_name)
         columns = df.columns.tolist()
 
         # Create new table.

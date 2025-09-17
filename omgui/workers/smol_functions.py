@@ -13,6 +13,7 @@ import logging
 import asyncio
 import aiofiles
 import requests
+from omgui.workers.smol_transformers import dataframe2molset
 import pubchempy as pcy
 from pathlib import Path
 from copy import deepcopy
@@ -21,7 +22,9 @@ from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 
 from omgui.helpers import logger
+from omgui.helpers.paths import parse_path
 from omgui import context
+from omgui.gui_services.molecules import GUIMoleculesService
 
 
 # OpenAD imports
@@ -32,17 +35,12 @@ from openad.helpers.output import (
     output_success,
     output_text,
 )
-from openad.helpers.files import open_file
-from openad.helpers.general import (
-    confirm_prompt,
-    pretty_date,
-    is_numeric,
-    merge_dict_lists,
-)
+from openad.helpers.general import pretty_date, is_numeric, merge_dict_lists
 from openad.helpers.spinner import spinner
 from openad.helpers.json_decimal_encoder import DecimalEncoder
 from openad.helpers.data_formats import OPENAD_SMOL_DICT
-from openad.helpers.paths import parse_path
+from openad.app.global_var_lib import GLOBAL_SETTINGS
+from openad.plugins.style_parser import style
 from openad.smols.smol_transformers import (
     molset2dataframe,
     write_dataframe2sdf,
@@ -51,6 +49,7 @@ from openad.smols.smol_transformers import (
     csv_path2molset,
     smiles_path2molset,
 )
+
 
 # Silcence RDKit errors
 RDLogger.DisableLog("rdApp.error")
@@ -193,9 +192,9 @@ mol_name_cache = {}
 #
 #
 
-
-############################################################
+# ------------------------------------
 # region - Lookup / creation
+# ------------------------------------
 
 
 def find_smol(
@@ -231,7 +230,7 @@ def find_smol(
     """
 
     # Look for molecule in the working set
-    smol = get_smol_from_mws(ctx, identifier)
+    smol = get_smol_from_mws(identifier)
 
     # Look for molecule on PubChem
     if not smol and enrich:
@@ -265,16 +264,14 @@ def find_smol(
     return smol
 
 
-def get_smol_from_mws(
-    ctx: context.Context, identifier: str, ignore_synonyms: bool = False
-) -> dict | None:
+def get_smol_from_mws(identifier: str, ignore_synonyms: bool = False) -> dict | None:
     """
     Retrieve a molecule from the molecule working set.
 
     Parameters
     ----------
-    cmd_pointer: object
-        The command pointer object.
+    ctx: context.Context
+        The context object.
     identifier: str
         The molecule identifier to search for.
         Valid inputs: InChI, SMILES, InChIKey, name, CID.
@@ -287,6 +284,7 @@ def get_smol_from_mws(
         The OpenAD smol dictionary if found, otherwise None.
     """
 
+    ctx = context.get()
     smol = get_smol_from_list(identifier, ctx.mws(), ignore_synonyms=ignore_synonyms)
     if smol is not None:
         return deepcopy(smol)
@@ -732,9 +730,9 @@ def get_molset_mols(path_absolute: Path) -> dict | None:
 
 
 # endregion
-
-############################################################
+# ------------------------------------
 # region - Validation
+# ------------------------------------
 
 
 def valid_identifier(identifier: str, rich=False) -> bool:
@@ -834,14 +832,14 @@ def valid_inchi(inchi: str) -> bool:
 
 
 # endregion
-
-############################################################
+# ------------------------------------
 # region - Reading / Saving
+# ------------------------------------
 
 
-def load_mols_from_file(cmd_pointer, file_path):
+def load_mols_from_file(file_path):
     """
-    Load list of molecules from a souce file.
+    Load list of molecules from a source file.
 
     Supported source files:
     - molset (.molset.json)
@@ -850,7 +848,7 @@ def load_mols_from_file(cmd_pointer, file_path):
     - SMILES (.smi)
     """
 
-    file_path = parse_path(cmd_pointer, file_path)
+    file_path = parse_path(file_path)
     molset = None
 
     try:
@@ -993,9 +991,9 @@ def save_molset_as_smiles(molset: list, path: str, remove_invalid_mols=False):
 
 
 # endregion
-
-############################################################
+# ------------------------------------
 # region - Utility
+# ------------------------------------
 
 
 def flatten_smol(smol: dict) -> dict:
@@ -1345,10 +1343,109 @@ def get_smol_name(smol: dict) -> str:
     return "Unknown"
 
 
-# endregion
+def random_smiles(count: int = 10, max_cid=150_000_000):
+    """
+    Fetch a specified number of random molecule SMILES.
 
-############################################################
+    Args:
+        count (int): Number of SMILES to fetch
+
+    Returns:
+        list: List of strings
+    """
+    results = []
+    retries = 0
+    max_retries = 20
+    i = 1
+    while len(results) < count and retries < max_retries:
+        cid, smiles = _fetch_random_compound(max_cid, i)
+        if cid and smiles:
+            results.append(smiles)
+            i += 1
+            retries = 0
+        else:
+            retries += 1
+    return results
+
+
+def _fetch_random_compound(max_cid, i, max_retries=20, debug=True):
+    """
+    Fetch a random molecule's CID and Canonical SMILES from PubChem.
+
+    Args:
+        max_cid (int): The upper limit for random CID generation. PubChem CIDs go
+                       into the hundreds of millions.
+        max_retries (int): Maximum attempts to find an existing compound.
+
+    Returns:
+        tuple: (cid, smiles) if successful, otherwise (None, None).
+    """
+    pubchem_api_base = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid"
+    headers = {"Accept": "text/plain"}  # Request plain text for SMILES
+
+    for attempt in range(max_retries):
+        random_cid = random.randint(1, max_cid)
+        url = f"{pubchem_api_base}/{random_cid}/property/CanonicalSMILES/TXT"
+        icon = "❌" if attempt + 1 == max_retries else "🔄"
+
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+
+            smiles = response.text.strip()
+            if smiles:
+                if debug:
+                    print(
+                        f"✅ #{i} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> SMILES: {smiles}"
+                    )
+                return random_cid, smiles
+            else:
+                if debug:
+                    print(
+                        f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> no result"
+                    )
+
+        except requests.exceptions.HTTPError as err:
+            if err.response.status_code == 404:
+                if debug:
+                    print(
+                        f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> not found"
+                    )
+            else:
+                if debug:
+                    print(
+                        f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> HTTP error"
+                    )
+        except requests.exceptions.ConnectionError:
+            if debug:
+                print(
+                    f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> connection error"
+                )
+        except requests.exceptions.Timeout:
+            if debug:
+                print(
+                    f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> timeout error"
+                )
+        except requests.exceptions.RequestException as err:
+            if debug:
+                print(
+                    f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> unexpected error"
+                )
+            if debug:
+                print(f"ℹ️ Error details: {err}")
+
+        # PubChem API advises max 5 requests per second
+        time.sleep(0.2)
+
+    if debug:
+        print(f"Failed to find a random molecule after {max_retries} attempts.")
+    return None, None
+
+
+# endregion
+# ------------------------------------
 # region - GUI operations
+# ------------------------------------
 
 
 def assemble_cache_path(ctx: context.Context, file_type: str, cache_id: str) -> str:
@@ -1449,160 +1546,9 @@ def read_molset_from_cache(ctx: context.Context, cache_id: str) -> dict:
 
 
 # endregion
-
-############################################################
+# ------------------------------------
 # region - Molecule working set
-
-# Note: get_smol_from_mws() is listed under Lookup / creation.
-
-
-# def mws_add_trash(
-#     ctx: context.Context,
-#     identifier: str = None,
-#     smol: dict = None,
-#     force: bool = False,
-#     suppress: bool = False,
-# ):
-#     """
-#     Add a molecule to your molecule working set.
-
-#     Parameters
-#     ----------
-#     ctx: context.Context
-#         The context object.
-#     smol: dict
-#         The OpenAD molecule object to add.
-#     force: bool
-#         If True, add without confirming.
-#     suppress: bool
-#         If True, suppress success output.
-#     """
-#     # TODO: Instead of ignoring molecules that are already in the list, we should
-#     #       update the existing molecule with the new data. See shred_merge_add_df_mols().
-
-#     # Name
-#     name = get_smol_name(smol)
-#     inchikey = smol.get("identifiers", {}).get("inchikey")
-
-#     # Fail - already in list
-#     if get_smol_from_mws(ctx, inchikey) is not None:
-#         output_error(
-#             f"Molecule already in list: <yellow>{name}</yellow>", return_val=False
-#         )
-#         return False
-
-#     # Add function
-#     def _add_mol():
-#         ctx.molecule_list.append(smol.copy())
-#         if suppress is False:
-#             output_success(
-#                 f"Molecule <yellow>{name}</yellow> was added", return_val=False
-#             )
-#         return True
-
-#     # Add without confirming.
-#     if force:
-#         return _add_mol()
-
-#     # Confirm before adding.
-#     # smiles = get_best_available_smiles(smol)
-#     # smiles_str = f" <reset>{smiles}</reset>" if smiles and name != smiles else ""
-#     if confirm_prompt(
-#         f"Add molecule <green>{name}</green> to your molecule working set?"
-#     ):
-#         return _add_mol()
-#     else:
-#         output_error(
-#             f"Molecule <yellow>{name}</yellow> was not added", return_val=False
-#         )
-#         return False
-
-
-# def mws_remove_trash(
-#     ctx: context.Context,
-#     identifier: str = None,
-#     smol: dict = None,
-#     force: bool = False,
-#     suppress: bool = False,
-# ):
-#     """
-#     Remove a molecule from your molecule working set.
-
-#     Parameters
-#     ----------
-#     ctx: context.Context
-#         The context object.
-#     smol: dict
-#         The OpenAD molecule object to remove.
-#     force: bool
-#         If True, remove without confirming.
-#     suppress: bool
-#         If True, suppress success output.
-#     """
-
-#     if not smol:
-#         output_error("No molecule provided", return_val=False)
-#         return False
-
-#     # Name
-#     name = smol["identifiers"]["name"]
-
-#     # Remove function.
-#     def _remove_mol():
-#         i = 0
-#         key, identifier_to_delete = get_best_available_identifier(smol)
-#         while ctx.molecule_list[i]["identifiers"][key] != identifier_to_delete:
-#             i = i + 1
-#         ctx.molecule_list.pop(i)
-#         if suppress is False:
-#             output_success(
-#                 f"Molecule <yellow>{name}</yellow> was removed", return_val=False
-#             )
-#         return True
-
-#     # Remove without confirming.
-#     if force:
-#         return _remove_mol()
-
-#     # Confirm before removing.
-#     smiles = get_best_available_smiles(smol)
-#     smiles_str = f" <reset>{smiles}</reset>" if smiles else ""
-#     if confirm_prompt(
-#         f"Remove molecule <green>{name}</green>{smiles_str} from your working set?"
-#     ):
-#         return _remove_mol()
-#     else:
-#         output_error(
-#             f"Molecule <yellow>{name}</yellow> was not removed", return_val=False
-#         )
-#         return False
-
-
-# def clear_mws(cmd_pointer: object, force: bool = False):
-#     """
-#     Clear the molecule working set.
-
-#     Parameters
-#     ----------
-#     cmd_pointer: object
-#         The command pointer object.
-#     force: bool
-#         If True, clear without confirming.
-#     """
-
-#     if force or confirm_prompt("Clear the molecule working set?"):
-#         cmd_pointer.molecule_list.clear()
-#         output_success("Molecule working set was cleared", return_val=False)
-
-
-def mws_is_empty(cmd_pointer):
-    """
-    Check if the molecule working set is empty.
-    """
-    return len(cmd_pointer.molecule_list) == 0
-
-
-# endregion
+# ------------------------------------
 
 
 def merge_smols(smol: dict, merge_smol: dict) -> dict:
@@ -1778,95 +1724,290 @@ def merge_molecule_REPLACE(merge_mol, mol):
             mol["anaylsis"].append()
 
 
-############################################################
-# region - DEPRECATED
+def load_mols_to_mws(inp):
+    """
+    Load a batch of molecules into the molecule working set.
+    """
+
+    molset = None
+    df_name = inp.as_dict().get("in_dataframe", None)
+    file_path = inp.as_dict().get("moles_file", None)
+    ctx = context.get()
+
+    # Load from dataframe
+    if df_name:
+        df = ctx.vars.get(df_name)
+        molset = dataframe2molset(df)
+        # molset = normalize_mol_df(ctx.vars.get(inp.as_dict().get("in_dataframe")), batch=True)
+        if molset is None:
+            return output_error("The provided dataframe does not contain molecules")
+
+    # Load from file
+    elif file_path:
+        molset = load_mols_from_file(file_path)
+        if molset is None:
+            return
+
+    # Add PubChem data
+    if "enrich_pubchem" in inp.as_dict():
+        _enrich_with_pubchem_data(molset)
+
+    # Clear mws unless append is passed
+    if "append" not in inp:
+        ctx.mws_clear()
+
+    added_count = 0
+    failed_count = 0
+    for smol in molset:
+        molecules_srv = GUIMoleculesService(ctx)
+        success = molecules_srv.add_mol_to_mws(smol=smol, silent=True)
+        if success:
+            added_count += 1
+        else:
+            failed_count += 1
+
+    # Todo: `load mols using file` should add instead of overwrite your current mols,
+    # when this is implemented, we'll need to calculate successfully loaded mols differently.
+    if added_count > 0:
+        output_success(
+            f"Successfully loaded <yellow>{added_count}</yellow> molecules into the working set",
+            pad=0,
+            return_val=False,
+        )
+        if failed_count > 0:
+            output_error(
+                f"Ignored <yellow>{failed_count}</yellow> duplicates",
+                pad=0,
+                return_val=False,
+            )
+    else:
+        output_error(
+            f"No new molecules were added, all {failed_count} provided molecules were are already present in the working set",
+            pad=0,
+            return_val=False,
+        )
+    return
 
 
-# def molformat_v2(mol):
-#     """
-#     Create a slightly modified "v2" OpenAD molecule data format,
-#     where identifiers are stored separately from properties. This
-#     is how the GUI consumes molecules, and should be used elsewhere
-#     in the application going forward as well. Please read comment
-#     above new_molecule() for more information.
-#     - - -
-#     What it does:
-#      1. Separate identifiers from properties.
-#      2. Flatten the mol["synonyms"]["Synonym"] to mol["synonyms"]
-#     """
-#     if mol is None:
-#         return None
-#     mol_v2 = {}
-#     mol_v2["identifiers"] = _get_identifiers(mol)
-#     mol_v2["properties"] = deepcopy(mol.get("properties"))
+def _enrich_with_pubchem_data(molset):
+    """
+    Pull data from PubChem to merge in into a molset.
+    """
 
-#     # For the messy double-level synonyms key in v1 format.
-#     if "Synonym" in mol.get("synonyms", {}):
-#         synonyms = deepcopy(mol.get("synonyms", {}).get("Synonym", []))
+    output_molset = []
 
-#     # For cases like an SDF or CSV where everything is just stored flat.
-#     elif "synonyms" in mol_v2["properties"]:
-#         synonyms = mol_v2["properties"]["synonyms"]
-#         del mol_v2["properties"]["synonyms"]
+    spinner.start("Fetching from PubChem")
 
-#     # For other cases, usually when no synonyms are present
-#     # like when creating a fresh molecule from an identifier.
-#     else:
-#         synonyms = deepcopy(mol.get("synonyms", []))
+    for i, smol in enumerate(molset):
+        try:
+            identifiers = smol["identifiers"]
 
-#     # Synonyms may be stored as a string array (mdl/sdf), or a string with linebreaks (csv).
-#     # print("\n\n* synonyms BEFORE", type(synonyms), "\n", synonyms)
-#     if isinstance(synonyms, str):
-#         try:
-#             synonyms = ast.literal_eval(synonyms)
-#         except (ValueError, SyntaxError):
-#             synonyms = synonyms.split("\n") if "\n" in synonyms else [synonyms]
-#     # print("\n\n* synonyms AFTER", type(synonyms), "\n", synonyms)
+            # Get name field regardless of case
+            name = next(
+                (value for key, value in identifiers.items() if key.lower() == "name"),
+                None,
+            )
+            spinner.text = style(f"<soft>Fetching from PubChem: #{i} - {name}</soft>")
 
-#     # Find name if it's missing.
-#     if not mol_v2["identifiers"]["name"]:
-#         mol_v2["identifiers"]["name"] = synonyms[0] if synonyms else None
+            # Use fallback name is missing
+            if not name:
+                name = smol.get("chemical_name", None)
 
-#     mol_v2["synonyms"] = synonyms
-#     mol_v2["analysis"] = deepcopy(mol.get("analysis"))
-#     mol_v2["property_sources"] = deepcopy(mol.get("property_sources"))
-#     mol_v2["enriched"] = deepcopy(mol.get("enriched"))
+            # Select the identifier keys we'll look for in order of preference
+            keys = [
+                "inchi",
+                "canonical_smiles",
+                "isomeric_smiles",
+                "smiles",
+                "inchikey",
+                "name",
+                "cid",
+            ]
+            identifier = next(
+                (
+                    identifiers.get(key)
+                    for key in keys
+                    if identifiers.get(key) is not None
+                ),
+                None,
+            )
+            name = name or identifier or "Unknown molecule"
+            if not identifier:
+                output_warning(
+                    f"#{i} - No valid identifier found for {name}", return_val=False
+                )
+                continue
 
-#     # # This removes all properties that are not in MOL_PROPERTIES
-#     # # I'm not sure what the benefit is. This shouldn't be limited.
-#     # mol_organized["properties"] = get_human_properties(mol)
+            # Fetch enriched molecule
+            smol_enriched = get_smol_from_pubchem(identifier)
+            if not smol_enriched:
+                output_warning(f"#{i} - Failed to enrich {name}", return_val=False)
 
-#     # if "DS_URL" in mol_organized["properties"]:
-#     #     mol_organized["properties"]["DS_URL"] = ""
+            # Merge enriched data
+            smol = merge_smols(smol, smol_enriched)
+            output_molset.append(smol)
 
-#     # Remove identifiers from properties.
-#     # - - -
-#     # Create a lowercase version of the properties dictionary
-#     # so we can scan for properties in a case-insensitive way.
-#     molIdfrs = {k.lower(): v for k, v in mol_v2["identifiers"].items()}
-#     for prop in list(mol_v2["properties"]):
-#         if prop.lower() in molIdfrs:
-#             del mol_v2["properties"][prop]
+        except Exception as err:  # pylint: disable=broad-except
+            spinner.stop()
+            output_error(
+                [
+                    "Something went wrong enriching molecules with data from PubChem",
+                    err,
+                ],
+                return_val=False,
+            )
 
-#     return mol_v2
+    spinner.succeed("Done")
+    spinner.stop()
+    return output_molset
 
 
-# # Previous version of flatten_smol()
-# def molformat_v2_to_v1(mol):
-#     """
-#     Convert the v2 OpenAD molecule object format back to the old v1 format.
-#     """
-#     if mol is None:
-#         return None
+def merge_molecule_property_data(inp=None, dataframe=None):
+    """
+    Merge data from a dataframe into your molecule working set.
 
-#     mol_v1 = {}
-#     mol_v1["name"] = deepcopy(mol.get("identifiers").get("name"))
-#     mol_v1["properties"] = {**mol.get("identifiers"), **mol.get("properties")}
-#     mol_v1["synonyms"] = {"Synonym": deepcopy(mol.get("synonyms"))}
-#     mol_v1["analysis"] = deepcopy(mol.get("analysis"))
-#     mol_v1["property_sources"] = deepcopy(mol.get("property_sources"))
-#     mol_v1["enriched"] = deepcopy(mol.get("enriched"))
-#     return mol_v1
+    The dataframe should contain the following columns:
+      - SMILES/subject
+      - property
+      - value
+
+    The property values will then be added to each molecule's properties.
+    """
+
+    if dataframe is None and inp is None:
+        return False
+
+    if dataframe is None:
+        # Load from dataframe
+        if (
+            "merge_molecules_data_dataframe" in inp.as_dict()
+            or "merge_molecules_data_dataframe-DEPRECATED"  # Can be removed once the deprecated syntax has been removed
+            in inp.as_dict()
+        ):
+            ctx = context.get()
+            dataframe = ctx.vars.get(inp.as_dict().get("in_dataframe"))
+
+        # Load from file (not yet implemented)
+        else:
+            dataframe = _load_mol_data(inp.as_dict()["moles_file"])
+
+        if dataframe is None:
+            output_error("Source not found ", return_val=False)
+            return True
+
+    # Detect the SMILES/subject column
+    if "subject" in dataframe.columns:
+        smiles_key = "subject"
+    elif "smiles" in dataframe.columns:
+        smiles_key = "smiles"
+    elif "SMILES" in dataframe.columns:
+        smiles_key = "SMILES"
+    else:
+        output_error(
+            "No <yellow>subject</yellow> or <yellow>SMILES</yellow> column found in merge data",
+            return_val=False,
+        )
+        return True
+
+    # Detect the property column
+    if "property" in dataframe.columns:
+        prop_key = "property"
+    elif "PROPERTY" in dataframe.columns:
+        prop_key = "PROPERTY"
+    else:
+        output_error(
+            "No <yellow>property</yellow> column found in merge data", return_val=False
+        )
+        return True
+
+    # Detect the value column
+    if "value" in dataframe.columns:
+        val_key = "value"
+    elif "VALUE" in dataframe.columns:
+        val_key = "VALUE"
+    elif "result" in dataframe.columns:
+        val_key = "result"
+    elif "RESULT" in dataframe.columns:
+        val_key = "RESULT"
+    else:
+        output_error(
+            "No <yellow>result</yellow> or <yellow>value</yellow> column found",
+            return_val=False,
+        )
+        return True
+
+    # Pivot the dataframe
+    dataframe = dataframe.pivot_table(
+        index=smiles_key, columns=[prop_key], values=val_key, aggfunc="first"
+    )
+    dataframe = dataframe.reset_index()
+
+    for row in dataframe.to_dict("records"):
+        update_flag = True
+        merge_smol = None
+
+        try:
+            smiles = canonicalize(row[smiles_key])
+            merge_smol = get_smol_from_mws(smiles)
+            GLOBAL_SETTINGS["grammar_refresh"] = True
+        except Exception:  # pylint: disable=broad-except
+            output_warning("unable to canonicalise:" + row[smiles_key])
+            continue
+
+        if merge_smol is None:
+            merge_smol = new_smol(smiles, name=row[smiles_key])
+            update_flag = False
+        else:
+            update_flag = True
+
+        if merge_smol is not None:
+            smol = merge_molecule_properties(row, merge_smol)
+            GLOBAL_SETTINGS["grammar_refresh"] = True
+            if update_flag is True:
+                molecules_srv = GUIMoleculesService(ctx)
+                molecules_srv.remove_mol_from_mws(smol=merge_smol, silent=True)
+            ctx = context.get()
+            ctx.mws_add(smol)
+
+    output_success("Data merged into your working set", return_val=False)
+    GLOBAL_SETTINGS["grammar_refresh"] = True
+    return True
+
+
+def _load_mol_data(file_path):
+    """loads molecule data from a file where Smiles, property and values are supplied in row format"""
+
+    file_path = parse_path(file_path)
+
+    # SDF
+    if file_path.split(".")[-1].lower() == "sdf":
+        try:
+            name = file_path.split("/")[-1]
+            ctx = context.get()
+            sdf_file = ctx.workspace_path() / name
+            mol_frame = Chem.PandasTools.LoadSDF(sdf_file)
+        except Exception as err:
+            output_error(msg("err_load", "SDF", err), return_val=False)
+            return None
+
+    # CSV
+    elif file_path.split(".")[-1].lower() == "csv":
+        try:
+            name = file_path.split("/")[-1]
+            ctx = context.get()
+            csv_file = ctx.workspace_path() / name
+            mol_frame = pandas.read_csv(csv_file, dtype="string")
+        except Exception as err:
+            output_error(msg("err_load", "CSV", err), return_val=False)
+            return None
+
+    return mol_frame
+
+
+# endregion
+# ------------------------------------
+# region - Unused
+# ------------------------------------
 
 
 # Unused. This adds an indice when it's missing, but there's no usecase
@@ -1904,105 +2045,4 @@ def index_molset_file_async(path_absolute):
 
 
 # endregion
-
-
-# To be orgnanized
-
-
-def random_smiles(count: int = 10, max_cid=150_000_000):
-    """
-    Fetch a specified number of random molecule SMILES.
-
-    Args:
-        count (int): Number of SMILES to fetch
-
-    Returns:
-        list: List of strings
-    """
-    results = []
-    retries = 0
-    max_retries = 20
-    i = 1
-    while len(results) < count and retries < max_retries:
-        cid, smiles = _fetch_random_compound(max_cid, i)
-        if cid and smiles:
-            results.append(smiles)
-            i += 1
-            retries = 0
-        else:
-            retries += 1
-    return results
-
-
-def _fetch_random_compound(max_cid, i, max_retries=20, debug=True):
-    """
-    Fetch a random molecule's CID and Canonical SMILES from PubChem.
-
-    Args:
-        max_cid (int): The upper limit for random CID generation. PubChem CIDs go
-                       into the hundreds of millions.
-        max_retries (int): Maximum attempts to find an existing compound.
-
-    Returns:
-        tuple: (cid, smiles) if successful, otherwise (None, None).
-    """
-    pubchem_api_base = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid"
-    headers = {"Accept": "text/plain"}  # Request plain text for SMILES
-
-    for attempt in range(max_retries):
-        random_cid = random.randint(1, max_cid)
-        url = f"{pubchem_api_base}/{random_cid}/property/CanonicalSMILES/TXT"
-        icon = "❌" if attempt + 1 == max_retries else "🔄"
-
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-
-            smiles = response.text.strip()
-            if smiles:
-                if debug:
-                    print(
-                        f"✅ #{i} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> SMILES: {smiles}"
-                    )
-                return random_cid, smiles
-            else:
-                if debug:
-                    print(
-                        f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> no result"
-                    )
-
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404:
-                if debug:
-                    print(
-                        f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> not found"
-                    )
-            else:
-                if debug:
-                    print(
-                        f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> HTTP error"
-                    )
-        except requests.exceptions.ConnectionError:
-            if debug:
-                print(
-                    f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> connection error"
-                )
-        except requests.exceptions.Timeout:
-            if debug:
-                print(
-                    f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> timeout error"
-                )
-        except requests.exceptions.RequestException as e:
-            if debug:
-                print(
-                    f"{icon} Attempt {attempt + 1}/{max_retries}: {random_cid:>10} --> unexpected error"
-                )
-            if debug:
-                print(f"ℹ️ Error details: {e}")
-
-        # PubChem API advises max 5 requests per second
-        time.sleep(0.2)
-
-    if debug:
-        print(f"Failed to find a random molecule after {max_retries} attempts.")
-    return None, None
+# ------------------------------------

@@ -30,8 +30,8 @@ def load_config():
             with open(config_path, "r", encoding="utf-8") as file:
                 _config = yaml.safe_load(file)
 
-    except Exception as e:  # pylint: disable=broad-except
-        logger.error(f"An error occurred while loading the config file: {e}")
+    except Exception as err:  # pylint: disable=broad-except
+        logger.error(f"An error occurred while loading the config file: {err}")
 
     # Prioritize environment variables if set
     _config["dir"] = os.path.expanduser(os.environ.get("OMGUI_DIR", _config.get("dir")))

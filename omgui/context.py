@@ -143,8 +143,8 @@ class Context:
                 logger.info("Creating new context file")
                 return self.default_context
 
-        except Exception as e:  # pylint: disable=broad-except
-            logger.error(f"An error occurred while loading the context file: {e}")
+        except Exception as err:  # pylint: disable=broad-except
+            logger.error("An error occurred while loading the context file: %s", err)
             return self.default_context
 
     # endregion
@@ -205,7 +205,6 @@ class Context:
         """
         Creates a new workspace with the specified name if it doesn't already exist.
         """
-        print("CREATE")
         # Create the workspace in the context
         workspace_name = workspace_name.strip().replace(" ", "_").upper()
         if workspace_name in self.workspaces():
@@ -269,7 +268,6 @@ class Context:
                 )
 
     def _load_sample_files(self, workspace_path):
-        print(3)
         import tarfile
         from pathlib import Path
 
@@ -307,31 +305,6 @@ class Context:
     # region - Molecule Working Set
     # ------------------------------------
 
-    def _load_mws(self):
-        """
-        Loads the molecule working set for the current workspace into memory.
-        """
-
-        mws_path = self.mws_path()
-
-        # Read molecules from file
-        if mws_path.exists():
-            try:
-                with open(mws_path, "r", encoding="utf-8") as file:
-                    return json.load(file)
-            except Exception as err:  # pylint: disable=broad-except
-                logger.error(
-                    f"An error occurred while loading the molecule working sets: {err}"
-                )
-                return []
-
-        # Create file if missing
-        else:
-            mws_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(mws_path, "w", encoding="utf-8") as file:
-                json.dump([], file, indent=4)
-            return []
-
     def mws(self):
         """
         Returns the current molecule working set.
@@ -340,13 +313,28 @@ class Context:
             self._mws = self._load_mws()
         return self._mws
 
-    def set_mws(self, molset: list):
+    def mws_set(self, molset: list, append: bool = False):
         """
-        Sets the current molecule working set.
+        Load a molset into the molecule working set.
         """
-        self._mws = molset
+        if append:
+            self._mws.extend(molset)
+        else:
+            self._mws = molset
         self._save()
         return True
+
+    def mws_count(self):
+        """
+        Returns the number of molecules in the current molecule working set.
+        """
+        return len(self._mws)
+
+    def mws_is_empty(self):
+        """
+        Returns whether the current molecule working set is empty.
+        """
+        return len(self._mws) == 0
 
     def mws_add(self, smol):
         """
@@ -368,6 +356,32 @@ class Context:
         """
         self._mws = []
         self._save()
+
+    def _load_mws(self):
+        """
+        Loads the molecule working set for the current workspace into memory.
+        """
+
+        mws_path = self.mws_path()
+
+        # Read molecules from file
+        if mws_path.exists():
+            try:
+                with open(mws_path, "r", encoding="utf-8") as file:
+                    return json.load(file)
+            except Exception as err:  # pylint: disable=broad-except
+                logger.error(
+                    "An error occurred while loading the molecule working sets: %s",
+                    err,
+                )
+                return []
+
+        # Create file if missing
+        else:
+            mws_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(mws_path, "w", encoding="utf-8") as file:
+                json.dump([], file, indent=4)
+            return []
 
     # endregion
     # ------------------------------------

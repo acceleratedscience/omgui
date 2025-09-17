@@ -1,9 +1,22 @@
+# System artifacts
 .DS_Store
+
+# Python build artifacts
 __pycache__
+
+# Package distribution files
+**/dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# Secret files
+.env
+
+# Custom ignores
 _*
 !__init__.py
-.venv
-.env
-**/dist/
 test*
 todo.txt

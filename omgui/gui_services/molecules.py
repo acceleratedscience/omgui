@@ -452,6 +452,7 @@ class GUIMoleculesService:
         identifier: str = None,
         smol: dict = None,
         enrich: bool = None,
+        silent: bool = False,
     ) -> bool:
         """
         Add a molecule to the molecule working set.
@@ -493,19 +494,25 @@ class GUIMoleculesService:
         inchikey = smol.get("identifiers", {}).get("inchikey")
 
         # Already in mws -> skip
-        if get_smol_from_mws(self.ctx, inchikey) is not None:
-            output_success(
-                f"Molecule <yellow>{name}</yellow> already in working set",
-                return_val=False,
-            )
+        if get_smol_from_mws(inchikey) is not None:
+            if not silent:
+                output_success(
+                    f"Molecule <yellow>{name}</yellow> already in working set",
+                    return_val=False,
+                )
             return True
 
         # Add to working set
         self.ctx.mws_add(smol)
-        output_success(f"Molecule <yellow>{name}</yellow> was added", return_val=False)
+        if not silent:
+            output_success(
+                f"Molecule <yellow>{name}</yellow> was added", return_val=False
+            )
         return True
 
-    def remove_mol_from_mws(self, identifier: str = None, smol: dict = None):
+    def remove_mol_from_mws(
+        self, identifier: str = None, smol: dict = None, silent=False
+    ):
         """
         Remove a molecule from your molecule working set.
 
@@ -519,7 +526,7 @@ class GUIMoleculesService:
 
         # Create molecule object if only identifier is provided
         if not smol:
-            smol = get_smol_from_mws(self.ctx, identifier)
+            smol = get_smol_from_mws(identifier)
 
         # -- smol is defined --
 
@@ -535,24 +542,27 @@ class GUIMoleculesService:
                     self.ctx.mws_remove(i)
 
                     # Feedback
-                    output_success(
-                        f"Molecule <yellow>{name}</yellow> was removed",
-                        return_val=False,
-                    )
+                    if not silent:
+                        output_success(
+                            f"Molecule <yellow>{name}</yellow> was removed",
+                            return_val=False,
+                        )
                     return True
 
             # Not found
-            output_error(
-                f"Molecule <yellow>{name}</yellow> not found in working set",
-                return_val=False,
-            )
+            if not silent:
+                output_error(
+                    f"Molecule <yellow>{name}</yellow> not found in working set",
+                    return_val=False,
+                )
             return False
 
         except Exception as err:  # pylint: disable=broad-except
-            output_error(
-                [f"Molecule <yellow>{name}</yellow> failed to be removed", err],
-                return_val=False,
-            )
+            if not silent:
+                output_error(
+                    [f"Molecule <yellow>{name}</yellow> failed to be removed", err],
+                    return_val=False,
+                )
             return False
 
     def check_mol_in_mws(self, smol):
@@ -564,7 +574,7 @@ class GUIMoleculesService:
         _, identifier = get_best_available_identifier(smol)
 
         # Check if it's in the working set
-        present = bool(get_smol_from_mws(self.ctx, identifier))
+        present = bool(get_smol_from_mws(identifier))
         return present
 
     def clear_mws(self):

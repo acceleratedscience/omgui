@@ -118,8 +118,8 @@ class MWS:
         from omgui.gui_services.molecules import GUIMoleculesService
 
         ctx = context.get()
-        molecules_srv = GUIMoleculesService(ctx)
         enrich = not basic
+        molecules_srv = GUIMoleculesService(ctx)
         molecules_srv.add_mol_to_mws(identifier, enrich=enrich)
 
     def remove(self, identifier: str) -> None:
