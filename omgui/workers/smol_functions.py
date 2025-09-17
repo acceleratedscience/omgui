@@ -13,7 +13,6 @@ import logging
 import asyncio
 import aiofiles
 import requests
-from omgui.workers.smol_transformers import dataframe2molset
 import pubchempy as pcy
 from pathlib import Path
 from copy import deepcopy
@@ -24,7 +23,7 @@ from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 from omgui.helpers import logger
 from omgui.helpers.paths import parse_path
 from omgui import context
-from omgui.gui_services.molecules import GUIMoleculesService
+from omgui.workers.smol_transformers import dataframe2molset
 
 
 # OpenAD imports
@@ -1728,6 +1727,8 @@ def load_mols_to_mws(inp):
     """
     Load a batch of molecules into the molecule working set.
     """
+    # Prevent circular import
+    from omgui.gui_services.molecules import GUIMoleculesService
 
     molset = None
     df_name = inp.as_dict().get("in_dataframe", None)
