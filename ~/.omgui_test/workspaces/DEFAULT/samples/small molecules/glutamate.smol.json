@@ -1,0 +1,1469 @@
+{
+    "analysis": [],
+    "enriched": true,
+    "identifiers": {
+        "canonical_smiles": "N[C@@H](CCC(=O)O)C(=O)O",
+        "cid": 33032,
+        "inchi": "InChI=1S/C5H9NO4/c6-3(5(9)10)1-2-4(7)8/h3H,1-2,6H2,(H,7,8)(H,9,10)/t3-/m0/s1",
+        "inchikey": "WHUUTDBJXJRKMK-VKHMYHEASA-N",
+        "isomeric_smiles": "N[C@@H](CCC(=O)O)C(=O)O",
+        "molecular_formula": "C5H9NO4",
+        "name": "Glutamate"
+    },
+    "meta": {
+        "labels:": [],
+        "notes": "",
+        "labels": []
+    },
+    "properties": {
+        "atom_stereo_count": 1,
+        "atoms": [
+            {
+                "aid": 1,
+                "element": "O",
+                "number": 8,
+                "x": 5.4641,
+                "y": 1.06
+            },
+            {
+                "aid": 2,
+                "element": "O",
+                "number": 8,
+                "x": 2,
+                "y": -1.94
+            },
+            {
+                "aid": 3,
+                "element": "O",
+                "number": 8,
+                "x": 4.5981,
+                "y": 2.56
+            },
+            {
+                "aid": 4,
+                "element": "O",
+                "number": 8,
+                "x": 3.732,
+                "y": -1.94
+            },
+            {
+                "aid": 5,
+                "element": "N",
+                "number": 7,
+                "x": 2.866,
+                "y": 1.56
+            },
+            {
+                "aid": 6,
+                "element": "C",
+                "number": 6,
+                "x": 3.732,
+                "y": 0.06
+            },
+            {
+                "aid": 7,
+                "element": "C",
+                "number": 6,
+                "x": 3.732,
+                "y": 1.06
+            },
+            {
+                "aid": 8,
+                "element": "C",
+                "number": 6,
+                "x": 2.866,
+                "y": -0.44
+            },
+            {
+                "aid": 9,
+                "element": "C",
+                "number": 6,
+                "x": 4.5981,
+                "y": 1.56
+            },
+            {
+                "aid": 10,
+                "element": "C",
+                "number": 6,
+                "x": 2.866,
+                "y": -1.44
+            },
+            {
+                "aid": 11,
+                "element": "H",
+                "number": 1,
+                "x": 3.9441,
+                "y": -0.5226
+            },
+            {
+                "aid": 12,
+                "element": "H",
+                "number": 1,
+                "x": 4.3426,
+                "y": 0.1677
+            },
+            {
+                "aid": 13,
+                "element": "H",
+                "number": 1,
+                "x": 3.732,
+                "y": 1.68
+            },
+            {
+                "aid": 14,
+                "element": "H",
+                "number": 1,
+                "x": 2.654,
+                "y": 0.1426
+            },
+            {
+                "aid": 15,
+                "element": "H",
+                "number": 1,
+                "x": 2.2554,
+                "y": -0.5477
+            },
+            {
+                "aid": 16,
+                "element": "H",
+                "number": 1,
+                "x": 2.3291,
+                "y": 1.25
+            },
+            {
+                "aid": 17,
+                "element": "H",
+                "number": 1,
+                "x": 2.866,
+                "y": 2.18
+            },
+            {
+                "aid": 18,
+                "element": "H",
+                "number": 1,
+                "x": 6.001,
+                "y": 1.37
+            },
+            {
+                "aid": 19,
+                "element": "H",
+                "number": 1,
+                "x": 2,
+                "y": -2.56
+            }
+        ],
+        "bond_stereo_count": 0,
+        "bonds": [
+            {
+                "aid1": 1,
+                "aid2": 9,
+                "order": 1
+            },
+            {
+                "aid1": 1,
+                "aid2": 18,
+                "order": 1
+            },
+            {
+                "aid1": 2,
+                "aid2": 10,
+                "order": 1
+            },
+            {
+                "aid1": 2,
+                "aid2": 19,
+                "order": 1
+            },
+            {
+                "aid1": 3,
+                "aid2": 9,
+                "order": 2
+            },
+            {
+                "aid1": 4,
+                "aid2": 10,
+                "order": 2
+            },
+            {
+                "aid1": 5,
+                "aid2": 7,
+                "order": 1,
+                "style": 6
+            },
+            {
+                "aid1": 5,
+                "aid2": 16,
+                "order": 1
+            },
+            {
+                "aid1": 5,
+                "aid2": 17,
+                "order": 1
+            },
+            {
+                "aid1": 6,
+                "aid2": 7,
+                "order": 1
+            },
+            {
+                "aid1": 6,
+                "aid2": 8,
+                "order": 1
+            },
+            {
+                "aid1": 6,
+                "aid2": 11,
+                "order": 1
+            },
+            {
+                "aid1": 6,
+                "aid2": 12,
+                "order": 1
+            },
+            {
+                "aid1": 7,
+                "aid2": 9,
+                "order": 1
+            },
+            {
+                "aid1": 7,
+                "aid2": 13,
+                "order": 1
+            },
+            {
+                "aid1": 8,
+                "aid2": 10,
+                "order": 1
+            },
+            {
+                "aid1": 8,
+                "aid2": 14,
+                "order": 1
+            },
+            {
+                "aid1": 8,
+                "aid2": 15,
+                "order": 1
+            }
+        ],
+        "cactvs_fingerprint": "11000000011000100011100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111000000000000100000000100000000000000000000000100000101000110000011000000000000100000000000000100000000000010000000000001000000000000010000000000000000000100100000000100000000000000000000000000000000000000000000000000000000000000000000000000010000001100000000000000000000000000000100000000000010010000000001000000000000000000000000100000000000000000001000001000000000000000000000000000000000000101011000010011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "charge": 0,
+        "complexity": 145,
+        "conformer_id_3d": null,
+        "conformer_rmsd_3d": null,
+        "coordinate_type": "2d",
+        "covalent_unit_count": 1,
+        "defined_atom_stereo_count": 1,
+        "defined_bond_stereo_count": 0,
+        "effective_rotor_count_3d": null,
+        "elements": [
+            "O",
+            "O",
+            "O",
+            "O",
+            "N",
+            "C",
+            "C",
+            "C",
+            "C",
+            "C",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H"
+        ],
+        "exact_mass": "147.05315777",
+        "feature_selfoverlap_3d": null,
+        "fingerprint": "00000371C0623800000000000000000000000000000000000000000000000000000000000000001E00100800000828C18004000800400200080000900800000000000000000081800000020012008000004000041000000000AC26000000000000000000000000000000000000000000000000",
+        "h_bond_acceptor_count": 5,
+        "h_bond_donor_count": 3,
+        "heavy_atom_count": 10,
+        "isotope_atom_count": 0,
+        "iupac_name": "(2S)-2-aminopentanedioic acid",
+        "mmff94_energy_3d": null,
+        "mmff94_partial_charges_3d": null,
+        "molecular_weight": 147.13,
+        "monoisotopic_mass": "147.05315777",
+        "multipoles_3d": null,
+        "pharmacophore_features_3d": null,
+        "record": {
+            "atoms": {
+                "aid": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19
+                ],
+                "element": [
+                    8,
+                    8,
+                    8,
+                    8,
+                    7,
+                    6,
+                    6,
+                    6,
+                    6,
+                    6,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "bonds": {
+                "aid1": [
+                    1,
+                    1,
+                    2,
+                    2,
+                    3,
+                    4,
+                    5,
+                    5,
+                    5,
+                    6,
+                    6,
+                    6,
+                    6,
+                    7,
+                    7,
+                    8,
+                    8,
+                    8
+                ],
+                "aid2": [
+                    9,
+                    18,
+                    10,
+                    19,
+                    9,
+                    10,
+                    7,
+                    16,
+                    17,
+                    7,
+                    8,
+                    11,
+                    12,
+                    9,
+                    13,
+                    10,
+                    14,
+                    15
+                ],
+                "order": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    2,
+                    2,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "charge": 0,
+            "coords": [
+                {
+                    "aid": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19
+                    ],
+                    "conformers": [
+                        {
+                            "style": {
+                                "aid1": [
+                                    7
+                                ],
+                                "aid2": [
+                                    5
+                                ],
+                                "annotation": [
+                                    6
+                                ]
+                            },
+                            "x": [
+                                5.4641,
+                                2,
+                                4.5981,
+                                3.732,
+                                2.866,
+                                3.732,
+                                3.732,
+                                2.866,
+                                4.5981,
+                                2.866,
+                                3.9441,
+                                4.3426,
+                                3.732,
+                                2.654,
+                                2.2554,
+                                2.3291,
+                                2.866,
+                                6.001,
+                                2
+                            ],
+                            "y": [
+                                1.06,
+                                -1.94,
+                                2.56,
+                                -1.94,
+                                1.56,
+                                0.06,
+                                1.06,
+                                -0.44,
+                                1.56,
+                                -1.44,
+                                -0.5226,
+                                0.1677,
+                                1.68,
+                                0.1426,
+                                -0.5477,
+                                1.25,
+                                2.18,
+                                1.37,
+                                -2.56
+                            ]
+                        }
+                    ],
+                    "type": [
+                        1,
+                        5,
+                        255
+                    ]
+                }
+            ],
+            "count": {
+                "atom_chiral": 1,
+                "atom_chiral_def": 1,
+                "atom_chiral_undef": 0,
+                "bond_chiral": 0,
+                "bond_chiral_def": 0,
+                "bond_chiral_undef": 0,
+                "covalent_unit": 1,
+                "heavy_atom": 10,
+                "isotope_atom": 0,
+                "tautomers": -1
+            },
+            "id": {
+                "id": {
+                    "cid": 33032
+                }
+            },
+            "props": [
+                {
+                    "urn": {
+                        "datatype": 5,
+                        "label": "Compound",
+                        "name": "Canonicalized",
+                        "release": "2021.10.14"
+                    },
+                    "value": {
+                        "ival": 1
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 7,
+                        "implementation": "E_COMPLEXITY",
+                        "label": "Compound Complexity",
+                        "release": "2021.10.14",
+                        "software": "Cactvs",
+                        "source": "Xemistry GmbH",
+                        "version": "3.4.8.18"
+                    },
+                    "value": {
+                        "fval": 145
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 5,
+                        "implementation": "E_NHACCEPTORS",
+                        "label": "Count",
+                        "name": "Hydrogen Bond Acceptor",
+                        "release": "2021.10.14",
+                        "software": "Cactvs",
+                        "source": "Xemistry GmbH",
+                        "version": "3.4.8.18"
+                    },
+                    "value": {
+                        "ival": 5
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 5,
+                        "implementation": "E_NHDONORS",
+                        "label": "Count",
+                        "name": "Hydrogen Bond Donor",
+                        "release": "2021.10.14",
+                        "software": "Cactvs",
+                        "source": "Xemistry GmbH",
+                        "version": "3.4.8.18"
+                    },
+                    "value": {
+                        "ival": 3
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 5,
+                        "implementation": "E_NROTBONDS",
+                        "label": "Count",
+                        "name": "Rotatable Bond",
+                        "release": "2021.10.14",
+                        "software": "Cactvs",
+                        "source": "Xemistry GmbH",
+                        "version": "3.4.8.18"
+                    },
+                    "value": {
+                        "ival": 4
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 16,
+                        "implementation": "E_SCREEN",
+                        "label": "Fingerprint",
+                        "name": "SubStructure Keys",
+                        "parameters": "extended 2",
+                        "release": "2021.10.14",
+                        "software": "Cactvs",
+                        "source": "Xemistry GmbH",
+                        "version": "3.4.8.18"
+                    },
+                    "value": {
+                        "binary": "00000371C0623800000000000000000000000000000000000000000000000000000000000000001E00100800000828C18004000800400200080000900800000000000000000081800000020012008000004000041000000000AC26000000000000000000000000000000000000000000000000"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "IUPAC Name",
+                        "name": "Allowed",
+                        "release": "2021.10.14",
+                        "software": "Lexichem TK",
+                        "source": "OpenEye Scientific Software",
+                        "version": "2.7.0"
+                    },
+                    "value": {
+                        "sval": "(2S)-2-aminopentanedioic acid"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "IUPAC Name",
+                        "name": "CAS-like Style",
+                        "release": "2021.10.14",
+                        "software": "Lexichem TK",
+                        "source": "OpenEye Scientific Software",
+                        "version": "2.7.0"
+                    },
+                    "value": {
+                        "sval": "(2S)-2-aminopentanedioic acid"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "IUPAC Name",
+                        "name": "Markup",
+                        "release": "2021.10.14",
+                        "software": "Lexichem TK",
+                        "source": "OpenEye Scientific Software",
+                        "version": "2.7.0"
+                    },
+                    "value": {
+                        "sval": "(2<I>S</I>)-2-aminopentanedioic acid"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "IUPAC Name",
+                        "name": "Preferred",
+                        "release": "2021.10.14",
+                        "software": "Lexichem TK",
+                        "source": "OpenEye Scientific Software",
+                        "version": "2.7.0"
+                    },
+                    "value": {
+                        "sval": "(2S)-2-aminopentanedioic acid"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "IUPAC Name",
+                        "name": "Systematic",
+                        "release": "2021.10.14",
+                        "software": "Lexichem TK",
+                        "source": "OpenEye Scientific Software",
+                        "version": "2.7.0"
+                    },
+                    "value": {
+                        "sval": "(2S)-2-azanylpentanedioic acid"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "IUPAC Name",
+                        "name": "Traditional",
+                        "release": "2021.10.14",
+                        "software": "Lexichem TK",
+                        "source": "OpenEye Scientific Software",
+                        "version": "2.7.0"
+                    },
+                    "value": {
+                        "sval": "(2S)-2-aminoglutaric acid"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "InChI",
+                        "name": "Standard",
+                        "release": "2021.10.14",
+                        "software": "InChI",
+                        "source": "iupac.org",
+                        "version": "1.0.6"
+                    },
+                    "value": {
+                        "sval": "InChI=1S/C5H9NO4/c6-3(5(9)10)1-2-4(7)8/h3H,1-2,6H2,(H,7,8)(H,9,10)/t3-/m0/s1"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "InChIKey",
+                        "name": "Standard",
+                        "release": "2021.10.14",
+                        "software": "InChI",
+                        "source": "iupac.org",
+                        "version": "1.0.6"
+                    },
+                    "value": {
+                        "sval": "WHUUTDBJXJRKMK-VKHMYHEASA-N"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 7,
+                        "label": "Log P",
+                        "name": "XLogP3",
+                        "release": "2021.10.14",
+                        "source": "sioc-ccbg.ac.cn",
+                        "version": "3.0"
+                    },
+                    "value": {
+                        "fval": -3.7
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "Mass",
+                        "name": "Exact",
+                        "release": "2021.10.14",
+                        "software": "PubChem",
+                        "source": "ncbi.nlm.nih.gov",
+                        "version": "2.2"
+                    },
+                    "value": {
+                        "sval": "147.05315777"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "Molecular Formula",
+                        "release": "2021.10.14",
+                        "software": "PubChem",
+                        "source": "ncbi.nlm.nih.gov",
+                        "version": "2.2"
+                    },
+                    "value": {
+                        "sval": "C5H9NO4"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "Molecular Weight",
+                        "release": "2021.10.14",
+                        "software": "PubChem",
+                        "source": "ncbi.nlm.nih.gov",
+                        "version": "2.2"
+                    },
+                    "value": {
+                        "sval": "147.13"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "SMILES",
+                        "name": "Canonical",
+                        "release": "2021.10.14",
+                        "software": "OEChem",
+                        "source": "OpenEye Scientific Software",
+                        "version": "2.3.0"
+                    },
+                    "value": {
+                        "sval": "C(CC(=O)O)C(C(=O)O)N"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "SMILES",
+                        "name": "Isomeric",
+                        "release": "2021.10.14",
+                        "software": "OEChem",
+                        "source": "OpenEye Scientific Software",
+                        "version": "2.3.0"
+                    },
+                    "value": {
+                        "sval": "C(CC(=O)O)[C@@H](C(=O)O)N"
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 7,
+                        "implementation": "E_TPSA",
+                        "label": "Topological",
+                        "name": "Polar Surface Area",
+                        "release": "2021.10.14",
+                        "software": "Cactvs",
+                        "source": "Xemistry GmbH",
+                        "version": "3.4.8.18"
+                    },
+                    "value": {
+                        "fval": 101
+                    }
+                },
+                {
+                    "urn": {
+                        "datatype": 1,
+                        "label": "Weight",
+                        "name": "MonoIsotopic",
+                        "release": "2021.10.14",
+                        "software": "PubChem",
+                        "source": "ncbi.nlm.nih.gov",
+                        "version": "2.2"
+                    },
+                    "value": {
+                        "sval": "147.05315777"
+                    }
+                }
+            ],
+            "stereo": [
+                {
+                    "tetrahedral": {
+                        "above": 5,
+                        "below": 13,
+                        "bottom": 9,
+                        "center": 7,
+                        "parity": 1,
+                        "top": 6,
+                        "type": 1
+                    }
+                }
+            ]
+        },
+        "rotatable_bond_count": 4,
+        "shape_fingerprint_3d": null,
+        "shape_selfoverlap_3d": null,
+        "tpsa": 101,
+        "undefined_atom_stereo_count": 0,
+        "undefined_bond_stereo_count": 0,
+        "volume_3d": null,
+        "xlogp": -3.7
+    },
+    "property_sources": {
+        "atom_stereo_count": {
+            "source": "PubChem"
+        },
+        "bond_stereo_count": {
+            "source": "PubChem"
+        },
+        "canonical_smiles": {
+            "source": "RDKit",
+            "date": "05-10-2024, 11:59:55"
+        },
+        "charge": {
+            "source": "PubChem"
+        },
+        "cid": {
+            "source": "PubChem"
+        },
+        "complexity": {
+            "datatype": 5,
+            "label": "Compound",
+            "name": "Canonicalized",
+            "release": "2021.10.14"
+        },
+        "conformer_count_3d": {
+            "source": "PubChem"
+        },
+        "conformer_id_3d": {
+            "source": "PubChem"
+        },
+        "conformer_model_rmsd_3d": {
+            "source": "PubChem"
+        },
+        "conformer_rmsd_3d": {
+            "source": "PubChem"
+        },
+        "coordinate_type": {
+            "source": "PubChem"
+        },
+        "covalent_unit_count": {
+            "source": "PubChem"
+        },
+        "defined_atom_stereo_count": {
+            "source": "PubChem"
+        },
+        "defined_bond_stereo_count": {
+            "source": "PubChem"
+        },
+        "effective_rotor_count_3d": {
+            "source": "PubChem"
+        },
+        "exact_mass": {
+            "datatype": 1,
+            "label": "Mass",
+            "name": "Exact",
+            "release": "2021.10.14",
+            "software": "PubChem",
+            "source": "ncbi.nlm.nih.gov",
+            "version": "2.2"
+        },
+        "feature_acceptor_count_3d": {
+            "source": "PubChem"
+        },
+        "feature_anion_count_3d": {
+            "source": "PubChem"
+        },
+        "feature_cation_count_3d": {
+            "source": "PubChem"
+        },
+        "feature_count_3d": {
+            "source": "PubChem"
+        },
+        "feature_donor_count_3d": {
+            "source": "PubChem"
+        },
+        "feature_hydrophobe_count_3d": {
+            "source": "PubChem"
+        },
+        "feature_ring_count_3d": {
+            "source": "PubChem"
+        },
+        "h_bond_acceptor_count": {
+            "datatype": 5,
+            "implementation": "E_NHACCEPTORS",
+            "label": "Count",
+            "name": "Hydrogen Bond Acceptor",
+            "release": "2021.10.14",
+            "software": "Cactvs",
+            "source": "Xemistry GmbH",
+            "version": "3.4.8.18"
+        },
+        "h_bond_donor_count": {
+            "datatype": 5,
+            "implementation": "E_NHDONORS",
+            "label": "Count",
+            "name": "Hydrogen Bond Donor",
+            "release": "2021.10.14",
+            "software": "Cactvs",
+            "source": "Xemistry GmbH",
+            "version": "3.4.8.18"
+        },
+        "heavy_atom_count": {
+            "source": "PubChem"
+        },
+        "inchi": {
+            "source": "RDKit",
+            "date": "05-10-2024, 11:59:55"
+        },
+        "inchikey": {
+            "source": "RDKit",
+            "date": "05-10-2024, 11:59:55"
+        },
+        "isomeric_smiles": {
+            "source": "RDKit",
+            "date": "05-10-2024, 11:59:55"
+        },
+        "isotope_atom_count": {
+            "source": "PubChem"
+        },
+        "iupac_name": {
+            "datatype": 1,
+            "label": "IUPAC Name",
+            "name": "Preferred",
+            "release": "2021.10.14",
+            "software": "Lexichem TK",
+            "source": "OpenEye Scientific Software",
+            "version": "2.7.0"
+        },
+        "mmff94_energy_3d": {
+            "source": "PubChem"
+        },
+        "mmff94_partial_charges_3d": {
+            "source": "PubChem"
+        },
+        "molecular_formula": {
+            "source": "RDKit",
+            "date": "05-10-2024, 11:59:55"
+        },
+        "molecular_weight": {
+            "source": "RDKit",
+            "date": "05-10-2024, 11:59:55"
+        },
+        "molecular_weight_exact": {
+            "source": "PubChem"
+        },
+        "monoisotopic_mass": {
+            "datatype": 1,
+            "label": "Weight",
+            "name": "MonoIsotopic",
+            "release": "2021.10.14",
+            "software": "PubChem",
+            "source": "ncbi.nlm.nih.gov",
+            "version": "2.2"
+        },
+        "multipoles_3d": {
+            "source": "PubChem"
+        },
+        "pharmacophore_features_3d": {
+            "source": "PubChem"
+        },
+        "rotatable_bond_count": {
+            "datatype": 5,
+            "implementation": "E_NROTBONDS",
+            "label": "Count",
+            "name": "Rotatable Bond",
+            "release": "2021.10.14",
+            "software": "Cactvs",
+            "source": "Xemistry GmbH",
+            "version": "3.4.8.18"
+        },
+        "sol": {
+            "source": "PubChem"
+        },
+        "sol_classification": {
+            "source": "PubChem"
+        },
+        "tpsa": {
+            "datatype": 7,
+            "implementation": "E_TPSA",
+            "label": "Topological",
+            "name": "Polar Surface Area",
+            "release": "2021.10.14",
+            "software": "Cactvs",
+            "source": "Xemistry GmbH",
+            "version": "3.4.8.18"
+        },
+        "undefined_atom_stereo_count": {
+            "source": "PubChem"
+        },
+        "undefined_bond_stereo_count": {
+            "source": "PubChem"
+        },
+        "volume_3d": {
+            "source": "PubChem"
+        },
+        "x_steric_quadrupole_3d": {
+            "source": "PubChem"
+        },
+        "xlogp": {
+            "datatype": 7,
+            "label": "Log P",
+            "name": "XLogP3",
+            "release": "2021.10.14",
+            "source": "sioc-ccbg.ac.cn",
+            "version": "3.0"
+        },
+        "y_steric_quadrupole_3d": {
+            "source": "PubChem"
+        },
+        "z_steric_quadrupole_3d": {
+            "source": "PubChem"
+        },
+        "name": {
+            "source": "RDKit",
+            "date": "05-10-2024, 11:59:55"
+        }
+    },
+    "sources": {},
+    "synonyms": [
+        "L-glutamic acid",
+        "GLUTAMIC ACID",
+        "56-86-0",
+        "(2S)-2-Aminopentanedioic acid",
+        "L-glutamate",
+        "(S)-2-Aminopentanedioic acid",
+        "Glutamidex",
+        "H-Glu-OH",
+        "Glutaminol",
+        "glutacid",
+        "Glutamicol",
+        "Glutaton",
+        "Aciglut",
+        "L-Glutaminic acid",
+        "glutaminic acid",
+        "Glusate",
+        "(S)-Glutamic acid",
+        "L-glu",
+        "Acidum glutamicum",
+        "D-Glutamiensuur",
+        "L-(+)-glutamic acid",
+        "alpha-aminoglutaric acid",
+        "Glutamic acid, L-",
+        "(S)-(+)-Glutamic acid",
+        "Acido glutamico",
+        "Acide glutamique",
+        "Acidum glutaminicum",
+        "1-Aminopropane-1,3-dicarboxylic acid",
+        "FEMA No. 3285",
+        "Glutamic acid (H-3)",
+        "alpha-Glutamic acid",
+        "glut",
+        "glutamate",
+        "L-alpha-Aminoglutaric acid",
+        "Glutamic acid, (S)-",
+        "25513-46-6",
+        "CCRIS 7314",
+        "2-Aminoglutaric acid",
+        "Pentanedioic acid, 2-amino-, (S)-",
+        "glu",
+        "AI3-18472",
+        "Acide glutamique [INN-French]",
+        "Acido glutamico [INN-Spanish]",
+        "Acidum glutamicum [INN-Latin]",
+        "EPA Pesticide Chemical Code 374350",
+        "NSC 143503",
+        "Glutamic Acid (L-glutamic acid)",
+        "2-Aminopentanedioic acid, (S)-",
+        "L-2-Aminoglutaric acid",
+        "aminoglutaric acid",
+        "EINECS 200-293-7",
+        "UNII-3KX376GY7L",
+        "MFCD00002634",
+        "L(+)-Glutamic acid",
+        "Glutamic acid (VAN)",
+        "3KX376GY7L",
+        "INS NO.620",
+        "DTXSID5020659",
+        "Glutaminic acid (VAN)",
+        "CHEBI:16015",
+        "Gamma-L-Glutamic Acid",
+        "INS-620",
+        "Glutamate, L-",
+        "Glutamic Acid [USAN:INN]",
+        "C5H9NO4",
+        "NSC-143503",
+        "L-2-amino-pentanedioic acid",
+        "E620",
+        "DTXCID30659",
+        "alpha-Aminoglutaric acid (VAN)",
+        "HSDB 490",
+        "E 620",
+        "E-620",
+        "EC 200-293-7",
+        "NCGC00024502-03",
+        "a-Glutamic acid",
+        "(S)-2-AMINO-1,5-PENTANEDIOIC ACID",
+        "a-Aminoglutaric acid",
+        "L-Glutamic acid-13C5,15N",
+        "Acide glutamique (INN-French)",
+        "Acido glutamico (INN-Spanish)",
+        "Acidum glutamicum (INN-Latin)",
+        "GLUTAMIC ACID (USP-RS)",
+        "GLUTAMIC ACID [USP-RS]",
+        "L-a-Aminoglutaric acid",
+        "GLUTAMIC ACID (EP MONOGRAPH)",
+        "GLUTAMIC ACID [EP MONOGRAPH]",
+        "L-Glutaminsaeure",
+        "L-Acido glutamico",
+        ".alpha.-Glutamic acid",
+        "Polyglutamic acid(PGA)",
+        "6899-05-4",
+        "glt",
+        "2-Amino-pentanedioic acid",
+        "2-aminopentanedioate",
+        "1-amino-propane-1,3-dicarboxylic acid",
+        "GLUTAMIC ACID [USAN]",
+        "L-Glutamic acid (9CI)",
+        "aminoglutarate",
+        "alpha-Glutamate",
+        "a-Glutamate",
+        "L-gluatmate",
+        "a-Aminoglutarate",
+        "L-glutamic-acid",
+        "NSC143503",
+        "L-Glutamic adid",
+        "2-Aminoglutarate",
+        "1ftj",
+        "1xff",
+        "(S)-glutamate",
+        "L-a-Aminoglutarate",
+        "alpha-Aminoglutarate",
+        "GGL",
+        "(L)-glutamic acid",
+        "H-Glu",
+        "L-Glutamic,(S)",
+        "L-(+)-Glutamate",
+        "L-alpha-Aminoglutarate",
+        "Glutamic acid (USP)",
+        "Tocris-0218",
+        "[3h]-l-glutamic acid",
+        "1ii5",
+        "(S)-(+)-Glutamate",
+        "(S)-Glu",
+        "L-[14C(U)]glutamate",
+        "(S)-2-Aminopentanedioate",
+        "Biomol-NT_000170",
+        "GLUTAMIC ACID [MI]",
+        "L-Glutamic acid (JP18)",
+        "SCHEMBL2202",
+        "GLUTAMIC ACID [INN]",
+        "L-Glutamic acid, 98.5%",
+        "Lopac0_000529",
+        "pentanedioic acid, 2-amino-",
+        "S)-2-Aminopentanedioic acid",
+        "GLUTAMIC ACID [VANDF]",
+        "L-GLUTAMIC ACID [FCC]",
+        "L-GLUTAMIC ACID [JAN]",
+        "BPBio1_001132",
+        "CHEMBL575060",
+        "GTPL1369",
+        "GLUTAMIC ACID [WHO-DD]",
+        "L-GLUTAMIC ACID [FHFI]",
+        "L-Glutamic acid, 99%, FCC",
+        "BDBM17657",
+        "CHEBI:53374",
+        "1-Aminopropane-1,3-dicarboxylate",
+        "Glutamic acid, L- (7CI,8CI)",
+        "L (+)-glutamic acid, alpha-form",
+        "1-amino-propane-1,3-dicarboxylate",
+        "L-Glutamic acid, non-animal source",
+        "Pentanedioic acid, 2-amino-, (S)",
+        "Tox21_113053",
+        "HB0383",
+        "HSCI1_000269",
+        "PDSP1_000128",
+        "PDSP1_001539",
+        "PDSP2_000127",
+        "PDSP2_001523",
+        "s6266",
+        "AKOS006238837",
+        "AKOS015854087",
+        "AM81690",
+        "CCG-204619",
+        "DB00142",
+        "SDCCGSBI-0050512.P002",
+        "CAS-56-86-0",
+        "ALANINE IMPURITY B [EP IMPURITY]",
+        "NCGC00024502-01",
+        "NCGC00024502-02",
+        "NCGC00024502-04",
+        "NCGC00024502-07",
+        "AC-11294",
+        "DS-13284",
+        "HY-14608",
+        "(S)-1-Aminopropane-1,3-dicarboxylic  acid",
+        "CS-0003473",
+        "G0059",
+        "NS00095129",
+        "EN300-52632",
+        "L-Glutamic acid, BioUltra, >=99.5% (NT)",
+        "L-Glutamic acid, tested according to Ph.Eur.",
+        "C00025",
+        "D00007",
+        "L-Glutamic acid, NIST(R)RM 8573, USGS40",
+        "LYSINE ACETATE IMPURITY B [EP IMPURITY]",
+        "M02979",
+        "M03872",
+        "L-Glutamic acid, JIS special grade, >=99.0%",
+        "L-Glutamic acid, NIST(R) RM 8574, USGS41",
+        "SR-01000597730",
+        "J-502415",
+        "L-Glutamic acid, ReagentPlus(R), >=99% (HPLC)",
+        "L-Glutamic acid, Vetec(TM) reagent grade, >=99%",
+        "SR-01000597730-1",
+        "BRD-K62309135-001-05-2",
+        "L-Glutamic acid, >=99%, FCC, natural sourced, FG",
+        "Q26995161",
+        "F8889-8668",
+        "Z756440052",
+        "27322E29-9696-49C1-B541-86BEF72DE2F3",
+        "Glutamic acid, European Pharmacopoeia (EP) Reference Standard",
+        "L-Glutamic acid, certified reference material, TraceCERT(R)",
+        "Glutamic acid, United States Pharmacopeia (USP) Reference Standard",
+        "L-Glutamic acid, from non-animal source, meets EP testing specifications, suitable for cell culture, 98.5-100.5%",
+        "H-Glu",
+        "EPA Pesticide Chemical Code 374350",
+        "aminoglutaric acid",
+        "C00025",
+        "NCGC00024502-07",
+        "1-Aminopropane-1,3-dicarboxylate",
+        "CCRIS 7314",
+        "L-alpha-Aminoglutarate",
+        "PDSP2_001523",
+        "GLUTAMIC ACID [INN]",
+        "1-Aminopropane-1,3-dicarboxylic acid",
+        "GLUTAMIC ACID [MI]",
+        "L-Glutamic acid, non-animal source",
+        "Acido glutamico",
+        "GLUTAMIC ACID (USP-RS)",
+        "AI3-18472",
+        "CAS-56-86-0",
+        "L (+)-glutamic acid, alpha-form",
+        "L-glutamate",
+        "L-Glutamic acid, NIST(R) RM 8574, USGS41",
+        "L-Glutaminsaeure",
+        "(S)-(+)-Glutamate",
+        "NSC 143503",
+        "ALANINE IMPURITY B [EP IMPURITY]",
+        "L-Glutamic acid (9CI)",
+        "1ftj",
+        "NSC-143503",
+        "Polyglutamic acid(PGA)",
+        "2-Amino-pentanedioic acid",
+        "Biomol-NT_000170",
+        "Acido glutamico [INN-Spanish]",
+        "(S)-2-Aminopentanedioate",
+        "2-Aminopentanedioic acid, (S)-",
+        "L-glutamic-acid",
+        "(2S)-2-Aminopentanedioic acid",
+        "MFCD00002634",
+        "HSDB 490",
+        "L-alpha-Aminoglutaric acid",
+        "M02979",
+        "L-GLUTAMIC ACID [JAN]",
+        "Glutamic acid, (S)-",
+        "1xff",
+        "Glutaminic acid (VAN)",
+        "a-Aminoglutaric acid",
+        "3KX376GY7L",
+        "SCHEMBL2202",
+        "L-Glutamic acid, BioUltra, >=99.5% (NT)",
+        "Glutamic Acid [USAN:INN]",
+        "GLUTAMIC ACID [VANDF]",
+        "Glutamidex",
+        "Glusate",
+        "aminoglutarate",
+        "Acide glutamique [INN-French]",
+        "Glutamic acid (USP)",
+        "AKOS006238837",
+        "L-Glutamic acid, JIS special grade, >=99.0%",
+        "SR-01000597730",
+        "Q26995161",
+        "L(+)-Glutamic acid",
+        "DTXCID30659",
+        "S)-2-Aminopentanedioic acid",
+        "(S)-Glutamic acid",
+        "GLUTAMIC ACID (EP MONOGRAPH)",
+        "a-Glutamate",
+        "NS00095129",
+        "alpha-Aminoglutaric acid (VAN)",
+        "L-Glutamic acid, ReagentPlus(R), >=99% (HPLC)",
+        "L-(+)-glutamic acid",
+        "BDBM17657",
+        "Tox21_113053",
+        "L-a-Aminoglutarate",
+        "2-aminopentanedioate",
+        "CHEBI:16015",
+        "E620",
+        "CHEBI:53374",
+        "INS-620",
+        "Acide glutamique",
+        "L-Glutamic acid-13C5,15N",
+        "GLUTAMIC ACID [EP MONOGRAPH]",
+        "L-2-Aminoglutaric acid",
+        "alpha-Aminoglutarate",
+        "[3h]-l-glutamic acid",
+        "glutaminic acid",
+        "L-GLUTAMIC ACID [FCC]",
+        "a-Aminoglutarate",
+        "DS-13284",
+        "L-Glutamic acid, tested according to Ph.Eur.",
+        "BPBio1_001132",
+        "H-Glu-OH",
+        "a-Glutamic acid",
+        "D00007",
+        "Tocris-0218",
+        "BRD-K62309135-001-05-2",
+        "NCGC00024502-03",
+        "L-[14C(U)]glutamate",
+        ".alpha.-Glutamic acid",
+        "s6266",
+        "L-gluatmate",
+        "Z756440052",
+        "DTXSID5020659",
+        "L-2-amino-pentanedioic acid",
+        "CS-0003473",
+        "Pentanedioic acid, 2-amino-, (S)-",
+        "2-Aminoglutarate",
+        "GLUTAMIC ACID [USP-RS]",
+        "L-Glutamic acid, certified reference material, TraceCERT(R)",
+        "Glutamic acid (VAN)",
+        "L-Glutaminic acid",
+        "L-glu",
+        "L-Acido glutamico",
+        "Glutamic Acid (L-glutamic acid)",
+        "GLUTAMIC ACID [WHO-DD]",
+        "GLUTAMIC ACID",
+        "HB0383",
+        "AC-11294",
+        "glu",
+        "L-Glutamic acid, 99%, FCC",
+        "L-Glutamic acid (JP18)",
+        "Pentanedioic acid, 2-amino-, (S)",
+        "1-amino-propane-1,3-dicarboxylic acid",
+        "(S)-glutamate",
+        "27322E29-9696-49C1-B541-86BEF72DE2F3",
+        "Lopac0_000529",
+        "NCGC00024502-04",
+        "L-Glutamic adid",
+        "56-86-0",
+        "Acidum glutamicum [INN-Latin]",
+        "L-a-Aminoglutaric acid",
+        "pentanedioic acid, 2-amino-",
+        "Glutamic acid, L- (7CI,8CI)",
+        "L-Glutamic acid, NIST(R)RM 8573, USGS40",
+        "(S)-2-Aminopentanedioic acid",
+        "LYSINE ACETATE IMPURITY B [EP IMPURITY]",
+        "alpha-Glutamate",
+        "1ii5",
+        "FEMA No. 3285",
+        "2-Aminoglutaric acid",
+        "SDCCGSBI-0050512.P002",
+        "Glutaminol",
+        "F8889-8668",
+        "NSC143503",
+        "G0059",
+        "AKOS015854087",
+        "GGL",
+        "CHEMBL575060",
+        "(S)-(+)-Glutamic acid",
+        "glutamate",
+        "EC 200-293-7",
+        "C5H9NO4",
+        "AM81690",
+        "(S)-2-AMINO-1,5-PENTANEDIOIC ACID",
+        "25513-46-6",
+        "INS NO.620",
+        "Glutamic acid, L-",
+        "DB00142",
+        "(S)-1-Aminopropane-1,3-dicarboxylic  acid",
+        "D-Glutamiensuur",
+        "GTPL1369",
+        "CCG-204619",
+        "6899-05-4",
+        "HSCI1_000269",
+        "PDSP1_000128",
+        "alpha-Glutamic acid",
+        "L-Glutamic acid, from non-animal source, meets EP testing specifications, suitable for cell culture, 98.5-100.5%",
+        "Acidum glutamicum",
+        "EN300-52632",
+        "UNII-3KX376GY7L",
+        "Acidum glutaminicum",
+        "SR-01000597730-1",
+        "Glutamic acid, European Pharmacopoeia (EP) Reference Standard",
+        "PDSP1_001539",
+        "EINECS 200-293-7",
+        "glutacid",
+        "NCGC00024502-01",
+        "NCGC00024502-02",
+        "L-GLUTAMIC ACID [FHFI]",
+        "glt",
+        "Acido glutamico (INN-Spanish)",
+        "Glutamic acid (H-3)",
+        "(S)-Glu",
+        "L-(+)-Glutamate",
+        "E-620",
+        "Acide glutamique (INN-French)",
+        "Glutaton",
+        "L-Glutamic,(S)",
+        "L-Glutamic acid, >=99%, FCC, natural sourced, FG",
+        "Acidum glutamicum (INN-Latin)",
+        "alpha-aminoglutaric acid",
+        "(L)-glutamic acid",
+        "Aciglut",
+        "PDSP2_000127",
+        "Gamma-L-Glutamic Acid",
+        "Glutamate, L-",
+        "E 620",
+        "GLUTAMIC ACID [USAN]",
+        "L-Glutamic acid, Vetec(TM) reagent grade, >=99%",
+        "J-502415",
+        "L-glutamic acid",
+        "1-amino-propane-1,3-dicarboxylate",
+        "HY-14608",
+        "glut",
+        "M03872",
+        "Glutamicol",
+        "L-Glutamic acid, 98.5%",
+        "Glutamic acid, United States Pharmacopeia (USP) Reference Standard"
+    ],
+    "index": 3
+}

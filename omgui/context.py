@@ -24,7 +24,7 @@ Usage:
 import json
 from pathlib import Path
 
-from omgui.configuration import config
+from omgui.configuration import get_config
 from omgui.helpers import logger
 from openad.helpers.output import output_text, output_error, output_success
 
@@ -111,8 +111,8 @@ class Context:
             _context = self._load_global_context()
 
         # Set context attributes
-        for key, value in _context:
-            if self.default_context.items().get(key) is not None:
+        for key, value in _context.items():
+            if self.default_context.get(key) is not None:
                 setattr(self, key, _context[key])
             else:
                 setattr(self, key, value)
@@ -136,7 +136,7 @@ class Context:
             dict: The context dictionary, or None if the file is not found.
         """
         try:
-            context_path = Path(config.get("dir")) / "context.json"
+            context_path = Path(get_config().data_dir) / "context.json"
 
             # Load from file
             if context_path.exists():
@@ -176,7 +176,7 @@ class Context:
             ctx_dict = self.__dict__.copy()
             if "_mws" in ctx_dict:
                 del ctx_dict["_mws"]
-            context_path = Path(config.get("dir")) / "context.json"
+            context_path = Path(get_config().data_dir) / "context.json"
             with open(context_path, "w", encoding="utf-8") as file:
                 # print("Save ctx:", context_path, _ctx)
                 json.dump(ctx_dict, file, indent=4)
@@ -287,7 +287,9 @@ class Context:
         Returns the current workspace path.
         """
 
-        return Path(config.get("dir")) / "workspaces" / (workspace or self.workspace)
+        return (
+            Path(get_config().data_dir) / "workspaces" / (workspace or self.workspace)
+        )
 
     def mws_path(self, workspace=None):
         """
@@ -300,7 +302,7 @@ class Context:
         """
         Returns the list of workspace names.
         """
-        workspaces_path = Path(config.get("dir")) / "workspaces"
+        workspaces_path = Path(get_config().data_dir) / "workspaces"
         if workspaces_path.exists():
             return [p.name for p in workspaces_path.iterdir() if p.is_dir()]
         else:

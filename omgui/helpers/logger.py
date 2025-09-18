@@ -51,23 +51,30 @@ class ColoredFormatter(logging.Formatter):
 
 
 # Configure
+# ------------------------------------
+
 root = logging.getLogger()
-root.setLevel(logging.INFO)
 
 # Avoid duplicate logs
 if root.handlers:
     root.handlers.clear()
 
-# Initialize
+
+# Jupyter notebooks
 if nb_mode():
-    # In Jupyter show only the message (no colors, no level/name)
+    # Only print the message (no colors, no level/name)
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter("%(message)s"))
+
+    # Never print info/debug logs
+    root.setLevel(logging.ERROR)
+
+# Standard terminal
 else:
     handler = logging.StreamHandler()
-    # fmt = "\x1b[90m---------\x1b[0m %(levelname)-8s \x1b[90m%(name)s\x1b[0m %(message)s"
     fmt = "%(levelname)-8s \x1b[90m%(name)s\x1b[0m %(message)s"
     handler.setFormatter(ColoredFormatter(fmt))
+    root.setLevel(logging.INFO)
 
 root.addHandler(handler)
 

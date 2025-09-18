@@ -1,0 +1,5 @@
+ReactionID,Reactants,Products,Catalyst,Temperature_C,Pressure_atm,Yield_percent
+RXN-001,"H2SO4, NaOH","Na2SO4, H2O",None,25,1,98.5
+RXN-002,"N2, H2","NH3",Fe,450,200,15.2
+RXN-003,"CH3COOH, C2H5OH","CH3COOC2H5, H2O",H2SO4,100,1,92.1
+RXN-004,"C6H6, HNO3","C6H5NO2, H2O",H2SO4,50,1,85.6

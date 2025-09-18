@@ -14,22 +14,13 @@ Usage:
     etc.
 """
 
-# Std
-import urllib
-from typing import Any
-from pathlib import Path
-
-# OMGUI
-from omgui import context
-from omgui.helpers import logger
-from omgui.configuration import config
-
-# Expose for simpler imports in our own codebase
-from omgui.context import ctx
-
-# Sub-modules for the public API
+# Expose sub-modules for the public API
 from omgui import mws
 
+from omgui.context import ctx
+from omgui.configuration import get_config
+
+config = get_config()
 
 # ------------------------------------
 # region - General
@@ -53,45 +44,52 @@ def configure(
     """
 
     if session:
-        config().set("session", True)
+        from omgui import context
+
+        get_config().set("session", True)
         context.new_session()  # Create a new session-only context
 
     if prompt:
-        config().set("prompt", prompt)
+        get_config().set("prompt", prompt)
 
     if workspace:
-        config().set("workspace", workspace)
+        get_config().set("workspace", workspace)
         ctx().set_workspace(workspace)  # Set the workspace in the context
 
     if data_dir:
-        config().set("data_dir", data_dir)
+        get_config().set("data_dir", data_dir)
 
     if host:
-        config().set("host", host)
+        get_config().set("host", host)
 
     if port:
-        config().set("port", port)
+        get_config().set("port", port)
 
     if base_path:
-        config().set("base_path", base_path)
+        get_config().set("base_path", base_path)
 
     if log_level:
-        config().set("log_level", log_level)
-        logger.setLevel(log_level)
+        from omgui.helpers import logger
+        from omgui.helpers.jupyter import nb_mode
+
+        get_config().set("log_level", log_level)
+        if not nb_mode():
+            logger.setLevel(log_level)
+
+    # Update the global config
+    global config
+    config = get_config()
 
 
-def get_context():
+def get_context() -> dict:
     """
-    Get the current context.
-
-    Returns:
-        dict: The context dictionary.
+    Get the current context as a dictionary.
     """
     ctx_dict = ctx().get_dict()
     return ctx_dict
 
 
-def launch(*args: Any, **kwargs: Any) -> Any:
+def launch(*args, **kwargs) -> None:
     """
     Launch the GUI server.
     """
@@ -100,7 +98,7 @@ def launch(*args: Any, **kwargs: Any) -> Any:
     return _gui_init(*args, **kwargs)
 
 
-def shutdown(*args: Any, **kwargs: Any) -> Any:
+def shutdown(*args, **kwargs) -> None:
     """
     Shutdown the GUI server.
     """
@@ -119,6 +117,7 @@ def show_mol(molecule_identifier: str = "") -> None:
     """
     Open the molecule viewer for a given molecule identifier.
     """
+    import urllib
     from omgui.gui_launcher import gui_init as _gui_init
 
     path = "mol/" + urllib.parse.quote(molecule_identifier, safe="/")
@@ -129,6 +128,8 @@ def show_molset(path: str = "") -> None:
     """
     Open the molecule set viewer for a given molecule set path.
     """
+    import urllib
+    from pathlib import Path
     from omgui.gui_launcher import gui_init as _gui_init
 
     if Path(path).suffix == "":
@@ -178,7 +179,7 @@ def create_workspace(name: str) -> bool:
 # ------------------------------------
 
 
-def show_files(*args: Any, **kwargs: Any) -> Any:
+def show_files(*args, **kwargs) -> None:
     """
     Open the file browser.
     """
@@ -187,10 +188,11 @@ def show_files(*args: Any, **kwargs: Any) -> Any:
     return _gui_init(*args, **kwargs)
 
 
-def show_file(path: str = "") -> Any:
+def show_file(path: str = "") -> None:
     """
     Open the appropriate viewer for a given file path.
     """
+    import urllib
     from omgui.gui_launcher import gui_init as _gui_init
 
     path = "~/" + urllib.parse.quote(path, safe="/")

@@ -15,6 +15,7 @@ Usage:
 """
 
 # Std
+from asyncio.log import logger
 import os
 from pathlib import Path
 
@@ -25,7 +26,7 @@ import yaml
 from omgui.helpers import logger
 
 
-def config():
+def get_config():
     """
     Get the config singleton instance.
     """
@@ -81,6 +82,10 @@ class Config:
         "WARNING", "ERROR", "CRITICAL".
     """
 
+    # Singleton instance
+    _instance = None
+    _initialized = False
+
     # Default config
     default_config = {
         "session": False,
@@ -106,6 +111,9 @@ class Config:
         Initialize the configuration by loading from environment variables,
         configuration file, and setting defaults.
         """
+        # Prevent re-initialization of singleton
+        if self._initialized:
+            return
 
         _config_file = self.load_config_file()
         _config_env = self.load_config_env()
@@ -117,17 +125,20 @@ class Config:
                 setattr(self, key, value)
 
         # Create the data directory if it doesn't exist
-        if not Path(_config.get("data_dir")).exists():
+        if not Path(_config.get("data_dir")).expanduser().exists():
             logger.info(
                 "Creating missing omgui data directory at '%s'", _config.get("data_dir")
             )
-            Path(_config.get("data_dir")).mkdir(parents=True, exist_ok=True)
+            Path(_config.get("data_dir")).expanduser().mkdir(
+                parents=True, exist_ok=True
+            )
 
     def load_config_file(self):
         """
         Loads configuration from a YAML file.
         Returns a dict.
         """
+
         _config_file = {}
         try:
             config_path = Path(os.getcwd()) / "omgui.config.yml"
@@ -163,8 +174,30 @@ class Config:
         Set a configuration value.
         This is used by omgui.config(key=val)
         """
+
         if key in self.default_config:
             self.default_config[key] = value
             logger.info("Config '%s' set to '%s'", key, value)
         else:
             logger.warning("Config key '%s' not recognized.", key)
+
+    def report(self):
+        """
+        Returns an overview of the current configuration.
+        """
+        _config_file = self.load_config_file()
+        _config_env = self.load_config_env()
+
+        print("Config file\n----------------------")
+        for key, val in _config_file.items():
+            print(f"{key:12}: {val}")
+        print("\nConfig env\n----------------------")
+        for key, val in _config_env.items():
+            print(f"{key:12}: {val}")
+        print("\nDefault config\n----------------------")
+        for key, val in self.default_config.items():
+            print(f"{key:12}: {val}")
+        print("\nCompiled config\n----------------------")
+        for key, val in self.__dict__.items():
+            if not key.startswith("_"):
+                print(f"{key:12}: {val}")

@@ -29,7 +29,7 @@ from fastapi.responses import HTMLResponse, Response
 from openad.helpers.output import output_text, output_error, output_success
 
 # omgui
-from omgui import ctx
+from omgui import config, ctx
 from omgui.gui_routes import gui_router
 from omgui.helpers import gui_install
 from omgui.helpers.jupyter import nb_mode
@@ -40,14 +40,10 @@ from omgui.helpers.exception_handlers import register_exception_handlers
 GUI_SERVER = None
 NOTEBOOK_MODE = nb_mode()
 
-# Optional BASE_PATH environment variable
+# Optional BASE_PATH configuration
 # We always want it w/o leading slash, but with trailing slash
 # See proxy_server.py for details
-BASE_PATH = (
-    (os.environ.get("BASE_PATH", "").strip("/") + "/")
-    if os.environ.get("BASE_PATH")
-    else ""
-)
+BASE_PATH = (config.base_path).strip("/") + "/"
 
 
 class GUIThread(Thread):
@@ -226,9 +222,7 @@ def _launch(path=None, query="", hash="", silent=False):
         return Response(content="index.html not found", status_code=404)
 
     # Determine port and host
-    host, port = next_avail_port(
-        host="0.0.0.0"
-    )  # todo: use config/env variable for host
+    host, port = next_avail_port(host=config.host, port=config.port)
 
     # Remove logging of warning & informational messages
     log = logging.getLogger("uvicorn")
