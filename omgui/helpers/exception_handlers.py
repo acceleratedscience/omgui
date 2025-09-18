@@ -1,3 +1,13 @@
+"""
+Exception Handlers for OMGUI FastAPI server.
+
+These handlers convert exceptions on any request
+into user-friendly JSON responses.
+"""
+
+# pylint: disable=missing-function-docstring, unused-argument
+
+# FastAPI
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.status import (
@@ -8,24 +18,14 @@ from starlette.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+
+# OMGUI
 from omgui.helpers import exceptions as omg_exc
-from omgui.helpers.exceptions import (
-    InvalidMoleculeInput,
-    InvalidMolset,
-    NoResult,
-    FailedOperation,
-    CacheFileNotFound,
-)
 
 
-async def value_error_handler(request: Request, err: ValueError):
-    return JSONResponse(
-        status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "message": "Invalid value provided.",
-            "error": str(err),
-        },
-    )
+# ------------------------------------
+# region - OMGUI Specific
+# ------------------------------------
 
 
 async def invalid_mol_input_handler(
@@ -54,7 +54,7 @@ async def no_result_handler(request: Request, err: omg_exc.NoResult):
     return JSONResponse(
         status_code=HTTP_422_UNPROCESSABLE_ENTITY,
         content={
-            "message": "No result was obtained.",  # %%
+            "message": "No result was obtained.",
             "error": str(err),
         },
     )
@@ -70,8 +70,35 @@ async def failed_operation_handler(request: Request, err: omg_exc.FailedOperatio
     )
 
 
+async def cache_file_not_found_handler(
+    request: Request, err: omg_exc.CacheFileNotFound
+):
+    return JSONResponse(
+        status_code=HTTP_400_BAD_REQUEST,
+        content={
+            "message": "The cached working copy is not found.",
+            "error": str(err),
+        },
+    )
+
+
+# endregion
+# ------------------------------------
+# region - General
+# ------------------------------------
+
+
+async def value_error_handler(request: Request, err: ValueError):
+    return JSONResponse(
+        status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "message": "Invalid value provided.",
+            "error": str(err),
+        },
+    )
+
+
 async def save_file_exists_handler(request: Request, err: FileExistsError):
-    # Note: We can't access `path` here easily, but you can pass it in the exception's args
     return JSONResponse(
         status_code=HTTP_409_CONFLICT,
         content={
@@ -91,18 +118,6 @@ async def save_file_not_found_handler(request: Request, err: FileNotFoundError):
     )
 
 
-async def cache_file_not_found_handler(
-    request: Request, err: omg_exc.CacheFileNotFound
-):
-    return JSONResponse(
-        status_code=HTTP_400_BAD_REQUEST,
-        content={
-            "message": "The cached working copy is not found.",
-            "error": str(err),
-        },
-    )
-
-
 async def permission_error_handler(request: Request, err: PermissionError):
     return JSONResponse(
         status_code=HTTP_403_FORBIDDEN,
@@ -117,12 +132,17 @@ async def catch_all_handler(request: Request, err: Exception):
     )
 
 
+# endregion
+# ------------------------------------
+
+
 def register_exception_handlers(app):
     app.add_exception_handler(omg_exc.InvalidMoleculeInput, invalid_mol_input_handler)
     app.add_exception_handler(omg_exc.InvalidMolset, invalid_molset_handler)
     app.add_exception_handler(omg_exc.NoResult, no_result_handler)
     app.add_exception_handler(omg_exc.FailedOperation, failed_operation_handler)
     app.add_exception_handler(omg_exc.CacheFileNotFound, cache_file_not_found_handler)
+
     app.add_exception_handler(ValueError, value_error_handler)
     app.add_exception_handler(FileExistsError, save_file_exists_handler)
     app.add_exception_handler(FileNotFoundError, save_file_not_found_handler)

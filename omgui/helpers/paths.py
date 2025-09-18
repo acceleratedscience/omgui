@@ -1,8 +1,17 @@
+# Std
 import os
 import re
+
+# OMGUI
 from omgui import context
+
+
 from openad.helpers.output import output_error, output_warning, output_success
 from openad.helpers.general import confirm_prompt
+
+# Load context
+ctx = context.get()
+
 
 NOT_ALLOWED_ERR = [
     "Absolute paths are not allowed here",
@@ -88,7 +97,6 @@ def parse_path(file_path, fallback_ext=None, force_ext=None) -> str:
 
     # Default: workspace path
     else:
-        ctx = context.get()
         path = ctx.workspace_path() / path / filename
 
     # Display wrning when file extension is changed
@@ -198,7 +206,6 @@ def fs_success(
     else:
         # Filename may have been modifier with index and extension,
         # so we need to parse it from the file_path instead.
-        ctx = context.get()
         workspace_path = ctx.workspace_path()
         within_workspace_path = path_resolved.replace(workspace_path, "").lstrip("/")
         if action == "saved":

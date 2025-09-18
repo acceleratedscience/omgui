@@ -1,5 +1,3 @@
-# pylint: disable=import-outside-toplevel
-
 """
 Public methods for the omgui library.
 Served via __init__.py.
@@ -11,16 +9,17 @@ Usage:
     etc.
 """
 
-
+# Std
 import urllib
 from typing import Any
 from pathlib import Path
+
+# OMGUI
 from omgui import context
+from omgui import mws  # Expose sub-modules
+
 
 from openad.helpers.output import output_text, output_error, output_success
-
-# Sub-modules
-from omgui import mws
 
 # Load context
 ctx = context.get()

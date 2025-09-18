@@ -1,0 +1,7 @@
+# Reason for ignoring:
+# - no-member: RDKit members are often not recognized by pylint
+# - broad-except: Often justified to fail more elegantly
+# - import-outside-toplevel: Necessary for lazy loading and to avoid circular imports
+
+[MESSAGES]
+disable=no-member, broad-except, import-outside-toplevel

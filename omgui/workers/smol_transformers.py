@@ -185,7 +185,7 @@ def dataframe2sdf(df):
                 mol_rdkit.SetProp(col, str(row[col]))
 
             sdf_data += (
-                Chem.MolToMolBlock(mol_rdkit) + "\n$$$$\n"
+                Chem.MolToMolBlock(mol_rdkit) + "\n$$$$\n"  # pylint: disable=no-member
             )  # pylint: disable=no-member
 
     return sdf_data
