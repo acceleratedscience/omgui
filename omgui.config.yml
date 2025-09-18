@@ -1,4 +1,0 @@
-data_dir: ~/.omgui_test
-base_path: test/
-log_level: DEBUG
-port: 8034
