@@ -29,7 +29,8 @@ from fastapi.responses import HTMLResponse, Response
 from openad.helpers.output import output_text, output_error, output_success
 
 # omgui
-from omgui.gui_routes import create_router
+from omgui import ctx
+from omgui.gui_routes import gui_router
 from omgui.helpers import gui_install
 from omgui.helpers.jupyter import nb_mode
 from omgui.helpers.general import next_avail_port, wait_for_port
@@ -83,7 +84,7 @@ class GUIThread(Thread):
         _print_shutdown_msg(self.host, self.port)
 
 
-def gui_init(ctx, path=None, data=None, silent=False):
+def gui_init(path=None, data=None, silent=False):
     """
     Check if the GUI is installed and start the server.
 
@@ -93,8 +94,6 @@ def gui_init(ctx, path=None, data=None, silent=False):
 
     Parameters
     ----------
-    ctx : object, required
-        The context object.
     path : str, optional
         The path to load. If none is provided, the filebrowser is loaded.
     data : dict, optional
@@ -107,13 +106,13 @@ def gui_init(ctx, path=None, data=None, silent=False):
     """
     # Jupyter: wrap up immediately
     if NOTEBOOK_MODE:
-        _gui_init(ctx, path, data, silent=True)
+        _gui_init(path, data, silent=True)
         return
 
     # Terminal: keep alive main thread
     # --> allow Ctrl+C to stop it elegantly
     try:
-        _gui_init(ctx, path, data, silent)
+        _gui_init(path, data, silent)
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
@@ -121,10 +120,10 @@ def gui_init(ctx, path=None, data=None, silent=False):
         pass
     finally:
         # Redundant, but to be safe
-        cleanup(ctx)
+        cleanup()
 
 
-def _gui_init(ctx, path=None, data=None, silent=False):
+def _gui_init(path=None, data=None, silent=False):
     # Install the GUI if needed
     gui_install.ensure()
 
@@ -133,10 +132,10 @@ def _gui_init(ctx, path=None, data=None, silent=False):
     hash = ""
 
     # Launch the GUI
-    _launch(ctx, path, query, hash, silent)
+    _launch(path, query, hash, silent)
 
 
-def _launch(ctx, path=None, query="", hash="", silent=False):
+def _launch(path=None, query="", hash="", silent=False):
     """
     Launch the GUI web server in a separate thread.
     """
@@ -160,7 +159,6 @@ def _launch(ctx, path=None, query="", hash="", silent=False):
     register_exception_handlers(app)
 
     # Include API routes
-    gui_router = create_router(ctx)
     app.include_router(gui_router, prefix="", tags=["GUI API"])
 
     # Shutdown route
@@ -322,17 +320,17 @@ def _open_browser(host, port, path, query, hash, silent=False):
         _print_launch_msg(url)
 
 
-def gui_shutdown(ctx=None, silent=False):
+def gui_shutdown(silent=False):
     """
     Shutdown the GUI server if it is running.
     """
+
     # Clear all working copy molsets in the /wc_cache folder
-    if ctx is not None:
-        workspace_path = ctx.workspace_path()
-        cache_dir = workspace_path + "/._openad/wc_cache"
-        if os.path.exists(cache_dir):
-            for file in os.listdir(cache_dir):
-                os.remove(os.path.join(cache_dir, file))
+    workspace_path = ctx().workspace_path()
+    cache_dir = workspace_path + "/._openad/wc_cache"
+    if os.path.exists(cache_dir):
+        for file in os.listdir(cache_dir):
+            os.remove(os.path.join(cache_dir, file))
 
     # Shutdown the server
     if GUI_SERVER and GUI_SERVER.is_running():
@@ -341,11 +339,11 @@ def gui_shutdown(ctx=None, silent=False):
         output_error("The GUI server is not running")
 
 
-def cleanup(ctx=None):
+def cleanup():
     """
     Cleanup function to be called at exit of the main process.
     """
-    gui_shutdown(ctx, silent=True)
+    gui_shutdown(silent=True)
 
 
 # Stylized launch message for the web server

@@ -8,20 +8,17 @@ from pathlib import Path
 
 from openad.helpers.files import open_file, file_stats
 
-from omgui import context
+from omgui import ctx
 from omgui.workers.smol_functions import create_molset_cache_file, get_molset_mols
 from omgui.workers.smol_transformers import (
     smiles_path2molset,
     sdf_path2molset,
     mdl_path2smol,
 )
-from omgui.workers.mmol_transformers import cif2mmol, pdb2mmol
-from omgui.helpers.mol_utils import create_molset_response
 
 # from omgui.helpers import logger
-
-# Load context
-ctx = context.get()
+from omgui.workers.mmol_transformers import cif2mmol, pdb2mmol
+from omgui.helpers.mol_utils import create_molset_response
 
 
 # File and directory names to hide in the file browser.
@@ -44,7 +41,7 @@ def delete_file(path_absolute=""):
     Move a file to the workspace trash.
     The trash gets cleared at the end of a session.
     """
-    trash_dir = ctx.workspace_path() / ".trash"
+    trash_dir = ctx().workspace_path() / ".trash"
     os.makedirs(trash_dir, exist_ok=True)
     os.system(f"mv '{path_absolute}' '{trash_dir}'")
 
@@ -57,7 +54,7 @@ def get_files(path=""):
     """
 
     # Get workspace path.
-    workspace_path = ctx.workspace_path()
+    workspace_path = ctx().workspace_path()
     dir_path = workspace_path / path
 
     # Dict structure for one level.
@@ -114,7 +111,7 @@ def get_files(path=""):
     #
 
     # Attach workspace name
-    workspace_name = ctx.workspace
+    workspace_name = ctx().workspace
     dir_name = path.split("/")[-1]
     level["dirname"] = workspace_name if not path else dir_name
 
@@ -158,7 +155,7 @@ def _compile_filedir_obj(path):
         The path of the file relative to the workspace, including the filename.
 
     """
-    workspace_path = ctx.workspace_path()
+    workspace_path = ctx().workspace_path()
     path_absolute = os.path.join(workspace_path, path)
     filename = os.path.basename(path)
 
@@ -263,7 +260,7 @@ def _attach_file_data(file_obj, query=None):
 
             # For JSON files, we can simply copy the original file (fast).
             if ext == "json":
-                cache_id = create_molset_cache_file(ctx, path_absolute=path_absolute)
+                cache_id = create_molset_cache_file(ctx(), path_absolute=path_absolute)
 
             # All other cases, write file from memory.
             else:

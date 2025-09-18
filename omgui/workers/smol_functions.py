@@ -20,10 +20,10 @@ from rdkit import Chem, rdBase, RDLogger
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 
-from omgui import context
+from omgui import ctx
 from omgui.helpers import logger
 from omgui.helpers.paths import parse_path
-from omgui.workers.smol_transformers import dataframe2molset
+from omgui.workers import smol_transformers
 
 
 # OpenAD imports
@@ -48,9 +48,6 @@ from openad.smols.smol_transformers import (
     csv_path2molset,
     smiles_path2molset,
 )
-
-# Load context
-ctx = context.get()
 
 
 # Silcence RDKit errors
@@ -281,7 +278,7 @@ def get_smol_from_mws(identifier: str, ignore_synonyms: bool = False) -> dict | 
         The OpenAD smol dictionary if found, otherwise None.
     """
 
-    smol = get_smol_from_list(identifier, ctx.mws(), ignore_synonyms=ignore_synonyms)
+    smol = get_smol_from_list(identifier, ctx().mws(), ignore_synonyms=ignore_synonyms)
     if smol is not None:
         return deepcopy(smol)
     return None
@@ -1456,7 +1453,7 @@ def assemble_cache_path(file_type: str, cache_id: str) -> str:
         The cache ID of the file.
     """
 
-    workspace_path = ctx.workspace_path()
+    workspace_path = ctx().workspace_path()
     return workspace_path / "._system" / "wc_cache " / f"{file_type}-{cache_id}.json"
 
 
@@ -1725,9 +1722,9 @@ def load_mols_to_mws(inp):
 
     # Load from dataframe
     if df_name:
-        df = ctx.vars.get(df_name)
-        molset = dataframe2molset(df)
-        # molset = normalize_mol_df(ctx.vars.get(inp.as_dict().get("in_dataframe")), batch=True)
+        df = ctx().vars.get(df_name)
+        molset = smol_transformers.dataframe2molset(df)
+        # molset = normalize_mol_df(ctx().vars.get(inp.as_dict().get("in_dataframe")), batch=True)
         if molset is None:
             return output_error("The provided dataframe does not contain molecules")
 
@@ -1743,7 +1740,7 @@ def load_mols_to_mws(inp):
 
     # Clear mws unless append is passed
     if "append" not in inp:
-        ctx.mws_clear()
+        ctx().mws_clear()
 
     added_count = 0
     failed_count = 0
@@ -1874,7 +1871,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
             or "merge_molecules_data_dataframe-DEPRECATED"  # Can be removed once the deprecated syntax has been removed
             in inp.as_dict()
         ):
-            dataframe = ctx.vars.get(inp.as_dict().get("in_dataframe"))
+            dataframe = ctx().vars.get(inp.as_dict().get("in_dataframe"))
 
         # Load from file (not yet implemented)
         else:
@@ -1954,7 +1951,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
             GLOBAL_SETTINGS["grammar_refresh"] = True
             if update_flag is True:
                 srv_molecules.remove_mol_from_mws(smol=merge_smol, silent=True)
-            ctx.mws_add(smol)
+            ctx().mws_add(smol)
 
     output_success("Data merged into your working set", return_val=False)
     GLOBAL_SETTINGS["grammar_refresh"] = True
@@ -1970,7 +1967,7 @@ def _load_mol_data(file_path):
     if file_path.split(".")[-1].lower() == "sdf":
         try:
             name = file_path.split("/")[-1]
-            sdf_file = ctx.workspace_path() / name
+            sdf_file = ctx().workspace_path() / name
             mol_frame = Chem.PandasTools.LoadSDF(sdf_file)
             return mol_frame
         except Exception as err:  # pylint: disable=broad-except
@@ -1981,7 +1978,7 @@ def _load_mol_data(file_path):
     elif file_path.split(".")[-1].lower() == "csv":
         try:
             name = file_path.split("/")[-1]
-            csv_file = ctx.workspace_path() / name
+            csv_file = ctx().workspace_path() / name
             mol_frame = pandas.read_csv(csv_file, dtype="string")
             return mol_frame
         except Exception as err:

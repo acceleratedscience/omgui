@@ -36,11 +36,18 @@ def get():
     return Context()
 
 
-def set_session(workspace: str):
+def ctx():
     """
-    Set the current context (global or session).
+    Get the context singleton instance.
     """
-    Context(session=True, workspace=workspace)
+    return Context()
+
+
+def new_session():
+    """
+    Create a new session-only context.
+    """
+    Context(session=True)
 
 
 class Context:
@@ -54,15 +61,15 @@ class Context:
 
     # Context values
     workspace: str
-    temp: bool = False  # Session-only context
+    session: bool = False  # Session-only context
     _mws: list
     vars: dict
 
     # Default context values
     default_context = {
         "workspace": "DEFAULT",
-        "temp": False,
         "vars": {},
+        "session": False,
         "_mws": [],
     }
 
@@ -70,7 +77,7 @@ class Context:
     # region - Initialization
     # ------------------------------------
 
-    def __new__(cls, *args, session: bool = None, workspace: str = None, **kwargs):
+    def __new__(cls, *args, session: bool = None, **kwargs):
         """
         Control singleton instance creation.
         """
@@ -79,7 +86,7 @@ class Context:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, session: bool = None, workspace: str = None):
+    def __init__(self, session: bool = None):
         """
         Initializes the context manager.
 
@@ -96,8 +103,7 @@ class Context:
         # A: Create virgin session context
         if session:
             _context = self.default_context.copy()
-            _context["workspace"] = workspace
-            _context["temp"] = True  # Mark as session-only
+            _context["session"] = True  # Mark as session-only
             _context["_mws"] = []
 
         # B: Load global context from file
@@ -119,8 +125,8 @@ class Context:
             self._mws = self._load_mws()
 
         # Save the context to file
-        self._save()
         self._initialized = True
+        self._save()
 
     def _load_global_context(self):
         """
@@ -157,7 +163,7 @@ class Context:
         Saves the current context to the context file in the data directory.
         """
         # Session context is not saved to disk
-        if self.temp:
+        if self.session:
             return
 
         try:
@@ -178,7 +184,7 @@ class Context:
         except Exception as err:  # pylint: disable=broad-except
             logger.error(f"An error occurred while saving the context file: {err}")
 
-    def get(self):
+    def get_dict(self):
         """
         Displays the current context, mainly for debugging purposes.
         """
@@ -313,7 +319,7 @@ class Context:
             self._mws = self._load_mws()
         return self._mws
 
-    def mws_set(self, molset: list, append: bool = False):
+    def mws_load(self, molset: list, append: bool = False):
         """
         Load a molset into the molecule working set.
         """
@@ -323,18 +329,6 @@ class Context:
             self._mws = molset
         self._save()
         return True
-
-    def mws_count(self):
-        """
-        Returns the number of molecules in the current molecule working set.
-        """
-        return len(self._mws)
-
-    def mws_is_empty(self):
-        """
-        Returns whether the current molecule working set is empty.
-        """
-        return len(self._mws) == 0
 
     def mws_add(self, smol):
         """

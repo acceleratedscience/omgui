@@ -1,5 +1,7 @@
 import time
 import socket
+import readline
+from openad.helpers.output import output_text
 
 
 def next_avail_port(port=8024, host="127.0.0.1"):
@@ -46,4 +48,20 @@ def wait_for_port(host, port, timeout=5.0, interval=0.1):
             # Keep retrying until the deadline is reached
             time.sleep(interval)
     # Timed out
+    return False
+
+
+# Confirm promt for True or False Questions
+def confirm_prompt(question: str = "", default=False) -> bool:
+    reply = None
+    while reply not in ("y", "n"):
+        try:
+            output_text(f"<yellow>{question}</yellow>", return_val=False)
+            reply = input("(y/n): ").casefold()
+            readline.remove_history_item(readline.get_current_history_length() - 1)
+        except KeyboardInterrupt:
+            print("\n")
+            return default
+    if reply == "y":
+        return True
     return False

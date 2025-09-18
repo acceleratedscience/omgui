@@ -6,7 +6,7 @@ import pandas as pd
 from IPython import get_ipython
 from openad.helpers.files import open_file
 
-from omgui import context
+from omgui import ctx
 from omgui.workers.smol_functions import (
     df_has_molecules,
     flatten_smol,
@@ -17,17 +17,14 @@ from omgui.workers.smol_functions import (
 from omgui.workers.smol_transformers import dataframe2molset
 from omgui.helpers.mol_utils import create_molset_response
 
-# Load context
-ctx = context.get()
-
 
 def get_dataframe(df_name, query):
     """
     Fetch the data from a dataframe referred to in a magic command.
     """
 
-    if ctx.vars:
-        df = ctx.vars.get(df_name)
+    if ctx().vars:
+        df = ctx().vars.get(df_name)
         if df is not None and not df.empty:
             # Dataframe has molecules -> load as molset
             if df_has_molecules(df):
@@ -85,7 +82,7 @@ def update_dataframe_molset(df_name, cache_id):
 
     # Store the columns of the current result table,
     # so we can recreate them when overwriting the result.
-    df = ctx.vars.get(df_name)
+    df = ctx().vars.get(df_name)
     columns = df.columns.tolist()
 
     # Create new table.

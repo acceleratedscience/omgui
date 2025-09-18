@@ -1,8 +1,5 @@
 from typing import Any
-from omgui import context
-
-# Load context
-ctx = context.get()
+from omgui import ctx
 
 
 def add(identifier: str, basic: bool = False) -> None:
@@ -37,7 +34,7 @@ def get() -> list[dict[str, Any]]:
     """
     Get the current molecule working set.
     """
-    return ctx.mws()
+    return ctx().mws()
 
 
 def get_names() -> list[str]:
@@ -46,8 +43,22 @@ def get_names() -> list[str]:
     """
     from omgui.workers.smol_transformers import molset_to_names_list
 
-    mws = ctx.mws()
+    mws = ctx().mws()
     return molset_to_names_list(mws)
+
+
+def count() -> int:
+    """
+    Get the number of molecules in the current working set.
+    """
+    return len(ctx().mws())
+
+
+def is_empty() -> bool:
+    """
+    Returns whether the current molecule working set is empty.
+    """
+    return len(ctx().mws()) == 0
 
 
 def open() -> None:
@@ -56,4 +67,4 @@ def open() -> None:
     """
     from omgui.gui_launcher import gui_init as _gui_init
 
-    return _gui_init(ctx, path="mws")
+    return _gui_init(path="mws")

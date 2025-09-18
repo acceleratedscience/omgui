@@ -33,7 +33,7 @@ from omgui.workers.mmol_functions import mmol_from_identifier
 from omgui.workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
 
 # Various
-from omgui import context
+from omgui import ctx
 from omgui.helpers import logger
 from omgui.helpers import JSONDecimalEncoder
 from omgui.helpers.mol_utils import create_molset_response
@@ -45,9 +45,6 @@ from openad.helpers.output import (
     output_success,
     output_text,
 )
-
-# Load context
-ctx = context.get()
 
 
 # ------------------------------------
@@ -178,7 +175,7 @@ def save_mol(mol, path, new_file=True, force=False, format_as="mol_json"):
         raise omg_exc.InvalidMoleculeInput
 
     # Compile path
-    workspace_path = ctx.workspace_path()
+    workspace_path = ctx().workspace_path()
     file_path = workspace_path / path
 
     # Throw error when detination file (does not) exist(s).
@@ -262,9 +259,9 @@ def get_molset_mws(query=None):
     """
     Get the list of molecules currently stored in the molecule working set.
     """
-    if len(ctx.mws()) > 0:
+    if len(ctx().mws()) > 0:
         # Add index
-        molset = ctx.mws()
+        molset = ctx().mws()
         for i, smol in enumerate(molset):
             smol["index"] = i + 1
 
@@ -346,7 +343,7 @@ def save_molset(
 
     """
     # Compile path
-    workspace_path = ctx.workspace_path()
+    workspace_path = ctx().workspace_path()
     file_path = workspace_path / path
     cache_path = assemble_cache_path("molset", cache_id)
 
@@ -414,7 +411,7 @@ def save_molset(
         for mol in molset:
             molset.append(mol)
 
-        ctx.mws_set(molset)
+        ctx().mws_load(molset)
 
     return True
 
@@ -506,7 +503,7 @@ def add_mol_to_mws(
         return True
 
     # Add to working set
-    ctx.mws_add(smol)
+    ctx().mws_add(smol)
     if not silent:
         output_success(f"Molecule <yellow>{name}</yellow> was added", return_val=False)
     return True
@@ -535,11 +532,11 @@ def remove_mol_from_mws(identifier: str = None, smol: dict = None, silent=False)
 
     try:
         # Find matching molecule
-        for i, item in enumerate(ctx.mws()):
+        for i, item in enumerate(ctx().mws()):
             if item.get("identifiers", {}).get("inchikey") == inchikey:
 
                 # Remove from mws
-                ctx.mws_remove(i)
+                ctx().mws_remove(i)
 
                 # Feedback
                 if not silent:
@@ -583,10 +580,10 @@ def clear_mws():
     """
     Clear the molecule working set.
     """
-    if len(ctx.mws()) == 0:
+    if len(ctx().mws()) == 0:
         output_warning("No molecules to clear", return_val=False)
         return True
-    ctx.mws_clear()
+    ctx().mws_clear()
     output_success("✅ Molecule working set cleared", return_val=False)
     return True
 
