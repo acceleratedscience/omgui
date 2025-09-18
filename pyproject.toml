@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omgui"
+version = "0.0.1"
+authors = [
+  { name="Moenen Erbuer / IBM Research", email="moenen.erbuer@ibm.com" },
+]
+description = "OMGUI is a library to visualize small molecules, macromolecules and various types of data on the fly."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "fastapi>=0.115.7",
+  "uvicorn>=0.34.2",
+  "Jinja2>=3.1.4",
+  "redis>=6.2.0",
+  "pandas>=2.2.3",
+  "rdkit>=2024.9.6",
+  "cinemol>=1.0.2",
+  "CairoSVG>=2.8.2",
+  "plotly>=6.3.0",
+  "kaleido>=1.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/acceleratedscience/omgui"
+"Bug Tracker" = "https://github.com/acceleratedscience/omgui/issues"
+
+
+
+# pip install omgui[dev]
+[project.optional-dependencies]
+dev = []

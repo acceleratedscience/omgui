@@ -1,0 +1,15 @@
+# Core
+fastapi
+uvicorn[standard]
+jinja2
+redis
+pandas
+
+# Molecule rendering
+rdkit
+cinemol
+cairosvg
+
+# Chart rendering
+plotly
+kaleido
