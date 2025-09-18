@@ -20,11 +20,15 @@ from typing import Any
 from pathlib import Path
 
 # OMGUI
-from omgui.context import ctx, new_session
-from omgui import mws  # Expose sub-modules
+from omgui import context
+from omgui.helpers import logger
+from omgui.configuration import config
 
+# Expose for simpler imports in our own codebase
+from omgui.context import ctx
 
-from openad.helpers.output import output_text, output_error, output_success
+# Sub-modules for the public API
+from omgui import mws
 
 
 # ------------------------------------
@@ -32,77 +36,48 @@ from openad.helpers.output import output_text, output_error, output_success
 # ------------------------------------
 
 
-def config(
-    session: bool = False,
-    prompt: bool = True,
-    workspace: str = "DEFAULT",
-    dir: str = "~/.omgui",
-    host: str = "localhost",
-    port: int = 8024,
-    base_path: str = "",
-    log_level: str = "INFO",
+def configure(
+    session: bool | None = None,
+    prompt: bool | None = None,
+    workspace: str | None = None,
+    data_dir: str | None = None,
+    host: str | None = None,
+    port: int | None = None,
+    base_path: str | None = None,
+    log_level: str | None = None,
 ) -> None:
     """
     Configuration options to be set right after import.
 
-    Every option corresponds to an environment variable
-    in SCREAMING_SNAKE_CASE.
-
-    Options
-    -------
-    session: bool, default False / .env: OMGUI_SESSION
-        By default, all omgui instances share a global context,
-        with a persistent molecule working set per workspace.
-        When you switch workspace, this affects all sessions.
-        When you set session=True, a new session-only context
-        is created, which does not affect other sessions. Your
-        molecule working set will reset when you exit this session.
-
-    prompt: bool, default True / .env: OMGUI_PROMPT
-        Whether to show confirmation prompts for certain actions.
-        If set to False, all prompts will be skipped and the
-        default action will be taken.
-
-    workspace: str, default "DEFAULT" / .env: OMGUI_WORKSPACE
-        Set workspace on startup. If the given workspace doesn't
-        exist, it will be created.
-
-    dir: str, default "~/.omgui" / .env: OMGUI_DIR
-        Data directory for the application storage.
-
-    host: str, default "localhost" / .env: OMGUI_HOST
-        Hostname for the GUI server. Use "0.0.0.0" to
-        allow external access.
-
-    port: int, default 8024 / .env: OMGUI_PORT
-        Port for the GUI server. If occupied, the next
-        available port will be used, so 8025 etc.
-
-    base_path: str, default "" / .env: OMGUI_BASE_PATH
-        Base path for the GUI server. If you are running
-        the server behind a reverse proxy, you might need
-        to set this to the subpath where the server is reachable.
-        For example, if the server is reachable at
-        "https://mydomain.com/omgui/", set base_path to "/omgui".
-
-    log_level: str, default "INFO" / .env: OMGUI_LOG_LEVEL
-        Log level for the server. One of "DEBUG", "INFO",
-        "WARNING", "ERROR", "CRITICAL".
+    See configuration.py for details.
     """
 
     if session:
-        new_session()
+        config().set("session", True)
+        context.new_session()  # Create a new session-only context
+
+    if prompt:
+        config().set("prompt", prompt)
 
     if workspace:
-        ctx().set_workspace(workspace)
+        config().set("workspace", workspace)
+        ctx().set_workspace(workspace)  # Set the workspace in the context
 
-    output_success(
-        [
-            f"✅ Session-only context created - workspace: {workspace}",
-            "Your molecule working set will reset when you exit this session.",
-        ],
-        return_val=False,
-    )
+    if data_dir:
+        config().set("data_dir", data_dir)
+
+    if host:
+        config().set("host", host)
+
+    if port:
+        config().set("port", port)
+
+    if base_path:
+        config().set("base_path", base_path)
+
+    if log_level:
+        config().set("log_level", log_level)
+        logger.setLevel(log_level)
 
 
 def get_context():

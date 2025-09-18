@@ -24,16 +24,9 @@ Usage:
 import json
 from pathlib import Path
 
-from omgui.config import config
+from omgui.configuration import config
 from omgui.helpers import logger
 from openad.helpers.output import output_text, output_error, output_success
-
-
-def get():
-    """
-    Get the context singleton instance.
-    """
-    return Context()
 
 
 def ctx():
@@ -48,11 +41,18 @@ def new_session():
     Create a new session-only context.
     """
     Context(session=True)
+    output_success(
+        [
+            "✅ Session-only context created",
+            "Your molecule working set will reset when you exit this session.",
+        ],
+        return_val=False,
+    )
 
 
 class Context:
     """
-    Application context manager for OMGUI.
+    Context singleton for omgui.
     """
 
     # Singleton instance
@@ -111,8 +111,8 @@ class Context:
             _context = self._load_global_context()
 
         # Set context attributes
-        for key, value in self.default_context.items():
-            if key in _context:
+        for key, value in _context:
+            if self.default_context.items().get(key) is not None:
                 setattr(self, key, _context[key])
             else:
                 setattr(self, key, value)
