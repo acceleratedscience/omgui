@@ -4,7 +4,12 @@ Dataframe functions for OMGUI API endpoints.
 
 import pandas as pd
 from IPython import get_ipython
-from openad.helpers.files import open_file
+
+
+# from openad.helpers.files import open_file
+def open_file(cache_path, return_err):
+    pass  # Placeholder, to be replaced
+
 
 from omgui import ctx
 from omgui.workers.smol_functions import (

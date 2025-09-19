@@ -25,19 +25,13 @@ from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 
 # OMGUI
 from omgui import ctx
-from omgui.util.paths import parse_path
 from omgui.workers import smol_transformers
-from spf import spf
-
-# OpenAD imports
-from openad.helpers.output_msgs import msg
-from openad.helpers.general import pretty_date, is_numeric, merge_dict_lists
-from openad.helpers.spinner import spinner
-from openad.helpers.json_decimal_encoder import DecimalEncoder
-from openad.helpers.data_formats import OPENAD_SMOL_DICT
-from openad.app.global_var_lib import GLOBAL_SETTINGS
-from openad.plugins.style_parser import style
-from openad.smols.smol_transformers import (
+from omgui.util.spinner import spinner
+from omgui.util.paths import parse_path
+from omgui.util.json_decimal_encoder import JSONDecimalEncoder
+from omgui.util.general import pretty_date, is_numeric, merge_dict_lists
+from omgui.workers.data_structures import OPENAD_SMOL_DICT
+from omgui.workers.smol_transformers import (
     molset2dataframe,
     write_dataframe2sdf,
     write_dataframe2csv,
@@ -45,6 +39,7 @@ from openad.smols.smol_transformers import (
     csv_path2molset,
     smiles_path2molset,
 )
+from spf import spf
 
 
 # Silcence RDKit errors
@@ -896,7 +891,7 @@ def save_molset_as_json(molset: list, file_path: str):
     # Write json to disk
     try:
         with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(molset, f, cls=DecimalEncoder, indent=4)
+            json.dump(molset, f, cls=JSONDecimalEncoder, indent=4)
             return True, None
     except Exception as err:  # pylint: disable=broad-except
         return False, {"error_msg": f"Error writing molset.json file: {err}"}
@@ -1232,7 +1227,7 @@ def normalize_mol_df(mol_df: pandas.DataFrame, batch: bool = False) -> pandas.Da
     # Add names when missing.
     try:
         if has_name is False:
-            spf.warning(msg("no_m2g_name_column"))  # @@todo clean
+            spf.warning("No name column identifed in data set")
 
             if not batch:
                 spinner.start("Downloading names")
@@ -1769,7 +1764,9 @@ def _enrich_with_pubchem_data(molset):
                 (value for key, value in identifiers.items() if key.lower() == "name"),
                 None,
             )
-            spinner.text = style(f"<soft>Fetching from PubChem: #{i} - {name}</soft>")
+            spinner.text = spf.produce(
+                f"<soft>Fetching from PubChem: #{i} - {name}</soft>"
+            )
 
             # Use fallback name is missing
             if not name:
@@ -1903,7 +1900,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
         try:
             smiles = canonicalize(row[smiles_key])
             merge_smol = get_smol_from_mws(smiles)
-            GLOBAL_SETTINGS["grammar_refresh"] = True
+            # GLOBAL_SETTINGS["grammar_refresh"] = True # TODO: replace with callback
         except Exception:  # pylint: disable=broad-except
             spf.warning("unable to canonicalise:" + row[smiles_key])
             continue
@@ -1916,13 +1913,13 @@ def merge_molecule_property_data(inp=None, dataframe=None):
 
         if merge_smol is not None:
             smol = merge_molecule_properties(row, merge_smol)
-            GLOBAL_SETTINGS["grammar_refresh"] = True
+            # GLOBAL_SETTINGS["grammar_refresh"] = True # TODO: replace with callback
             if update_flag is True:
                 srv_molecules.remove_mol_from_mws(smol=merge_smol, silent=True)
             ctx().mws_add(smol)
 
     spf.success("Data merged into your working set")
-    GLOBAL_SETTINGS["grammar_refresh"] = True
+    # GLOBAL_SETTINGS["grammar_refresh"] = True # TODO: replace with callback
     return True
 
 
@@ -1939,7 +1936,7 @@ def _load_mol_data(file_path):
             mol_frame = Chem.PandasTools.LoadSDF(sdf_file)
             return mol_frame
         except Exception as err:  # pylint: disable=broad-except
-            spf.error(msg("err_load", "SDF", err))
+            spf.error([f"Unable to load SDF file", err])
             return None
 
     # CSV
@@ -1950,7 +1947,7 @@ def _load_mol_data(file_path):
             mol_frame = pandas.read_csv(csv_file, dtype="string")
             return mol_frame
         except Exception as err:
-            spf.error(msg("err_load", "CSV", err))
+            spf.error([f"Unable to load CSV file", err])
             return None
 
 
@@ -1988,7 +1985,7 @@ def index_molset_file_async(path_absolute):
         # Write
         async with aiofiles.open(cache_path, "w", encoding="utf-8") as f:
             await f.write(
-                json.dumps(molset, ensure_ascii=False, indent=4, cls=DecimalEncoder)
+                json.dumps(molset, ensure_ascii=False, indent=4, cls=JSONDecimalEncoder)
             )
 
     asyncio.run(_index_molset_file(path_absolute))

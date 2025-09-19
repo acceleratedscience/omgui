@@ -1,9 +1,11 @@
-import re
+# Std
 import json
+
+# 3rd party
 import requests
-from Bio import Entrez
-from collections import OrderedDict
-from openad.helpers.general import encode_uri_component
+
+# OMGUI
+from omgui.util.general import encode_uri_component
 
 
 def mmol_from_identifier(identifier):
@@ -232,6 +234,7 @@ def ncbi_search(identifier):
 
     Currently not used.
     """
+    from Bio import Entrez
 
     # NCBI identification
     # https://biopython.org/docs/latest/Tutorial/chapter_entrez.html#entrez-guidelines

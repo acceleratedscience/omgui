@@ -18,8 +18,6 @@ from omgui.workers.smol_transformers import (
 from omgui.workers.mmol_transformers import cif2mmol, pdb2mmol
 from omgui.util.mol_utils import create_molset_response
 
-from openad.helpers.files import open_file, file_stats
-
 # File and directory names to hide in the file browser.
 IGNORE_FILES = [".DS_Store", "._system"]
 
@@ -159,16 +157,18 @@ def _compile_filedir_obj(path):
     filename = os.path.basename(path)
 
     # Get file exists or error code.
-    f_stats, err_code = file_stats(path_absolute)
+    f_stats = os.stat(path_absolute)
 
-    # No file/dir found
-    if err_code:
-        return {
-            "_meta": {"errCode": err_code},
-            "filename": filename,
-            "path": path,
-            "pathAbsolute": path_absolute,
-        }
+    # TODO: review, no longer used since we moved away from file_stats()
+
+    # # No file/dir found
+    # if err_code:
+    #     return {
+    #         "_meta": {"errCode": err_code},
+    #         "filename": filename,
+    #         "path": path,
+    #         "pathAbsolute": path_absolute,
+    #     }
 
     # File
     if os.path.isfile(path_absolute):

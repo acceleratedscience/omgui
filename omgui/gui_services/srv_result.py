@@ -3,8 +3,18 @@ Result memory functions for OMGUI API endpoints.
 """
 
 import pandas as pd
-from openad.helpers.files import open_file
-from openad.app.global_var_lib import MEMORY
+
+# from openad.helpers.files import open_file
+# from openad.app.global_var_lib import MEMORY
+
+# Placeholders, to be replaced
+MEMORY = {}
+
+
+def open_file(cache_path, return_err):
+    pass
+
+
 from omgui.workers.smol_functions import (
     df_has_molecules,
     flatten_smol,

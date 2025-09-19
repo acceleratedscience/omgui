@@ -1,7 +1,12 @@
+# Std
 import copy
+
+# 3rd party
 import gemmi
-from openad.helpers.data_formats import OPENAD_MMOL_DICT
-from openad.mmols.mmol_functions import parse_cif_block
+
+# OMGUI
+from omgui.workers.mmol_functions import parse_cif_block
+from omgui.workers.data_structures import OPENAD_MMOL_DICT
 
 
 def mmol2cif(mmol_dict, path=None):

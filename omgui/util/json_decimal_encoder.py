@@ -6,9 +6,9 @@ https://stackoverflow.com/a/1960649
 
 Usage:
     import json
-    from openad.helpers.json_decimal_encoder import DecimalEncoder
+    from omgui.util.json_decimal_encoder import JSONDecimalEncoder
     data = {"a": Decimal("1.1")}
-    print(json.dumps(data, cls=DecimalEncoder))
+    print(json.dumps(data, cls=JSONDecimalEncoder))
 """
 
 import json
