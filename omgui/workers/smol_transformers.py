@@ -2,11 +2,16 @@
 Functions to translate between different molecule and molecule set formats.
 """
 
-import ast
+# Std
 import json
-import pandas as pd
 from pathlib import Path
+
+# 3rd party
+import ast
+import pandas as pd
 from rdkit import Chem, RDLogger
+from rdkit.Chem import Draw
+from rdkit.Chem.rdDistGeom import EmbedMolecule
 
 # OMGUI
 import omgui.workers.smol_functions as smol_functions
@@ -33,7 +38,7 @@ def smol2svg(inchi_or_smiles, highlight=None):
     highlight: str
         A SMARTS string to highlight a substructure in the molecule.
     """
-    # Generate RDKit molecule object.
+    # Generate RDKit molecule object
     mol_rdkit = Chem.MolFromInchi(inchi_or_smiles)
     if not mol_rdkit:
         mol_rdkit = Chem.MolFromSmiles(inchi_or_smiles)  # pylint: disable=no-member
@@ -47,7 +52,7 @@ def smol2svg(inchi_or_smiles, highlight=None):
     else:
         highlight_atoms = None
 
-    mol_drawer = Chem.Draw.MolDraw2DSVG(400, 300)  # pylint: disable=no-member
+    mol_drawer = Draw.MolDraw2DSVG(400, 300)  # pylint: disable=no-member
     mol_drawer.DrawMolecule(mol_rdkit, highlightAtoms=highlight_atoms)
     mol_drawer.FinishDrawing()
     return mol_drawer.GetDrawingText()
@@ -87,7 +92,7 @@ def smol2mdl(smol=None, inchi_or_smiles=None, path=None):
     mol_rdkit = Chem.AddHs(mol_rdkit)  # pylint: disable=no-member
 
     # Generate 3D coordinates.
-    Chem.rdDistGeom.EmbedMolecule(mol_rdkit)  # pylint: disable=no-member
+    EmbedMolecule(mol_rdkit)
 
     # Generate MDL data.
     mol_mdl = Chem.MolToMolBlock(mol_rdkit)  # pylint: disable=no-member

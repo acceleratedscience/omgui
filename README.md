@@ -1,5 +1,7 @@
 <!-- source ../agenv/bin/activate -->
 
+<!-- python -m test -->
+
 OMGUI / Open Modular Graphical User Interface
 
 # Data Visualization

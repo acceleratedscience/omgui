@@ -165,6 +165,7 @@ class Config:
             if config_path.exists():
                 with open(config_path, "r", encoding="utf-8") as file:
                     _config_file = yaml.safe_load(file)
+                    _config_file = _config_file if _config_file else {}
 
             # Log what's loaded
             _file_vars = list(_config_file.keys())
