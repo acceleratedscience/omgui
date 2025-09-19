@@ -1,7 +1,7 @@
 import time
 import socket
 import readline
-from openad.helpers.output import output_text
+from spf import spf
 
 
 def next_avail_port(port=8024, host="127.0.0.1"):
@@ -56,7 +56,7 @@ def confirm_prompt(question: str = "", default=False) -> bool:
     reply = None
     while reply not in ("y", "n"):
         try:
-            output_text(f"<yellow>{question}</yellow>", return_val=False)
+            spf(f"<yellow>{question}</yellow>")
             reply = input("(y/n): ").casefold()
             readline.remove_history_item(readline.get_current_history_length() - 1)
         except KeyboardInterrupt:

@@ -8,9 +8,9 @@ import pandas as pd
 from pathlib import Path
 from rdkit import Chem, RDLogger
 
-from openad.helpers.files import open_file
-from openad.helpers.output import output_error
+# OMGUI
 import omgui.workers.smol_functions as smol_functions
+from spf import spf
 
 
 # Suppress RDKit errors
@@ -279,7 +279,7 @@ def molset2dataframe(molset, remove_invalid_mols=False, include_romol=False):
 
         # Store mols that failed to parse.
         if not mol_rdkit:
-            output_error("Failed to parse:", i, smiles)  # Keep this
+            spf.error("Failed to parse:", i, smiles)  # Keep this
             invalid.append(i)
             continue
 

@@ -37,13 +37,7 @@ from omgui import ctx
 from omgui.util.json_decimal_encoder import JSONDecimalEncoder
 from omgui.util.mol_utils import create_molset_response
 from omgui.util import exceptions as omg_exc
-
-from openad.helpers.output import (
-    output_error,
-    output_warning,
-    output_success,
-    output_text,
-)
+from spf import spf
 
 
 # ------------------------------------
@@ -495,16 +489,13 @@ def add_mol_to_mws(
     # Already in mws -> skip
     if get_smol_from_mws(inchikey) is not None:
         if not silent:
-            output_success(
-                f"Molecule <yellow>{name}</yellow> already in working set",
-                return_val=False,
-            )
+            spf.success(f"Molecule <yellow>{name}</yellow> already in working set")
         return True
 
     # Add to working set
     ctx().mws_add(smol)
     if not silent:
-        output_success(f"Molecule <yellow>{name}</yellow> was added", return_val=False)
+        spf.success(f"Molecule <yellow>{name}</yellow> was added")
     return True
 
 
@@ -539,26 +530,17 @@ def remove_mol_from_mws(identifier: str = None, smol: dict = None, silent=False)
 
                 # Feedback
                 if not silent:
-                    output_success(
-                        f"Molecule <yellow>{name}</yellow> was removed",
-                        return_val=False,
-                    )
+                    spf.success(f"Molecule <yellow>{name}</yellow> was removed")
                 return True
 
         # Not found
         if not silent:
-            output_error(
-                f"Molecule <yellow>{name}</yellow> not found in working set",
-                return_val=False,
-            )
+            spf.error(f"Molecule <yellow>{name}</yellow> not found in working set")
         return False
 
     except Exception as err:  # pylint: disable=broad-except
         if not silent:
-            output_error(
-                [f"Molecule <yellow>{name}</yellow> failed to be removed", err],
-                return_val=False,
-            )
+            spf.error([f"Molecule <yellow>{name}</yellow> failed to be removed", err])
         return False
 
 
@@ -580,10 +562,10 @@ def clear_mws():
     Clear the molecule working set.
     """
     if len(ctx().mws()) == 0:
-        output_warning("No molecules to clear", return_val=False)
+        spf.warning("No molecules to clear")
         return True
     ctx().mws_clear()
-    output_success("✅ Molecule working set cleared", return_val=False)
+    spf.success("✅ Molecule working set cleared")
     return True
 
 

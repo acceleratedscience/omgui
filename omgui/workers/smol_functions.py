@@ -27,15 +27,10 @@ from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 from omgui import ctx
 from omgui.util.paths import parse_path
 from omgui.workers import smol_transformers
+from spf import spf
 
 # OpenAD imports
 from openad.helpers.output_msgs import msg
-from openad.helpers.output import (
-    output_error,
-    output_warning,
-    output_success,
-    output_text,
-)
 from openad.helpers.general import pretty_date, is_numeric, merge_dict_lists
 from openad.helpers.spinner import spinner
 from openad.helpers.json_decimal_encoder import DecimalEncoder
@@ -245,15 +240,9 @@ def find_smol(
     # Fail - invalid.
     if not smol:
         if enrich:
-            output_error(
-                f"Unable to identify molecule <yellow>{identifier}</yellow>",
-                return_val=False,
-            )
+            spf.error(f"Unable to identify molecule <yellow>{identifier}</yellow>")
         else:
-            output_error(
-                f"Invalid InChI or SMILES string <yellow>{identifier}</yellow>",
-                return_val=False,
-            )
+            spf.error(f"Invalid InChI or SMILES string <yellow>{identifier}</yellow>")
 
     return smol
 
@@ -302,35 +291,35 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         smol = _get_pubchem_compound(identifier, PCY_IDFR["inchi"])
         if not smol and show_spinner:
             spinner.stop()
-            output_text(error_msg.format("InChI"))
+            spf(error_msg.format("InChI"))
     if not smol and len(identifier) == 27:
         if show_spinner:
             spinner.start("Searching PubChem for inchikey")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["inchikey"])
         if not smol and show_spinner:
             spinner.stop()
-            output_text(error_msg.format("inchikey"))
+            spf(error_msg.format("inchikey"))
     if not smol and is_numeric(identifier):
         if show_spinner:
             spinner.start("Searching PubChem for CID")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["cid"])
         if not smol and show_spinner:
             spinner.stop()
-            output_text(error_msg.format("CID"))
+            spf(error_msg.format("CID"))
     if not smol and possible_smiles(identifier):
         if show_spinner:
             spinner.start("Searching PubChem for SMILES")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["smiles"])
         if not smol and show_spinner:
             spinner.stop()
-            output_text(error_msg.format("SMILES"))
+            spf(error_msg.format("SMILES"))
     if not smol:
         if show_spinner:
             spinner.start("Searching PubChem for name")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["name"])
         if not smol and show_spinner:
             spinner.stop()
-            output_text(error_msg.format("name"))
+            spf(error_msg.format("name"))
     # # Commented out until getting no time outs from pubchem.
     # if not smol:
     #     smol = _get_pubchem_compound(identifier, PCY_IDFR["formula"])
@@ -415,7 +404,7 @@ def _get_pubchem_compound(identifier: str, identifier_type: str) -> dict | None:
         pass
 
         # # Keep here for debugging
-        # output_error(
+        # spf.error(
         #     [
         #         "Error _get_pubchem_compound()",
         #         f"identifier: {identifier}",
@@ -863,12 +852,11 @@ def load_mols_from_file(file_path):
 
         # Unsupported file type
         else:
-            output_error(
+            spf.error(
                 [
                     "Unsupported file type",
                     "Accepted file extensions are: .molset.json / .sdf / .csv / .smi",
-                ],
-                return_val=False,
+                ]
             )
 
     except (
@@ -879,9 +867,8 @@ def load_mols_from_file(file_path):
         IOError,
     ) as err:
         filename = file_path.split("/")[-1]
-        output_error(
-            [f"Failed to load molecules from file <yellow>{filename}</yellow>", err],
-            return_val=False,
+        spf.error(
+            [f"Failed to load molecules from file <yellow>{filename}</yellow>", err]
         )
 
     # Return
@@ -1068,7 +1055,7 @@ def get_smol_from_list(identifier, molset, ignore_synonyms=False):
         identifiers_dict = openad_mol.get("identifiers")
         synonyms = openad_mol.get("synonyms", [])
         if not identifiers_dict:
-            output_error("get_smol_from_list(): Invalid molset input", return_val=False)
+            spf.error("get_smol_from_list(): Invalid molset input")
             return None
 
         # Name match
@@ -1245,7 +1232,7 @@ def normalize_mol_df(mol_df: pandas.DataFrame, batch: bool = False) -> pandas.Da
     # Add names when missing.
     try:
         if has_name is False:
-            output_warning(msg("no_m2g_name_column"))  # @@todo clean
+            spf.warning(msg("no_m2g_name_column"))  # @@todo clean
 
             if not batch:
                 spinner.start("Downloading names")
@@ -1724,7 +1711,7 @@ def load_mols_to_mws(inp):
         molset = smol_transformers.dataframe2molset(df)
         # molset = normalize_mol_df(ctx().vars.get(inp.as_dict().get("in_dataframe")), batch=True)
         if molset is None:
-            return output_error("The provided dataframe does not contain molecules")
+            return spf.error("The provided dataframe does not contain molecules")
 
     # Load from file
     elif file_path:
@@ -1752,22 +1739,14 @@ def load_mols_to_mws(inp):
     # Todo: `load mols using file` should add instead of overwrite your current mols,
     # when this is implemented, we'll need to calculate successfully loaded mols differently.
     if added_count > 0:
-        output_success(
-            f"Successfully loaded <yellow>{added_count}</yellow> molecules into the working set",
-            pad=0,
-            return_val=False,
+        spf.success(
+            f"Successfully loaded <yellow>{added_count}</yellow> molecules into the working set"
         )
         if failed_count > 0:
-            output_error(
-                f"Ignored <yellow>{failed_count}</yellow> duplicates",
-                pad=0,
-                return_val=False,
-            )
+            spf.error(f"Ignored <yellow>{failed_count}</yellow> duplicates")
     else:
-        output_error(
-            f"No new molecules were added, all {failed_count} provided molecules were are already present in the working set",
-            pad=0,
-            return_val=False,
+        spf.error(
+            f"No new molecules were added, all {failed_count} provided molecules were are already present in the working set"
         )
     return
 
@@ -1816,15 +1795,13 @@ def _enrich_with_pubchem_data(molset):
             )
             name = name or identifier or "Unknown molecule"
             if not identifier:
-                output_warning(
-                    f"#{i} - No valid identifier found for {name}", return_val=False
-                )
+                spf.warning(f"#{i} - No valid identifier found for {name}")
                 continue
 
             # Fetch enriched molecule
             smol_enriched = get_smol_from_pubchem(identifier)
             if not smol_enriched:
-                output_warning(f"#{i} - Failed to enrich {name}", return_val=False)
+                spf.warning(f"#{i} - Failed to enrich {name}")
 
             # Merge enriched data
             smol = merge_smols(smol, smol_enriched)
@@ -1832,12 +1809,11 @@ def _enrich_with_pubchem_data(molset):
 
         except Exception as err:  # pylint: disable=broad-except
             spinner.stop()
-            output_error(
+            spf.error(
                 [
                     "Something went wrong enriching molecules with data from PubChem",
                     err,
-                ],
-                return_val=False,
+                ]
             )
 
     spinner.succeed("Done")
@@ -1876,7 +1852,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
             dataframe = _load_mol_data(inp.as_dict()["moles_file"])
 
         if dataframe is None:
-            output_error("Source not found ", return_val=False)
+            spf.error("Source not found ")
             return True
 
     # Detect the SMILES/subject column
@@ -1887,9 +1863,8 @@ def merge_molecule_property_data(inp=None, dataframe=None):
     elif "SMILES" in dataframe.columns:
         smiles_key = "SMILES"
     else:
-        output_error(
-            "No <yellow>subject</yellow> or <yellow>SMILES</yellow> column found in merge data",
-            return_val=False,
+        spf.error(
+            "No <yellow>subject</yellow> or <yellow>SMILES</yellow> column found in merge data"
         )
         return True
 
@@ -1899,9 +1874,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
     elif "PROPERTY" in dataframe.columns:
         prop_key = "PROPERTY"
     else:
-        output_error(
-            "No <yellow>property</yellow> column found in merge data", return_val=False
-        )
+        spf.error("No <yellow>property</yellow> column found in merge data")
         return True
 
     # Detect the value column
@@ -1914,10 +1887,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
     elif "RESULT" in dataframe.columns:
         val_key = "RESULT"
     else:
-        output_error(
-            "No <yellow>result</yellow> or <yellow>value</yellow> column found",
-            return_val=False,
-        )
+        spf.error("No <yellow>result</yellow> or <yellow>value</yellow> column found")
         return True
 
     # Pivot the dataframe
@@ -1935,7 +1905,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
             merge_smol = get_smol_from_mws(smiles)
             GLOBAL_SETTINGS["grammar_refresh"] = True
         except Exception:  # pylint: disable=broad-except
-            output_warning("unable to canonicalise:" + row[smiles_key])
+            spf.warning("unable to canonicalise:" + row[smiles_key])
             continue
 
         if merge_smol is None:
@@ -1951,7 +1921,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
                 srv_molecules.remove_mol_from_mws(smol=merge_smol, silent=True)
             ctx().mws_add(smol)
 
-    output_success("Data merged into your working set", return_val=False)
+    spf.success("Data merged into your working set")
     GLOBAL_SETTINGS["grammar_refresh"] = True
     return True
 
@@ -1969,7 +1939,7 @@ def _load_mol_data(file_path):
             mol_frame = Chem.PandasTools.LoadSDF(sdf_file)
             return mol_frame
         except Exception as err:  # pylint: disable=broad-except
-            output_error(msg("err_load", "SDF", err), return_val=False)
+            spf.error(msg("err_load", "SDF", err))
             return None
 
     # CSV
@@ -1980,7 +1950,7 @@ def _load_mol_data(file_path):
             mol_frame = pandas.read_csv(csv_file, dtype="string")
             return mol_frame
         except Exception as err:
-            output_error(msg("err_load", "CSV", err), return_val=False)
+            spf.error(msg("err_load", "CSV", err))
             return None
 
 

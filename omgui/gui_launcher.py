@@ -25,9 +25,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 
-
-from openad.helpers.output import output_text, output_error, output_success
-
 # omgui
 from omgui import config, ctx
 from omgui.gui_routes import gui_router
@@ -35,6 +32,7 @@ from omgui.util import gui_install
 from omgui.util.jupyter import nb_mode
 from omgui.util.general import next_avail_port, wait_for_port
 from omgui.util.exception_handlers import register_exception_handlers
+from spf import spf
 
 
 GUI_SERVER = None
@@ -330,7 +328,7 @@ def gui_shutdown(silent=False):
     if GUI_SERVER and GUI_SERVER.is_running():
         GUI_SERVER.shutdown()
     elif not silent:
-        output_error("The GUI server is not running")
+        spf.error("The GUI server is not running")
 
 
 def cleanup():
@@ -342,7 +340,7 @@ def cleanup():
 
 # Stylized launch message for the web server
 def _print_launch_msg(url):
-    output_text(f"<yellow>Launching GUI:</yellow>\n<link>{url}</link>", pad=1)
+    spf(f"<yellow>Launching GUI:</yellow>\n<link>{url}</link>", pad=1)
 
 
 # Stylized shutdown message for the web server
@@ -350,7 +348,7 @@ def _print_shutdown_msg(host, port):
     # prefix_char = "&empty;"
     # prefix = f"<red>{html.unescape(prefix_char)}</red> "
     prefix = "🚫 "
-    output_success(
+    spf.success(
         [
             f"{prefix}OpenAD GUI shutdown complete",
             f"{prefix}{host}:{port}",

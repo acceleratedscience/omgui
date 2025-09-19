@@ -28,8 +28,7 @@ from pathlib import Path
 # OMGUI
 from omgui.configuration import config
 from omgui.util.logger import get_logger
-
-from openad.helpers.output import output_text, output_error, output_success
+from spf import spf
 
 
 logger = get_logger()
@@ -47,12 +46,11 @@ def new_session():
     Create a new session-only context.
     """
     Context(session=True)
-    output_success(
+    spf.success(
         [
             "✅ Session-only context created",
             "Your molecule working set will reset when you exit this session.",
-        ],
-        return_val=False,
+        ]
     )
 
 
@@ -229,10 +227,7 @@ class Context:
         self._create_workspace_dir(workspace_name)
 
         self._save()
-        output_success(
-            f"Switched to new workspace: <yellow>{workspace_name}</yellow>",
-            return_val=False,
-        )
+        spf.success(f"Switched to new workspace: <yellow>{workspace_name}</yellow>")
 
     def set_workspace(self, workspace_name, silent: bool = False):
         """
@@ -241,19 +236,15 @@ class Context:
         # Set the workspace in the context
         workspace_name = workspace_name.strip().replace(" ", "_").upper()
         if workspace_name not in self.workspaces():
-            output_error(
-                f"There is no workspace named '<yellow>{workspace_name}</yellow>'",
-                return_val=False,
+            spf.error(
+                f"There is no workspace named '<yellow>{workspace_name}</yellow>'"
             )
             return
         self.workspace = workspace_name
 
         self._save()
         if not silent:
-            output_success(
-                f"Switched to workspace: <yellow>{workspace_name}</yellow>",
-                return_val=False,
-            )
+            spf.success(f"Switched to workspace: <yellow>{workspace_name}</yellow>")
 
     def _create_workspace_dir(self, workspace_name):
         """
@@ -265,9 +256,8 @@ class Context:
         if not workspace_path.exists():
             try:
                 workspace_path.mkdir(parents=True, exist_ok=True)
-                output_success(
-                    f"Created new workspace: <yellow>{workspace_path_short}</yellow>",
-                    return_val=False,
+                spf.success(
+                    f"Created new workspace: <yellow>{workspace_path_short}</yellow>"
                 )
             except Exception as err:  # pylint: disable=broad-except
                 logger.error(

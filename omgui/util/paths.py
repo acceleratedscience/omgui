@@ -4,10 +4,8 @@ import re
 
 # OMGUI
 from omgui import ctx
-
-
-from openad.helpers.output import output_error, output_warning, output_success
-from openad.helpers.general import confirm_prompt
+from omgui.util.general import confirm_prompt
+from spf import spf
 
 
 NOT_ALLOWED_ERR = [
@@ -34,7 +32,7 @@ def prepare_file_path(file_path, fallback_ext=None, force_ext=None):
     file_path = parse_path(file_path, fallback_ext, force_ext)
     file_path = _ensure_file_path(file_path)
     # if not file_path:
-    #     output_error("Directory does not exist", return_val=False)
+    #     spf.error("Directory does not exist")
     #     return None
     return file_path
 
@@ -84,7 +82,7 @@ def parse_path(file_path, fallback_ext=None, force_ext=None) -> str:
         # to do with file paths in proxy, maybe this shoudl be
         # blocked with dedicated env bar instead.
         # if is_proxy():
-        #     output_error(NOT_ALLOWED_ERR)
+        #     spf.error(NOT_ALLOWED_ERR)
         #     return None
         path = os.path.join(path, filename)
 
@@ -98,12 +96,11 @@ def parse_path(file_path, fallback_ext=None, force_ext=None) -> str:
 
     # Display wrning when file extension is changed
     if new_ext:
-        output_warning(
+        spf.warning(
             [
                 f"⚠️  File extension changed to <reset>{new_ext}</reset>",
                 f"--> {path if is_absolute else filename}",
-            ],
-            return_val=False,
+            ]
         )
     return path
 
@@ -126,7 +123,7 @@ def _ensure_file_path(file_path) -> bool:
         try:
             os.makedirs(os.path.dirname(file_path))
         except OSError as err:
-            output_error(["Error creating directory", err])
+            spf.error(["Error creating directory", err])
             return False
     return file_path
 
@@ -170,7 +167,7 @@ def block_absolute(file_path) -> bool:
         return
     """
     if is_abs_path(file_path):
-        output_error(NOT_ALLOWED_ERR)
+        spf.error(NOT_ALLOWED_ERR)
         return True
     return False
 
@@ -195,9 +192,7 @@ def fs_success(
     """
     # Absolute path
     if is_abs_path(path_input):
-        output_success(
-            f"{subject} {action}: <yellow>{path_resolved}</yellow>", return_val=False
-        )
+        spf.success(f"{subject} {action}: <yellow>{path_resolved}</yellow>")
 
     # Workspace path
     else:
@@ -206,12 +201,8 @@ def fs_success(
         workspace_path = ctx().workspace_path()
         within_workspace_path = path_resolved.replace(workspace_path, "").lstrip("/")
         if action == "saved":
-            output_success(
-                f"{subject} saved to workspace as <yellow>{within_workspace_path}</yellow>",
-                return_val=False,
+            spf.success(
+                f"{subject} saved to workspace as <yellow>{within_workspace_path}</yellow>"
             )
         elif action == "removed":
-            output_success(
-                [f"{subject} removed from workspace", within_workspace_path],
-                return_val=False,
-            )
+            spf.success([f"{subject} removed from workspace", within_workspace_path])

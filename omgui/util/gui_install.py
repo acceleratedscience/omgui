@@ -6,7 +6,7 @@ import os
 import tarfile
 import urllib.request
 from pathlib import Path
-from openad.helpers.output import output_text
+from spf import spf
 
 
 def ensure():
@@ -25,7 +25,7 @@ def install(destination_dir: Path, v: str = "0.2"):
     """
     Download and install the GUI build files.
     """
-    output_text("<soft>Installing GUI...</soft>", return_val=False)
+    spf("<soft>Installing GUI...</soft>")
 
     download_url = f"https://github.com/acceleratedscience/openad-gui/releases/download/v{v}/dist.tar.gz"
 
