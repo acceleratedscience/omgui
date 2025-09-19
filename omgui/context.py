@@ -31,8 +31,6 @@ from omgui.util.logger import get_logger
 
 from openad.helpers.output import output_text, output_error, output_success
 
-output_text("<cyan>Hello <bold>World</bold></cyan>", pad=1, edge=True)
-
 
 logger = get_logger()
 
@@ -85,7 +83,7 @@ class Context:
     # region - Initialization
     # ------------------------------------
 
-    def __new__(cls, *args, session: bool = None, **kwargs):
+    def __new__(cls, session: bool = None):
         """
         Control singleton instance creation.
         """

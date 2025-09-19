@@ -43,7 +43,7 @@ NOTEBOOK_MODE = nb_mode()
 # Optional BASE_PATH configuration
 # We always want it w/o leading slash, but with trailing slash
 # See proxy_server.py for details
-BASE_PATH = (config.base_path).strip("/") + "/"
+BASE_PATH = (config.base_path).strip("/") + "/" if config.base_path else ""
 
 
 class GUIThread(Thread):
