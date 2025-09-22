@@ -2,15 +2,17 @@
 
 ### _Open Modular Graphical User Interface_
 
-OMGUI is a dead-simple python module to visualize and triage your molecule results.
-
+OMGUI is a dead-simple python module to visualize and triage your molecule results.  
 It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](#functionality).
+
+Run it from a Jupyter Notebook or any python script.
+
+> [!WARNING]  
+> OMGUI is in development. Not all described functionality is implemented yet.
 
 <br>
 
 #### Quick Start
-
-Run it from a Jupyter Notebook or any python script:
 
 ```python
 import omgui
@@ -25,9 +27,6 @@ omgui.show_mol('dopamine')
 ```
 
 <kbd><img src="docs/assets/gui-molecule.png" /></kbd>
-
-> [!WARNING]  
-> OMGUI is in development. Not all described functionality is implemented yet.
 
 <br>
 
