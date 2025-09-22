@@ -8,6 +8,14 @@ _Open Modular Graphical User Interface_
 
 OMGUI lets visualize small molecules, macromolecules and various types of data on the fly.
 
+```python
+import omgui
+
+omgui.show_molset(['CCO', 'C=C', 'O=C=O'])
+
+omgui.show_mol('dopamine')
+```
+
 ### Install
 
 > [!NOTE]  
