@@ -219,20 +219,23 @@ def find_smol(
 
     # Look for molecule in the working set
     smol = get_smol_from_mws(identifier)
+    print("A", smol is None)
 
     # Look for molecule on PubChem
     if not smol and enrich:
         smol = get_smol_from_pubchem(identifier, show_spinner)
+        print("B", smol is None)
 
     # Try creating molecule object with RDKit.
     if not smol:
         if show_spinner:
             spinner.start("Creating molecule with RDKit")
         smol = new_smol(identifier, name=name)
+        print("C", smol is None)
         if show_spinner:
             spinner.stop()
 
-    # Fail - invalid.
+    # Fail - invalid
     if not smol:
         if enrich:
             spf.error(f"Unable to identify molecule <yellow>{identifier}</yellow>")
