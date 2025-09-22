@@ -72,6 +72,9 @@ Supported charts are:
 -   box plots
 -   histograms
 
+> [!WARNING]  
+> Not yet implemented, coming soon.
+
 ```python
 from omgui import chartviz
 
