@@ -1,6 +1,6 @@
 # OMGUI
 
-### _Open Modular Graphical User Interface_
+### _Open-source Molecular Graphical User Interface_
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/omgui)](https://pypi.org/project/omgui/)
 [![PyPI version](https://img.shields.io/pypi/v/omgui)](https://pypi.org/project/omgui/)
@@ -12,12 +12,14 @@ It supports small molecules as well as macromolecules like proteins, plus it doe
 
 Run it from a Jupyter Notebook or any python script.
 
+<br>
+
 > [!WARNING]  
 > OMGUI is in development. Not all described functionality is implemented yet.
 
 <br>
 
-#### Quick Start
+## Quick Start
 
 ```python
 import omgui
