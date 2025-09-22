@@ -1,12 +1,12 @@
-<!-- source ../agenv/bin/activate -->
-
-<!-- python -m test -->
-
 # OMGUI
 
 _Open Modular Graphical User Interface_
 
-OMGUI lets visualize small molecules, macromolecules and various types of data on the fly.
+OMGUI is a dead-simple python module to visualize and triage your molecule results.
+
+It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](#quick-start).
+
+Run it from a Jupyter Notebook or any python script:
 
 ```python
 import omgui
@@ -22,9 +22,12 @@ omgui.show_mol('dopamine')
 
 ![molecule](docs/assets/gui-molecule.png)
 
+> [!WARNING]  
+> OMGUI is in development. Not all described functionality is implemented yet.
+
 <br>
 
-### Install
+### Installation
 
 > [!NOTE]  
 > _Optional: create virtual environment_
@@ -38,17 +41,36 @@ omgui.show_mol('dopamine')
 > ```
 
 ```shell
-pip install -r requirements.txt
+# pip install omgui # To be published
+pip install git+https://github.com/themoenen/omgui@gui_merge
 ```
 
-```shell
-yes | plotly_get_chrome
+<!-- ```shell
+yes | plotly_get_cxrome
+``` -->
+
+<br>
+
+### Quick Start
+
+### Molecule viewer
+
+Inspect a single molecule.
+
+> Supports `SMILES` and `InChI` identifiers, and if the molecule exists on PubChem, you can also find it by `name`, `InChIKey` or PubChem `CID`.
+
+```python
+omgui.show_mol('dopamine')
 ```
 
-```
-uvicorn 'app.main:app' --host=0.0.0.0 --port=8034 --reload  --no-access-log
+Inspect a set of molecules.
+
+> Supported identifiers are `SMILES` and `InChI`.
+
+```python
+omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ```
 
-### Deploy
+<!-- source ../agenv/bin/activate -->
 
-To deploy this app, use the [Dockerfile](Dockerfile), as it installs some system requirements for the Plotly PNG/SVG output to work.
+<!-- python -m test -->
