@@ -1,6 +1,6 @@
 # OMGUI
 
-_Open Modular Graphical User Interface_
+## _Open Modular Graphical User Interface_
 
 OMGUI is a dead-simple python module to visualize and triage your molecule results.
 
@@ -51,7 +51,7 @@ yes | plotly_get_cxrome
 
 <br>
 
-### Quick Start
+## Quick Start
 
 ### Molecule viewer
 
