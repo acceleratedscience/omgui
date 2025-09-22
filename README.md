@@ -26,6 +26,8 @@ pip install git+https://github.com/themoenen/omgui@gui_merge
 
 ## Quick Start
 
+### Inspect a Set of Molecules
+
 ```python
 import omgui
 
@@ -33,6 +35,10 @@ omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ```
 
 <kbd><img src="docs/assets/gui-molset.png" /></kbd>
+
+<br>
+
+### Inspect a Single Molecule
 
 ```python
 omgui.show_mol('dopamine')
