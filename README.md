@@ -46,6 +46,10 @@ omgui.show_mol('dopamine')
 
 <kbd><img src="docs/assets/gui-molecule.png" /></kbd>
 
+===
+
+To discover what else **omgui** can do for you, jump to [Functioality](docs/functionality.md).
+
 <!-- ```shell
 yes | plotly_get_cxrome
 ``` -->
