@@ -46,7 +46,7 @@ def _load_sample_files():
     """
     import tarfile
 
-    sample_file = Path(__file__).parent / "dev" / "samples.tar.gz"
+    sample_file = Path(__file__).parent / "data" / "samples.tar.gz"
     workspace_path = ctx().workspace_path()
 
     with tarfile.open(sample_file, "r:gz") as tar_ref:
