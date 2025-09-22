@@ -15,7 +15,7 @@ Usage:
 """
 
 # Expose sub-modules for the public API
-# from omgui import mws
+from omgui import mws
 
 from omgui.context import ctx
 from omgui.startup import startup as _startup
@@ -205,7 +205,3 @@ def show_file(path: str = "") -> None:
 
 # endregion
 # ------------------------------------
-
-
-# Expose sub-modules for the public API
-from omgui import mws
