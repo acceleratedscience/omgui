@@ -14,15 +14,13 @@ import omgui
 omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ```
 
-<!-- ![molecule](docs/assets/gui-molset.png) -->
-
 <kbd><img src="docs/assets/gui-molset.png" /></kbd>
 
 ```python
 omgui.show_mol('dopamine')
 ```
 
-![molecule](docs/assets/gui-molecule.png)
+<kbd><img src="docs/assets/gui-molecule.png" /></kbd>
 
 > [!WARNING]  
 > OMGUI is in development. Not all described functionality is implemented yet.
