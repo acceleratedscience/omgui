@@ -20,7 +20,7 @@ pip install git+https://github.com/themoenen/omgui@gui_merge
 <br>
 
 > [!WARNING]  
-> OMGUI is in development. Not all described functionality is implemented yet.
+> OMGUI is in active development. Not all described functionality is implemented yet.
 
 <br>
 

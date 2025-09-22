@@ -5,6 +5,7 @@
 <!--  ### Table of Contents omit in toc -->
 
 - [Molecule viewer](#molecule-viewer)
+- [Molecule Working Set](#molecule-working-set)
 - [Data Viewer](#data-viewer)
 - [Molecule 2D/3D Visualizer](#molecule-2d3d-visualizer)
 - [Chart Visualizer](#chart-visualizer)
@@ -28,6 +29,47 @@ omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ```
 
 > Supported identifiers are `SMILES` and `InChI`.
+
+<br>
+
+## Molecule Working Set
+
+Your molecules working set (or "mws") functions as a basket where you can store selected candidates for further processing.
+
+> [!WARNING]  
+> Partly implemented.
+
+```python
+from omgui import mws
+
+# Add some molecules and inspect them in the GUI
+mws.add("C(C(=O)O)N")
+mws.add("C1=CC=CC=C1")
+mws.open()
+```
+
+```python
+
+# Get a list of your molecules as SMILES
+my_candidates = mws.get_smiles()
+
+# Perform any type of property calculation
+my_calculated_props = [
+    { "foo": 0.729 },
+    { "foo": 1.235 }
+]
+
+# Update the molecules in your working set
+mws.add_props(my_calculated_props)
+
+# Export your results as SDF file
+mws.export(format="sdf")
+```
+
+```python
+# Clear your working set to start over.
+mws.clear()
+```
 
 <br>
 
