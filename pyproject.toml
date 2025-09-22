@@ -5,7 +5,10 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 package-dir = {"" = "."}
 packages = { find = {} } # Automatically find all packages in the project
-include-package-data = True # Include non-code files specified in MANIFEST.in
+include-package-data = true # Include non-code files specified in MANIFEST.in
+
+[tool.setuptools.package-data]
+omgui = ["data/samples.tar.gz"]
 
 [project]
 name = "omgui"
