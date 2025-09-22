@@ -198,11 +198,13 @@ def _launch(path=None, query="", hash="", silent=False):
                 ):
                     content = file_path.read_text(encoding="utf-8")
                     content = content.replace("__BASE_PATH__/", BASE_PATH)
+                    print("A", content)
                     return Response(content=content, media_type=mime_type)
 
                 # Everything else -> read bytes and return as is
                 else:
                     content = file_path.read_bytes()
+                    print("B", content)
                     media_type = mime_type or "application/octet-stream"
                     return Response(content=content, media_type=media_type)
 
