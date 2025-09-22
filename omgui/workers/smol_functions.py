@@ -526,7 +526,7 @@ def _sep_identifiers_from_properties(smol: dict) -> dict:
             del smol["properties"][prop]
 
     # This is a Workaround for Pub Chempy and Pubchem being out of sync
-    for src in smol["properties"]["record"]["props"]:
+    for src in smol.get("properties", {}).get("record", {}).get("props", []):
         if "urn" in src:
             if src["urn"]["label"] == "SMILES" and src["urn"]["name"] == "Absolute":
                 smol["identifiers"]["isomeric_smiles"] = src["value"]["sval"]

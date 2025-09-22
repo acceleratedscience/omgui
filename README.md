@@ -11,10 +11,18 @@ OMGUI lets visualize small molecules, macromolecules and various types of data o
 ```python
 import omgui
 
-omgui.show_molset(['CCO', 'C=C', 'O=C=O'])
+omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
+```
 
+![molecule](docs/assets/gui-molset.png)
+
+```python
 omgui.show_mol('dopamine')
 ```
+
+![molecule](docs/assets/gui-molecule.png)
+
+<br>
 
 ### Install
 
