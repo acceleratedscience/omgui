@@ -219,19 +219,16 @@ def find_smol(
 
     # Look for molecule in the working set
     smol = get_smol_from_mws(identifier)
-    print("A", smol is None)
 
     # Look for molecule on PubChem
     if not smol and enrich:
         smol = get_smol_from_pubchem(identifier, show_spinner)
-        print("B", smol is None)
 
     # Try creating molecule object with RDKit.
     if not smol:
         if show_spinner:
             spinner.start("Creating molecule with RDKit")
         smol = new_smol(identifier, name=name)
-        print("C", smol is None)
         if show_spinner:
             spinner.stop()
 
@@ -279,7 +276,6 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         The small molecule identifier to search for.
         Valid inputs: InChI, SMILES, InChIKey, name, CID.
     """
-    print("get_smol_from_pubchem", identifier)
 
     error_msg = "<error>x</error> <soft>{} search on PubChem returned empty</soft>"
 
@@ -288,7 +284,6 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for InChI")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["inchi"])
-        print(100, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("InChI"))
@@ -296,7 +291,6 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for inchikey")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["inchikey"])
-        print(101, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("inchikey"))
@@ -304,7 +298,6 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for CID")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["cid"])
-        print(102, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("CID"))
@@ -312,7 +305,6 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for SMILES")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["smiles"])
-        print(103, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("SMILES"))
@@ -320,7 +312,6 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for name")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["name"])
-        print(104, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("name"))
@@ -388,20 +379,15 @@ def _get_pubchem_compound(identifier: str, identifier_type: str) -> dict | None:
         The type of identifier to search for (see PCY_IDFR).
     """
 
-    print("_get_pubchem_compound", identifier, identifier_type)
-
     mol_pcy = None
 
     try:
         # Find molecule on PubChem
-        print(200)
         compounds = pcy.get_compounds(identifier, identifier_type)
-        print(201, compounds)
         if len(compounds) == 0:
             return None
         else:
             mol_pcy = compounds[0].to_dict()
-            print(202, mol_pcy)
 
         # Create OpenAD smol dict
         if mol_pcy:
@@ -439,7 +425,6 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
     identifier_type: str
         The type of identifier to search for (see PCY_IDFR).
     """
-    print("---- _add_pcy_data")
 
     smol["enriched"] = True
 
