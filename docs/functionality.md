@@ -1,4 +1,4 @@
-[&arrl; back](../)
+[&larr; back](../)
 
 # OMGUI - Functionality <!-- omit in toc -->
 

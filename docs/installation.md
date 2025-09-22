@@ -1,4 +1,4 @@
-[&arrl; back](../)
+[&larr; back](../)
 
 # OMGUI - Installation
 
