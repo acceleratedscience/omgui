@@ -1,6 +1,8 @@
-# 8
+# 9
+
 
 # Std
+import importlib
 from time import sleep
 from threading import Thread
 from pathlib import Path
@@ -38,6 +40,16 @@ def startup():
         # Add sample files to workspace
         if config().sample_files:
             _load_sample_files()
+
+        import importlib.resources
+
+        with (
+            importlib.resources.files("omgui.data")
+            .joinpath("samples.tar.gz")
+            .open("rb") as f
+        ):
+            print(10000)
+            print(f.__sizeof__())
 
     Thread(target=_startup).start()
 
