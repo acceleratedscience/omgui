@@ -394,11 +394,14 @@ def _get_pubchem_compound(identifier: str, identifier_type: str) -> dict | None:
 
     try:
         # Find molecule on PubChem
+        print(200)
         compounds = pcy.get_compounds(identifier, identifier_type)
+        print(201, compounds)
         if len(compounds) == 0:
             return None
         else:
             mol_pcy = compounds[0].to_dict()
+            print(202, mol_pcy)
 
         # Create OpenAD smol dict
         if mol_pcy:
@@ -436,6 +439,7 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
     identifier_type: str
         The type of identifier to search for (see PCY_IDFR).
     """
+    print("---- _add_pcy_data")
 
     smol["enriched"] = True
 
@@ -477,7 +481,7 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
             if prop_name_key == x:
                 if len(prop_name.split("-")) > 0:
 
-                    for y in smol_pcy["record"]["props"]:
+                    for y in smol_pcy.get("record", {}).get("props", []):
 
                         if "label" not in y["urn"]:
 
