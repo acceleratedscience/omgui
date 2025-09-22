@@ -2,9 +2,10 @@
 
 ### _Open Modular Graphical User Interface_
 
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/openad)](https://pypi.org/project/omgui/)
-[![PyPI version](https://img.shields.io/pypi/v/openad)](https://pypi.org/project/omgui/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/omgui)](https://pypi.org/project/omgui/)
+[![PyPI version](https://img.shields.io/pypi/v/omgui)](https://pypi.org/project/omgui/)
 [![License MIT](https://img.shields.io/github/license/acceleratedscience/openad-toolkit)](https://opensource.org/licenses/MIT)
+[![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/)
 
 OMGUI is a dead-simple python module to visualize and triage your molecule results.  
 It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](#functionality).
