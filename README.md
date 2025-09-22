@@ -1,10 +1,14 @@
 # OMGUI
 
-## _Open Modular Graphical User Interface_
+### _Open Modular Graphical User Interface_
 
 OMGUI is a dead-simple python module to visualize and triage your molecule results.
 
-It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](#quick-start).
+It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](#functionality).
+
+<br>
+
+#### Quick Start
 
 Run it from a Jupyter Notebook or any python script:
 
@@ -51,7 +55,7 @@ yes | plotly_get_cxrome
 
 <br>
 
-## Quick Start
+## Functionality
 
 ### Molecule viewer
 
