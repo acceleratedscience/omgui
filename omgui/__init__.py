@@ -128,18 +128,14 @@ def show_mol(molecule_identifier: str = "") -> None:
     _gui_init(path)
 
 
-def show_molset(smiles: list[str] = []) -> None:
+def show_molset(smiles_or_inchi: list[str]) -> None:
     """
-    Open the molecule set viewer for a list of SMILES.
+    Open the molecule set viewer for a list of SMILES or InChI strings.
     """
     import urllib
-    from pathlib import Path
     from omgui.gui_launcher import gui_init as _gui_init
 
-    if Path(path).suffix == "":
-        path += ".molset.json"
-
-    path = "~/" + urllib.parse.quote(path, safe="/")
+    path = "molset/" + urllib.parse.quote("~".join(smiles_or_inchi), safe="/")
     _gui_init(path)
 
 
