@@ -14,7 +14,7 @@ from rdkit.Chem import Draw
 from rdkit.Chem.rdDistGeom import EmbedMolecule
 
 # OMGUI
-import omgui.workers.smol_functions as smol_functions
+from omgui.gui.workers import smol_functions
 from omgui.spf import spf
 
 

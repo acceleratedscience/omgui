@@ -27,7 +27,7 @@ from fastapi.responses import HTMLResponse, Response
 
 # omgui
 from omgui import config, ctx
-from omgui.gui_routes import gui_router
+from omgui.gui.gui_routes import gui_router
 from omgui.util import gui_install
 from omgui.util.jupyter import nb_mode
 from omgui.util.general import next_avail_port, wait_for_port

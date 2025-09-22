@@ -15,14 +15,14 @@ def open_file(cache_path, return_err):
     pass
 
 
-from omgui.workers.smol_functions import (
+from omgui.gui.workers.smol_functions import (
     df_has_molecules,
     flatten_smol,
     create_molset_cache_file,
     assemble_cache_path,
     read_molset_from_cache,
 )
-from omgui.workers.smol_transformers import dataframe2molset
+from omgui.gui.workers.smol_transformers import dataframe2molset
 from omgui.util.mol_utils import create_molset_response
 
 

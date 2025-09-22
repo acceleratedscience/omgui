@@ -7,7 +7,7 @@ import json
 import shutil
 
 # Small molecule functions
-from omgui.workers.smol_functions import (
+from omgui.gui.workers.smol_functions import (
     get_smol_from_pubchem,
     create_molset_cache_file,
     get_smol_name,
@@ -19,7 +19,7 @@ from omgui.workers.smol_functions import (
     get_best_available_smiles,
     merge_smols,
 )
-from omgui.workers.smol_transformers import (
+from omgui.gui.workers.smol_transformers import (
     smol2svg,
     smol2mdl,
     molset2dataframe,
@@ -29,8 +29,8 @@ from omgui.workers.smol_transformers import (
 
 
 # Macromolecule functions
-from omgui.workers.mmol_functions import mmol_from_identifier
-from omgui.workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
+from omgui.gui.workers.mmol_functions import mmol_from_identifier
+from omgui.gui.workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
 
 # Various
 from omgui import ctx

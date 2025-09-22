@@ -2,7 +2,7 @@
 Logger singleton.
 
 Usage:
-    from omgui.helpers.logger import get_logger
+    from omgui.util.logger import get_logger
 
     logger = get_logger()
     logger.info("Your message")

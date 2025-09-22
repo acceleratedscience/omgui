@@ -13,11 +13,11 @@ from urllib.parse import unquote
 from fastapi import APIRouter, Request, status
 
 # OMGUI - Service modules
-from omgui.gui_services import srv_general
-from omgui.gui_services import srv_file_system
-from omgui.gui_services import srv_molecules
-from omgui.gui_services import srv_result
-from omgui.gui_services import srv_dataframe
+from omgui.gui.gui_services import srv_general
+from omgui.gui.gui_services import srv_file_system
+from omgui.gui.gui_services import srv_molecules
+from omgui.gui.gui_services import srv_result
+from omgui.gui.gui_services import srv_dataframe
 
 # OMGUI
 from omgui import ctx

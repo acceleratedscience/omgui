@@ -25,13 +25,13 @@ from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 
 # OMGUI
 from omgui import ctx
-from omgui.workers import smol_transformers
 from omgui.util.spinner import spinner
 from omgui.util.paths import parse_path
 from omgui.util.json_decimal_encoder import JSONDecimalEncoder
 from omgui.util.general import pretty_date, is_numeric, merge_dict_lists
-from omgui.workers.data_structures import OPENAD_SMOL_DICT
-from omgui.workers.smol_transformers import (
+from omgui.gui.workers import smol_transformers
+from omgui.gui.workers.data_structures import OPENAD_SMOL_DICT
+from omgui.gui.workers.smol_transformers import (
     molset2dataframe,
     write_dataframe2sdf,
     write_dataframe2csv,

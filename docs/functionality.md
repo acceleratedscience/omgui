@@ -54,20 +54,20 @@ mws.open()
 my_candidates = mws.get_smiles()
 
 # Perform any type of property calculation
-my_calculated_props = [
+my_calculated_prop_result = [
     { "foo": 0.729 },
     { "foo": 1.235 }
 ]
 
 # Update the molecules in your working set
-mws.add_props(my_calculated_props)
+mws.add_props(my_calculated_prop_result)
 
 # Export your results as SDF file
 mws.export(format="sdf")
 ```
 
 ```python
-# Clear your working set to start over.
+# Clear your working set to start over
 mws.clear()
 ```
 

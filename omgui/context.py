@@ -5,20 +5,22 @@ By default, a global context file is loaded on startup,
 which means that if you switch workspaces, this will
 affect all sessions of OMGUI.
 
-The user can set the scope to a session-context, which means
-that changes to your session context (e.g., switching workspaces)
-will not affect the global context or other sessions.
-This allows you to work across different workspaces in parallel.
+You can set the scope to a session-context, which means
+that changes to your session context (e.g., switching
+workspaces) will not affect the global context or other
+sessions. This allows you to work across different
+workspaces in parallel.
 
-For now, the context is only used to store your current workspace.
-Working set molecules are stored per workspace.
+For now, the context is only used to store your current
+workspace. Working set molecules are stored per workspace.
 
 Usage:
 
-    import omgui
+    from omgui.context import ctx
 
-    # Optional: set session context
-    omgui.set_scope('my_workspace')
+    workspace = ctx().workspace
+    workspaces = ctx().workspaces()
+    ctx().set_workspace("MY_WORKSPACE")
 """
 
 # Std

@@ -9,13 +9,13 @@ from pathlib import Path
 
 # OMGUI
 from omgui import ctx
-from omgui.workers.smol_functions import create_molset_cache_file, get_molset_mols
-from omgui.workers.smol_transformers import (
+from omgui.gui.workers.smol_functions import create_molset_cache_file, get_molset_mols
+from omgui.gui.workers.smol_transformers import (
     smiles_path2molset,
     sdf_path2molset,
     mdl_path2smol,
 )
-from omgui.workers.mmol_transformers import cif2mmol, pdb2mmol
+from omgui.gui.workers.mmol_transformers import cif2mmol, pdb2mmol
 from omgui.util.mol_utils import create_molset_response
 
 # File and directory names to hide in the file browser.

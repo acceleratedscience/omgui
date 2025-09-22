@@ -41,7 +41,7 @@ def get_names() -> list[str]:
     """
     Get list of molecule names from your working set.
     """
-    from omgui.workers.smol_transformers import molset_to_names_list
+    from omgui.gui.workers.smol_transformers import molset_to_names_list
 
     mws = ctx().mws()
     return molset_to_names_list(mws)
@@ -65,6 +65,6 @@ def open() -> None:
     """
     Open the current molecule working set in the GUI.
     """
-    from omgui.gui_launcher import gui_init as _gui_init
+    from omgui.main import gui_init as _gui_init
 
     return _gui_init(path="mws")

@@ -97,7 +97,7 @@ def launch(*args, **kwargs) -> None:
     """
     Launch the GUI server.
     """
-    from omgui.gui_launcher import gui_init as _gui_init
+    from omgui.main import gui_init as _gui_init
 
     return _gui_init(*args, **kwargs)
 
@@ -106,7 +106,7 @@ def shutdown(*args, **kwargs) -> None:
     """
     Shutdown the GUI server.
     """
-    from omgui.gui_launcher import gui_shutdown as _gui_shutdown
+    from omgui.main import gui_shutdown as _gui_shutdown
 
     return _gui_shutdown(*args, **kwargs)
 
@@ -122,7 +122,7 @@ def show_mol(molecule_identifier: str = "") -> None:
     Open the molecule viewer for a given molecule identifier.
     """
     import urllib
-    from omgui.gui_launcher import gui_init as _gui_init
+    from omgui.main import gui_init as _gui_init
 
     path = "mol/" + urllib.parse.quote(molecule_identifier, safe="/")
     _gui_init(path)
@@ -133,7 +133,7 @@ def show_molset(smiles_or_inchi: list[str]) -> None:
     Open the molecule set viewer for a list of SMILES or InChI strings.
     """
     import urllib
-    from omgui.gui_launcher import gui_init as _gui_init
+    from omgui.main import gui_init as _gui_init
 
     path = "molset/" + urllib.parse.quote("~".join(smiles_or_inchi), safe="/")
     _gui_init(path)
@@ -183,7 +183,7 @@ def show_files(*args, **kwargs) -> None:
     """
     Open the file browser.
     """
-    from omgui.gui_launcher import gui_init as _gui_init
+    from omgui.main import gui_init as _gui_init
 
     return _gui_init(*args, **kwargs)
 
@@ -193,7 +193,7 @@ def show_file(path: str = "") -> None:
     Open the appropriate viewer for a given file path.
     """
     import urllib
-    from omgui.gui_launcher import gui_init as _gui_init
+    from omgui.main import gui_init as _gui_init
 
     path = "~/" + urllib.parse.quote(path, safe="/")
     _gui_init(path)

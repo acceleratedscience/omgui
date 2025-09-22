@@ -5,8 +5,8 @@ import copy
 import gemmi
 
 # OMGUI
-from omgui.workers.mmol_functions import parse_cif_block
-from omgui.workers.data_structures import OPENAD_MMOL_DICT
+from omgui.gui.workers.mmol_functions import parse_cif_block
+from omgui.gui.workers.data_structures import OPENAD_MMOL_DICT
 
 
 def mmol2cif(mmol_dict, path=None):
