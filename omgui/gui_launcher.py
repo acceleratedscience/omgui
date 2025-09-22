@@ -195,29 +195,19 @@ def _launch(path=None, query="", hash="", silent=False):
                     "text/javascript",
                     "text/plain",
                 ]
-                print("\b---\nPATH:", file_path)
-                print("mime_type:", mime_type, mime_type in text_mimetypes)
-                print("suffix:", file_path.suffix, file_path.suffix in text_extensions)
                 if mime_type in text_mimetypes or file_path.suffix in text_extensions:
                     content = file_path.read_text(encoding="utf-8")
                     content = content.replace("__BASE_PATH__/", BASE_PATH)
-                    print("A", file_path)
                     return Response(content=content, media_type=mime_type)
 
                 # Everything else -> read bytes and return as is
                 else:
                     content = file_path.read_bytes()
-                    print("B", file_path)
                     media_type = mime_type or "application/octet-stream"
                     return Response(content=content, media_type=media_type)
 
-            else:
-                print("@", file_path)
-
             # All other paths server index.html --> hand off to Vue router
             index_path = gui_build_dir / "index.html"
-            print("index path!:", index_path)
-            print("exists:", index_path.exists())
             if index_path.exists():
                 html_content = index_path.read_text(encoding="utf-8")
                 html_content = html_content.replace("__BASE_PATH__/", BASE_PATH)
