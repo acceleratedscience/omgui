@@ -18,7 +18,7 @@ from time import sleep
 
 # OMGUI
 from omgui.util.jupyter import nb_mode
-from spf import spf
+from omgui.spf import spf
 
 # from openad.app.global_var_lib import GLOBAL_SETTINGS
 # Placeholder

@@ -2,7 +2,7 @@ import time
 import socket
 import datetime
 import readline
-from spf import spf
+from omgui.spf import spf
 
 
 def next_avail_port(port=8024, host="127.0.0.1"):

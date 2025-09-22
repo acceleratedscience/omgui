@@ -5,7 +5,7 @@ import re
 # OMGUI
 from omgui import ctx
 from omgui.util.general import confirm_prompt
-from spf import spf
+from omgui.spf import spf
 
 
 NOT_ALLOWED_ERR = [

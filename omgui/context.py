@@ -28,7 +28,7 @@ from pathlib import Path
 # OMGUI
 from omgui.configuration import config
 from omgui.util.logger import get_logger
-from spf import spf
+from omgui.spf import spf
 
 
 logger = get_logger()

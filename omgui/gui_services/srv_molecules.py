@@ -37,7 +37,7 @@ from omgui import ctx
 from omgui.util.json_decimal_encoder import JSONDecimalEncoder
 from omgui.util.mol_utils import create_molset_response
 from omgui.util import exceptions as omg_exc
-from spf import spf
+from omgui.spf import spf
 
 
 # ------------------------------------

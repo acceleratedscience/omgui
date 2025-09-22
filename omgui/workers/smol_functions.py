@@ -39,7 +39,7 @@ from omgui.workers.smol_transformers import (
     csv_path2molset,
     smiles_path2molset,
 )
-from spf import spf
+from omgui.spf import spf
 
 
 # Silcence RDKit errors

@@ -32,7 +32,7 @@ from omgui.util import gui_install
 from omgui.util.jupyter import nb_mode
 from omgui.util.general import next_avail_port, wait_for_port
 from omgui.util.exception_handlers import register_exception_handlers
-from spf import spf
+from omgui.spf import spf
 
 
 GUI_SERVER = None

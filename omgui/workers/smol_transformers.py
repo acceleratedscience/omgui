@@ -15,7 +15,7 @@ from rdkit.Chem.rdDistGeom import EmbedMolecule
 
 # OMGUI
 import omgui.workers.smol_functions as smol_functions
-from spf import spf
+from omgui.spf import spf
 
 
 # Suppress RDKit errors

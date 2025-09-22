@@ -6,7 +6,7 @@ import os
 import tarfile
 import urllib.request
 from pathlib import Path
-from spf import spf
+from omgui.spf import spf
 
 
 def ensure():
