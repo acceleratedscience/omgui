@@ -23,7 +23,7 @@ Instructions:
     1. Set the BASE_PATH environment variable to `proxy/8024/`:
     2. Start your OMGUI server (runs on port 8024 by default):
 
-        BASE_PATH=proxy/8024/ python -c "import omgui; omgui.launch()"
+        OMGUI_BASE_PATH=proxy/8024/ python -c "import omgui; omgui.launch()"
 
     3. Start this proxy server in a separate terminal:
 
