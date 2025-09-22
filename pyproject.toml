@@ -25,6 +25,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+  "aiofiles>=22.1.0",
   "CairoSVG>=2.8.2",
   "cinemol>=1.0.2",
   "fastapi>=0.115.7",
