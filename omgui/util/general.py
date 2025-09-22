@@ -90,7 +90,7 @@ def pretty_date(timestamp=None, style="log", include_time=True):
         raise ValueError(f"Invalid '{style}' style parameter")
 
     # Parse date/time string
-    date_time = datetime.fromtimestamp(timestamp)
+    date_time = datetime.datetime.fromtimestamp(timestamp)
     return date_time.strftime(fmt)
 
 

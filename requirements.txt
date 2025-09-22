@@ -13,3 +13,6 @@ cairosvg
 # Chart rendering
 plotly
 kaleido
+
+# Other
+tabulate

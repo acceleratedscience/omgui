@@ -342,6 +342,14 @@ async def get_molset_mws(request: Request):
     return srv_molecules.get_molset_mws(query)
 
 
+@gui_router.post(f"{api_v1}/get-molset-adhoc")
+async def get_molset_adhoc(request: Request):
+    body = await request.json()
+    identifiers = body.get("identifiers", [])
+    query = body.get("query", {})
+    return srv_molecules.get_molset_adhoc(identifiers, query)
+
+
 @gui_router.post(f"{api_v1}/update-molset-mws")
 async def update_molset_mws(request: Request):
     body = await request.json()

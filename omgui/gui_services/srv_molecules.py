@@ -271,6 +271,38 @@ def get_molset_mws(query=None):
         return None
 
 
+def get_molset_adhoc(identifiers, query=None):
+    """
+    Get an ad-hoc molset from a list of identifiers provided in the query.
+    """
+    if len(identifiers) == 0:
+        raise ValueError("No identifiers provided")
+
+    molset = []
+    for identifier in identifiers:
+        smol = find_smol(identifier)
+        if smol:
+            molset.append(smol)
+        else:
+            spf.warning(f"No molecule found for identifier: {identifier}")
+
+    if len(molset) == 0:
+        raise omg_exc.NoResult("No molecules found for the provided identifiers")
+
+    # Add index
+    for i, smol in enumerate(molset):
+        smol["index"] = i + 1
+
+    # Create cache working copy
+    cache_id = create_molset_cache_file(molset)
+
+    # Read molset from cache
+    molset = read_molset_from_cache(cache_id)
+
+    # Formulate response object
+    return create_molset_response(molset, query, cache_id)
+
+
 ##
 
 

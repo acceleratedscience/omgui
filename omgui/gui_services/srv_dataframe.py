@@ -1,3 +1,6 @@
+# NOT YET IMPLEMENTED - this is specific openad magic
+# command handling and may need to be rethought.
+
 """
 Dataframe functions for OMGUI API endpoints.
 """

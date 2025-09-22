@@ -128,9 +128,9 @@ def show_mol(molecule_identifier: str = "") -> None:
     _gui_init(path)
 
 
-def show_molset(path: str = "") -> None:
+def show_molset(smiles: list[str] = []) -> None:
     """
-    Open the molecule set viewer for a given molecule set path.
+    Open the molecule set viewer for a list of SMILES.
     """
     import urllib
     from pathlib import Path
