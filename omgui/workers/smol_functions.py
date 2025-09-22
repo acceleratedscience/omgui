@@ -1972,7 +1972,6 @@ def index_molset_file_async(path_absolute):
     cache_path: str
         The path to the cached working copy of a molset.
     """
-    print(3333)
 
     async def _index_molset_file(cache_path):
         # Read
