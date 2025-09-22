@@ -192,19 +192,24 @@ def _launch(path=None, query="", hash="", silent=False):
                     "css": "text/css",
                     "js": "text/javascript",
                 }
+                print("\b---\nPATH:", file_path)
+                print("mime_type:", mime_type, mime_type in text_types.values())
+                print(
+                    "suffix:", file_path.suffix, file_path.suffix in text_types.keys()
+                )
                 if (
                     mime_type in text_types.values()
                     or file_path.suffix in text_types.keys()
                 ):
                     content = file_path.read_text(encoding="utf-8")
                     content = content.replace("__BASE_PATH__/", BASE_PATH)
-                    print("A", content)
+                    print("A", file_path)
                     return Response(content=content, media_type=mime_type)
 
                 # Everything else -> read bytes and return as is
                 else:
                     content = file_path.read_bytes()
-                    print("B", content)
+                    print("B", file_path)
                     media_type = mime_type or "application/octet-stream"
                     return Response(content=content, media_type=media_type)
 
