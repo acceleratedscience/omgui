@@ -187,15 +187,15 @@ def _launch(path=None, query="", hash="", silent=False):
                 mime_type, _ = mimetypes.guess_type(path)
 
                 # Assets where we may need to replace __BASE_PATH__
-                text_extensions = ["html", "css", "js"]
-                text_mimetypes = [
+                scan_suffixes = ["html", "css", "js"]
+                scan_mimetypes = [
                     "text/html",
                     "text/css",
                     "application/javascript",
                     "text/javascript",
                     "text/plain",
                 ]
-                if mime_type in text_mimetypes or file_path.suffix in text_extensions:
+                if mime_type in scan_mimetypes or file_path.suffix in scan_suffixes:
                     content = file_path.read_text(encoding="utf-8")
                     content = content.replace("__BASE_PATH__/", BASE_PATH)
                     return Response(content=content, media_type=mime_type)
