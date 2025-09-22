@@ -2,16 +2,11 @@
 
 <!-- python -m test -->
 
-OMGUI / Open Modular Graphical User Interface
+# OMGUI
 
-# Data Visualization
+_Open Modular Graphical User Interface_
 
-Application to visualize data on the fly.
-
--   [Charting API](https://omgui.onrender.com/demo/charts) to turn JSON into charts on the fly
--   [Molecules API](https://omgui.onrender.com/demo) to visualize SMILES in 2D and 3D
-
-<br>
+OMGUI lets visualize small molecules, macromolecules and various types of data on the fly.
 
 ### Install
 

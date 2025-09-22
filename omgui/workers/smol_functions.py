@@ -279,6 +279,7 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         The small molecule identifier to search for.
         Valid inputs: InChI, SMILES, InChIKey, name, CID.
     """
+    print("get_smol_from_pubchem", identifier)
 
     error_msg = "<error>x</error> <soft>{} search on PubChem returned empty</soft>"
 
@@ -287,6 +288,7 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for InChI")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["inchi"])
+        print(100, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("InChI"))
@@ -294,6 +296,7 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for inchikey")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["inchikey"])
+        print(101, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("inchikey"))
@@ -301,6 +304,7 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for CID")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["cid"])
+        print(102, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("CID"))
@@ -308,6 +312,7 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for SMILES")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["smiles"])
+        print(103, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("SMILES"))
@@ -315,6 +320,7 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         if show_spinner:
             spinner.start("Searching PubChem for name")
         smol = _get_pubchem_compound(identifier, PCY_IDFR["name"])
+        print(104, smol is None)
         if not smol and show_spinner:
             spinner.stop()
             spf(error_msg.format("name"))
@@ -382,6 +388,8 @@ def _get_pubchem_compound(identifier: str, identifier_type: str) -> dict | None:
         The type of identifier to search for (see PCY_IDFR).
     """
 
+    print("_get_pubchem_compound", identifier, identifier_type)
+
     mol_pcy = None
 
     try:
@@ -398,17 +406,17 @@ def _get_pubchem_compound(identifier: str, identifier_type: str) -> dict | None:
             smol = _add_pcy_data(smol, mol_pcy, identifier, identifier_type)
             return smol
 
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
+    except Exception as err:  # pylint: disable=broad-exception-caught
 
-        # # Keep here for debugging
-        # spf.error(
-        #     [
-        #         "Error _get_pubchem_compound()",
-        #         f"identifier: {identifier}",
-        #         f"identifier_type: {identifier_type}",
-        #     ]
-        # )
+        # Keep here for debugging
+        spf.error(
+            [
+                "Error _get_pubchem_compound()",
+                f"identifier: {identifier}",
+                f"identifier_type: {identifier_type}",
+                err,
+            ]
+        )
 
     return None
 
