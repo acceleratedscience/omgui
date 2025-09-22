@@ -2,7 +2,7 @@
 
 # OMGUI - Functionality <!-- omit in toc -->
 
-### Table of Contents <!-- omit in toc -->
+<!--  ### Table of Contents omit in toc -->
 
 - [Molecule viewer](#molecule-viewer)
 - [Data Viewer](#data-viewer)
@@ -10,7 +10,7 @@
 
 <br>
 
-### Molecule viewer
+## Molecule viewer
 
 Inspect a single molecule:
 
@@ -30,7 +30,7 @@ omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 
 <br>
 
-### Data Viewer
+## Data Viewer
 
 The data viewer lets you easily view an edit data from a CSV file. This includes editing values as well as adding, removing and renaming rows or columns.
 
@@ -39,6 +39,6 @@ The data viewer lets you easily view an edit data from a CSV file. This includes
 
 <br>
 
-### Molecule 2D/3D Visualizer
+## Molecule 2D/3D Visualizer
 
 The visualizer library lets you generate `SVG` or `PNG` images on the fly for any molecule, including optional substructure highlighting.
