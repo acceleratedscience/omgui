@@ -396,16 +396,17 @@ def _get_pubchem_compound(identifier: str, identifier_type: str) -> dict | None:
             return smol
 
     except Exception as err:  # pylint: disable=broad-exception-caught
+        pass
 
-        # Keep here for debugging
-        spf.error(
-            [
-                "Error _get_pubchem_compound()",
-                f"identifier: {identifier}",
-                f"identifier_type: {identifier_type}",
-                err,
-            ]
-        )
+        # # Keep here for debugging
+        # spf.error(
+        #     [
+        #         "Error _get_pubchem_compound()",
+        #         f"identifier: {identifier}",
+        #         f"identifier_type: {identifier_type}",
+        #         err,
+        #     ]
+        # )
 
     return None
 
