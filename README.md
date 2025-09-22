@@ -7,10 +7,15 @@
 [![License MIT](https://img.shields.io/github/license/acceleratedscience/openad-toolkit)](https://opensource.org/licenses/MIT)
 [![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/)
 
-OMGUI is a dead-simple python module to visualize and triage your molecule results.  
+OMGUI makes it dead-simple to visualize and triage your molecule results in Python.  
 It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](#functionality).
 
 Run it from a Jupyter Notebook or any python script.
+
+```shell
+# pip install omgui # To be published
+pip install git+https://github.com/themoenen/omgui@gui_merge
+```
 
 <br>
 
