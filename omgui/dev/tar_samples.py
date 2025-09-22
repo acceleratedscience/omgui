@@ -24,5 +24,5 @@ def create_tar_from_dir(dir_path, tar_path):
 
 if __name__ == "__main__":
     src_path = Path("~/.omgui/workspaces/DEFAULT/samples").expanduser()
-    dest_path = Path(__file__).parent / "samples.tar.gz"
+    dest_path = Path(__file__).parents[1] / "data" / "samples.tar.gz"
     create_tar_from_dir(src_path, dest_path)
