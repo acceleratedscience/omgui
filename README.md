@@ -14,7 +14,9 @@ import omgui
 omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ```
 
+<kbd>
 ![molecule](docs/assets/gui-molset.png)
+</kbd>
 
 ```python
 omgui.show_mol('dopamine')
@@ -55,21 +57,21 @@ yes | plotly_get_cxrome
 
 ### Molecule viewer
 
-Inspect a single molecule.
-
-> Supports `SMILES` and `InChI` identifiers, and if the molecule exists on PubChem, you can also find it by `name`, `InChIKey` or PubChem `CID`.
+Inspect a single molecule:
 
 ```python
 omgui.show_mol('dopamine')
 ```
 
-Inspect a set of molecules.
+> Supports `SMILES` and `InChI` identifiers, and if the molecule exists on PubChem, you can also find it by `name`, `InChIKey` or PubChem `CID`.
 
-> Supported identifiers are `SMILES` and `InChI`.
+Inspect a set of molecules:
 
 ```python
 omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ```
+
+> Supported identifiers are `SMILES` and `InChI`.
 
 <!-- source ../agenv/bin/activate -->
 
