@@ -2,7 +2,7 @@
 
 <!-- python -m test -->
 
-OMGUI / Open Modular Graphical User Interface 7
+OMGUI / Open Modular Graphical User Interface
 
 # Data Visualization
 
