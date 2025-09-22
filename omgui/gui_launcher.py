@@ -187,20 +187,18 @@ def _launch(path=None, query="", hash="", silent=False):
                 mime_type, _ = mimetypes.guess_type(path)
 
                 # Assets where we may need to replace __BASE_PATH__
-                text_types = {
-                    "html": "text/html",
-                    "css": "text/css",
-                    "js": "text/javascript",
-                }
+                text_extensions = ["html", "css", "js"]
+                text_mimetypes = [
+                    "text/html",
+                    "text/css",
+                    "application/javascript",
+                    "text/javascript",
+                    "text/plain",
+                ]
                 print("\b---\nPATH:", file_path)
-                print("mime_type:", mime_type, mime_type in text_types.values())
-                print(
-                    "suffix:", file_path.suffix, file_path.suffix in text_types.keys()
-                )
-                if (
-                    mime_type in text_types.values()
-                    or file_path.suffix in text_types.keys()
-                ):
+                print("mime_type:", mime_type, mime_type in text_mimetypes)
+                print("suffix:", file_path.suffix, file_path.suffix in text_extensions)
+                if mime_type in text_mimetypes or file_path.suffix in text_extensions:
                     content = file_path.read_text(encoding="utf-8")
                     content = content.replace("__BASE_PATH__/", BASE_PATH)
                     print("A", file_path)
@@ -213,9 +211,12 @@ def _launch(path=None, query="", hash="", silent=False):
                     media_type = mime_type or "application/octet-stream"
                     return Response(content=content, media_type=media_type)
 
+            else:
+                print("@", file_path)
+
             # All other paths server index.html --> hand off to Vue router
             index_path = gui_build_dir / "index.html"
-            print("index path:", index_path)
+            print("index path!:", index_path)
             print("exists:", index_path.exists())
             if index_path.exists():
                 html_content = index_path.read_text(encoding="utf-8")
