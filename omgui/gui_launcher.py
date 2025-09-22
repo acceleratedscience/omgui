@@ -208,6 +208,8 @@ def _launch(path=None, query="", hash="", silent=False):
 
             # All other paths server index.html --> hand off to Vue router
             index_path = gui_build_dir / "index.html"
+            print("index path:", index_path)
+            print("exists:", index_path.exists())
             if index_path.exists():
                 html_content = index_path.read_text(encoding="utf-8")
                 html_content = html_content.replace("__BASE_PATH__/", BASE_PATH)
