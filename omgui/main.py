@@ -26,7 +26,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from contextlib import asynccontextmanager
-from omgui.util.fastapi_middleware import TrailingSlashMiddleware
 
 # Redis
 import redis.asyncio as aioredis
@@ -196,7 +195,6 @@ def _launch(path=None, query="", hash="", silent=False):
         description="A Python library to visualize small molecules, macromolecules and various types of data on the fly",
         lifespan=lifespan,
     )
-    # app.add_middleware(TrailingSlashMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

@@ -7,15 +7,14 @@ import os
 import json
 from enum import Enum
 from typing import Literal
-from urllib.parse import urlencode
-from urllib.parse import quote, unquote
+from urllib.parse import unquote
 
 
 # FastAPI
 from fastapi import APIRouter
-from fastapi import Request, HTTPException, status, Query, Body, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import Response, HTMLResponse, PlainTextResponse
+from fastapi import Request, HTTPException, status, Query, Body, Depends
 
 # 3rd party
 import kaleido
