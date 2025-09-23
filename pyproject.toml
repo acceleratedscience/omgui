@@ -8,7 +8,7 @@ packages = { find = {} } # Automatically find all packages in the project
 include-package-data = true # Include non-code files specified in MANIFEST.in
 
 [tool.setuptools.package-data]
-omgui = ["data/samples.tar.gz"]
+omgui = ["gui/data/samples.tar.gz"]
 
 [project]
 name = "omgui"
@@ -16,7 +16,7 @@ version = "0.0.1"
 authors = [
   { name="Moenen Erbuer / IBM Research", email="moenen.erbuer@ibm.com" },
 ]
-description = "OMGUI is a library to visualize small molecules, macromolecules and various types of data on the fly."
+description = "OMGUI is a Python library to visualize small molecules, macromolecules and various types of data on the fly."
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"

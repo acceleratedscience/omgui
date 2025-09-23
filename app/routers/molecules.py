@@ -7,7 +7,7 @@ import logging
 from io import BytesIO
 from typing import Literal
 
-# Fast API
+# FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi import HTTPException, Query
 from fastapi.responses import Response
@@ -99,7 +99,6 @@ def visualize_molecule(
 
     # Success
     logger.info("Success generating SVG for SMILES: %s", smiles)
-    logger.info("\nSVG:\n---\n%s", svg_str)
 
     # Return as PNG
     if png:

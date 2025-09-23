@@ -21,19 +21,33 @@ from threading import Thread
 
 
 # FastAPI
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
+from contextlib import asynccontextmanager
+from omgui.util.fastapi_middleware import TrailingSlashMiddleware
 
-# omgui
+# Redis
+import redis.asyncio as aioredis
+import redis.exceptions
+
+# OMGUI
 from omgui import config, ctx
-from omgui.gui.gui_routes import gui_router
 from omgui.util import gui_install
 from omgui.util.jupyter import nb_mode
+from omgui.util.logger import get_logger
 from omgui.util.general import next_avail_port, wait_for_port
 from omgui.util.exception_handlers import register_exception_handlers
 from omgui.spf import spf
 
+# OMGUI Routers
+from omgui.gui.gui_routes import gui_router
+from omgui.chartviz.chartviz_routes import chartviz_router
+from omgui.molviz.molviz_routes import molviz_router
+
+# Logger
+logger = get_logger()
 
 GUI_SERVER = None
 NOTEBOOK_MODE = nb_mode()
@@ -141,8 +155,48 @@ def _launch(path=None, query="", hash="", silent=False):
         _open_browser(GUI_SERVER.host, GUI_SERVER.port, path, query, hash, silent)
         return
 
+    # Lifespan Event Handler
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        """
+        Manages the lifecycle of the application, including Redis connection.
+        """
+        redis_url = os.getenv("REDIS_URL")
+
+        if redis_url:
+            try:
+                logger.info("REDIS_URL: %s", redis_url)
+                app.state.redis = aioredis.from_url(
+                    redis_url, encoding="utf-8", decode_responses=True
+                )
+                await app.state.redis.ping()
+                logger.info("📀 Redis connection successful")
+            except redis.exceptions.ConnectionError:
+                logger.error(
+                    "❌ Failed to connect to Redis --> Falling back to in-memory cache"
+                )
+                app.state.redis = None
+                app.state.in_memory_cache = {}
+        else:
+            # No Redis URL provided, default to in-memory cache
+            app.state.redis = None
+            app.state.in_memory_cache = {}
+            logger.info("💾 REDIS_URL not available, defaulting to in-memory cache")
+
+        # Application will run from here
+        yield
+
+        # Logic to run on shutdown
+        if getattr(app.state, "redis", None):
+            await app.state.redis.close()
+
     # Initialize FastAPI app
-    app = FastAPI(title="OpenAD")
+    app = FastAPI(
+        title="OMGUI",
+        description="A Python library to visualize small molecules, macromolecules and various types of data on the fly",
+        lifespan=lifespan,
+    )
+    # app.add_middleware(TrailingSlashMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -152,8 +206,15 @@ def _launch(path=None, query="", hash="", silent=False):
     )
     register_exception_handlers(app)
 
+    # Mount static files directory
+    app.mount("/static", StaticFiles(directory="omgui/static"), name="static")
+
     # Include API routes
+    # fmt: off
     app.include_router(gui_router, prefix="", tags=["GUI API"])
+    app.include_router(molviz_router, prefix="/viz/mol", tags=["Molecule Visualization"])
+    app.include_router(chartviz_router, prefix="/viz/chart", tags=["Chart Visualization"])
+    # fmt: on
 
     # Shutdown route
     @app.get("/shutdown")
@@ -176,11 +237,22 @@ def _launch(path=None, query="", hash="", silent=False):
 
     # Serve all other paths by pointing to index.html,
     # Vue router takes care of the rest.
+    # - - -
+    # Note: we can't use a "/{path:path}" catch-all route,
+    # because this conflicts with FastAPI's handling of
+    # redirecting routes with slashes (redirect_slashes).
     @app.get("/")
-    @app.get("/{path:path}")
-    async def serve(path: str = ""):
+    @app.get("/~/{path:path}")
+    @app.get("/mol/{path:path}")
+    @app.get("/smol/{path:path}")
+    @app.get("/mmol/{path:path}")
+    @app.get("/mws/{path:path}")
+    @app.get("/result/{path:path}")
+    @app.get("/assets/{path:path}")
+    async def serve(request: Request, path: str = ""):
         try:
-            gui_build_dir = Path(__file__).parents[0].resolve() / "dist"
+            gui_build_dir = Path(__file__).parents[0].resolve() / "gui" / "client"
+            path = request.url.path.lstrip("/")  # We need the full path
             file_path = gui_build_dir / path
 
             if path != "" and file_path.exists():
@@ -319,7 +391,7 @@ def gui_shutdown(silent=False):
 
     # Clear all working copy molsets in the /wc_cache folder
     workspace_path = ctx().workspace_path()
-    cache_dir = workspace_path + "/._openad/wc_cache"
+    cache_dir = workspace_path / "._openad" / "wc_cache"
     if os.path.exists(cache_dir):
         for file in os.listdir(cache_dir):
             os.remove(os.path.join(cache_dir, file))

@@ -22,6 +22,7 @@ from pathlib import Path
 import yaml
 
 # OMGUI
+from omgui.spf import spf
 from omgui.util.logger import get_logger
 
 
@@ -41,6 +42,12 @@ class Config:
 
     Every option corresponds to an environment variable
     in SCREAMING_SNAKE_CASE.
+
+    Priorities (high to low):
+        1. omgui.configure() during runtime
+        2. Environment variables (OMGUI_*)
+        3. Configuration file (omgui.config.yml)
+        4. Default values
 
     Options
     -------
@@ -108,6 +115,9 @@ class Config:
         "log_level": "INFO",
     }
 
+    # Config settings set via omgui.configure() during runtime
+    config_runtime = {}
+
     def __new__(cls):
         """
         Control singleton instance creation.
@@ -127,8 +137,9 @@ class Config:
 
         _config = (
             self.default_config  # Base: defaults
-            | self.config_file()  # 2nd priority: omgui.config.yml
-            | self.config_env()  # First priority: environment variables
+            | self.config_file()  # 3nd priority: omgui.config.yml
+            | self.config_env()  # 2nd priority: environment variables
+            | self.config_runtime  # 1st priority: set via omgui.configure()
         )
 
         # Write to self
@@ -170,9 +181,8 @@ class Config:
             # Log what's loaded
             _file_vars = list(_config_file.keys())
             logger.info(
-                "Loaded config options from file '%s': %s",
-                config_path,
-                ", ".join(_file_vars) if _file_vars else "-",
+                "Loaded config options from file omgui.config.yml: %s",
+                ", ".join(_file_vars) if _file_vars else "None",
             )
 
             return _config_file
@@ -209,7 +219,7 @@ class Config:
         _env_vars = list(_config_env.keys())
         logger.info(
             "Loaded config options from environment variables: %s",
-            ", ".join(_env_vars) if _env_vars else "-",
+            ", ".join(_env_vars) if _env_vars else "None",
         )
         return _config_env
 
@@ -220,7 +230,7 @@ class Config:
         """
 
         if key in self.default_config:
-            self.default_config[key] = value
+            self.config_runtime[key] = value
             logger.info("Config '%s' set to '%s'", key, value)
         else:
             logger.warning("Config key '%s' not recognized.", key)
@@ -229,17 +239,37 @@ class Config:
         """
         Prints an overview of the current configuration.
         """
-
-        print("\nDefault config (base)\n----------------------")
-        for key, val in self.default_config.items():
-            print(f"{key:12}: {val}")
-        print("\nConfig file (2nd prio)\n----------------------")
-        for key, val in self.config_file().items():
-            print(f"{key:12}: {val}")
-        print("\nConfig env (1st prio)\n----------------------")
-        for key, val in self.config_env().items():
-            print(f"{key:12}: {val}")
-        print("\nCompiled config\n----------------------")
+        _report = []
+        _report.append("<h1>Compiled config</h1>")
         for key, val in self.__dict__.items():
             if not key.startswith("_"):
-                print(f"{key:12}: {val}")
+                _report.append(f"<green>{key:12}</green><soft>:</soft> {val}")
+
+        spf("\n".join(_report), pad=2, edge=True)
+        _report = []
+
+        _report.append("<h2>Configuration Sources:</h2>\n")
+
+        _report.append("  1. Config runtime")
+        for key, val in self.config_runtime.items():
+            _report.append(f"     {key:12}: {val}")
+        if len(self.config_runtime.items()) == 0:
+            _report.append("     <soft>None</soft>")
+
+        _report.append("\n  2. Config env")
+        for key, val in self.config_env().items():
+            _report.append(f"     {key:12}: {val}")
+        if len(self.config_env().items()) == 0:
+            _report.append("     <soft>None</soft>")
+
+        _report.append("\n  3. Config file")
+        for key, val in self.config_file().items():
+            _report.append(f"     {key:12}: {val}")
+        if len(self.config_file().items()) == 0:
+            _report.append("     <soft>None</soft>")
+
+        _report.append("\n  4. Default config:")
+        for key, val in self.default_config.items():
+            _report.append(f"     {key:12}: {val}")
+
+        spf("\n".join(_report), pad_btm=2)

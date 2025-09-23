@@ -2,17 +2,22 @@
 SVG rendering function for 3D molecular structures.
 """
 
+# Std
 import re
 import time
-import logging
-from enum import Enum
-from rdkit import Chem
 from random import randint
-from rdkit.Chem import AllChem
 from typing import Optional, Literal, List
+
+# 3rd party
+from rdkit import Chem
+from rdkit.Chem import AllChem
 from cinemol.api import Atom, Bond, Look, Style, draw_molecule
 
-logger = logging.getLogger(__name__)
+# OMGUI
+from omgui.util.logger import get_logger
+
+# Logger
+logger = get_logger()
 
 
 def render(
