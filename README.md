@@ -15,13 +15,12 @@ It supports small molecules as well as macromolecules like proteins, plus it doe
 Run it from a Jupyter Notebook or any python script.
 
 ```shell
-pip install git+https://github.com/themoenen/omgui@v0.1
+pip install git+https://github.com/themoenen/omgui.git@v0.1
 ```
-
-<br>
 
 > [!WARNING]  
 > OMGUI is in active development. Not all described functionality is implemented yet.
+> A stable version will be released on Pypi in due time.
 
 <br>
 
