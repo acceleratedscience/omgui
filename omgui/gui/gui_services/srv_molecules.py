@@ -51,7 +51,6 @@ def get_smol_data(identifier):
     Get molecule data, plus MDL and SVG.
     Used when requesting a molecule by its identifier.
     """
-    print("\n----- get_smol_data()", identifier)
     smol = find_smol(identifier, enrich=True)
 
     # Fail
