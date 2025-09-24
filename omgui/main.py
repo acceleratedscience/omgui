@@ -28,11 +28,11 @@ from fastapi.responses import HTMLResponse, Response
 from contextlib import asynccontextmanager
 
 # Redis
-import redis.asyncio as aioredis
 import redis.exceptions
+import redis.asyncio as aioredis
 
 # OMGUI
-from omgui import config, ctx, configure
+from omgui import config, ctx
 from omgui.util import gui_install
 from omgui.util.jupyter import nb_mode
 from omgui.util.logger import get_logger
@@ -47,21 +47,6 @@ from omgui.molviz.molviz_routes import molviz_router
 
 # Logger
 logger = get_logger()
-
-# Check if [viz] optional dependencies are installed
-# and set config.viz_deps accordingly
-try:
-    import plotly  # pylint: disable=unused-import
-    import kaleido  # pylint: disable=unused-import
-    import cairosvg  # pylint: disable=unused-import
-
-    configure(viz_deps=True)
-    logger.info("Optional [viz] dependencies are installed")
-except ImportError:
-    configure(viz_deps=False)
-    logger.warning(
-        "Optional [viz] dependencies are not installed - install with `pip install omgui[viz]`"
-    )
 
 GUI_SERVER = None
 NOTEBOOK_MODE = nb_mode()
@@ -260,7 +245,6 @@ def _launch(path=None, query="", hash=""):
     # because this conflicts with FastAPI's handling of
     # redirecting routes with slashes (redirect_slashes).
     # fmt: off
-    @app.get("/{path:path}", tags=["GUI"], summary="Serve the GUI")
     @app.get("/", tags=["GUI"], summary="Serve the GUI")
     @app.get("/~/{path:path}", tags=["GUI"], summary="Serve the GUI filebrowser")
     @app.get("/mol/{path:path}", tags=["GUI"], summary="Serve the GUI molecule viewer")
@@ -279,6 +263,7 @@ def _launch(path=None, query="", hash=""):
     @app.get("/svg/{path:path}", tags=["GUI"], summary="Serve the GUI svg endpoint")
     @app.get("/kitchensink/{path:path}", tags=["GUI"], summary="Serve the GUI kitchensink")
     @app.get("/home", tags=["GUI"], summary="Serve the GUI homepage")
+    # @app.get("/{path:path}", tags=["GUI"], summary="Serve the GUI") # Only for testing, do not enable
     # fmt: on
     async def serve(request: Request, path: str = ""):
         try:

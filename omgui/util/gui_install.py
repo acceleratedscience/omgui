@@ -21,7 +21,7 @@ def ensure():
         install(destination_dir)
 
 
-def install(destination_dir: Path, v: str = "0.2"):
+def install(destination_dir: Path, v: str = "0.3"):
     """
     Download and install the GUI build files.
     """

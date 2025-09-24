@@ -36,6 +36,61 @@ def config():
     return Config()
 
 
+def configure(
+    session: bool | None = None,
+    prompt: bool | None = None,
+    workspace: str | None = None,
+    data_dir: str | None = None,
+    host: str | None = None,
+    port: int | None = None,
+    base_path: str | None = None,
+    log_level: str | None = None,
+    viz_deps: bool | None = None,
+) -> None:
+    """
+    Optional config options to be set right after import.
+
+    This will update config with the provided values.
+    See configuration.py for details.
+    """
+
+    if session:
+        from omgui import context
+
+        config().set("session", True)
+        context.new_session()  # Create a new session-only context
+
+    if prompt:
+        config().set("prompt", prompt)
+
+    if workspace:
+        # Workspace gets created in startup()
+        config().set("workspace", workspace)
+
+    if data_dir:
+        config().set("data_dir", data_dir)
+
+    if host:
+        config().set("host", host)
+
+    if port:
+        config().set("port", port)
+
+    if base_path:
+        config().set("base_path", base_path)
+
+    if log_level:
+        config().set("log_level", log_level)
+
+        from omgui.util.jupyter import nb_mode
+
+        if not nb_mode():
+            logger.setLevel(log_level)
+
+    if viz_deps is not None:
+        config().set("viz_deps", viz_deps)
+
+
 class Config:
     """
     Configuration singleton for omgui.

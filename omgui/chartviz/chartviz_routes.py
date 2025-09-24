@@ -16,8 +16,11 @@ from fastapi.responses import Response, HTMLResponse
 from fastapi import Request, HTTPException, status, Query, Body, Depends
 
 # 3rd party
-import kaleido  # We need this
-import plotly.graph_objects as go
+try:
+    import kaleido  # pylint: disable=unused-import
+    import plotly.graph_objects as go
+except ImportError:
+    pass
 
 # OMGUI
 from omgui import config

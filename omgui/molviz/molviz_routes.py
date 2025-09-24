@@ -13,7 +13,10 @@ from fastapi.responses import Response, HTMLResponse
 from fastapi import APIRouter, Request
 
 # 3rd party
-from cairosvg import svg2png
+try:
+    from cairosvg import svg2png
+except ImportError:
+    pass
 
 # OMGUI
 from omgui import config

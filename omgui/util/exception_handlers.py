@@ -9,7 +9,7 @@ into user-friendly JSON responses.
 
 # FastAPI exceptions
 from fastapi import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
@@ -86,12 +86,9 @@ async def cache_file_not_found_handler(
 async def missing_dependencies_viz(
     request: Request, err: omg_exc.MissingDependenciesViz
 ):
-    return JSONResponse(
+    return PlainTextResponse(
         status_code=HTTP_503_SERVICE_UNAVAILABLE,
-        content={
-            "message": "Optional dependencies for /viz routes are not installed. Install with `pip install omgui[viz]`.",
-            "error": str(err),
-        },
+        content="Optional dependencies for /viz routes are not installed. Install with `pip install omgui[viz]`.",
     )
 
 

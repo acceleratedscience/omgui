@@ -16,6 +16,7 @@ Usage:
 
 # Expose sub-modules for the public API
 from omgui import mws
+from omgui.configuration import configure
 
 from omgui.context import ctx
 from omgui.startup import startup as _startup
@@ -27,66 +28,6 @@ _startup()
 # ------------------------------------
 # region - General
 # ------------------------------------
-
-
-def configure(
-    session: bool | None = None,
-    prompt: bool | None = None,
-    workspace: str | None = None,
-    data_dir: str | None = None,
-    host: str | None = None,
-    port: int | None = None,
-    base_path: str | None = None,
-    log_level: str | None = None,
-    viz_deps: bool | None = None,
-) -> None:
-    """
-    Optional config options to be set right after import.
-
-    This will update config with the provided values.
-    See configuration.py for details.
-    """
-
-    if session:
-        from omgui import context
-
-        _config().set("session", True)
-        context.new_session()  # Create a new session-only context
-
-    if prompt:
-        _config().set("prompt", prompt)
-
-    if workspace:
-        # Workspace gets created in startup()
-        _config().set("workspace", workspace)
-
-    if data_dir:
-        _config().set("data_dir", data_dir)
-
-    if host:
-        _config().set("host", host)
-
-    if port:
-        _config().set("port", port)
-
-    if base_path:
-        _config().set("base_path", base_path)
-
-    if log_level:
-        from omgui.util.jupyter import nb_mode
-        from omgui.util.logger import get_logger
-
-        _config().set("log_level", log_level)
-        if not nb_mode():
-            logger = get_logger()
-            logger.setLevel(log_level)
-
-    if viz_deps is not None:
-        _config().set("viz_deps", viz_deps)
-
-    # Update the global config
-    global config
-    config = _config()
 
 
 def get_context() -> dict:
