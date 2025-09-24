@@ -51,6 +51,10 @@ logging.getLogger("pubchempy").handlers.clear()
 logging.getLogger("pubchempy").propagate = False
 logging.getLogger("pubchempy").setLevel(logging.WARNING)
 
+from omgui.util.logger import get_logger
+
+logger = get_logger()
+
 # This doesn't seem to work anymore... is upposed to live inside the function scope.
 # rdBase.BlockLogs()  # pylint: disable=c-extension-no-member
 
@@ -217,18 +221,18 @@ def find_smol(
     smol: dict
         The OpenAD small molecule dictionary if found, otherwise None.
     """
-    print("\n----- find_smol()", identifier, enrich)
+    logger.info(f"\n----- find_smol() - identifier: {identifier} - enrich: {enrich}")
 
     # Look for molecule in the working set
     smol = get_smol_from_mws(identifier)
-    print("- get_smol_from_mws -->", smol is not None)
+    logger.info(f"- get_smol_from_mws --> {smol is not None}")
 
     if smol:
-        print("- >>>> SMOL FROM MWS:", smol)
+        logger.info(f"- >>>> SMOL FROM MWS: {smol}")
 
     # Look for molecule on PubChem
     if not smol and enrich:
-        print("- LOOKUP ON PUBCHEM")
+        logger.info("- LOOKUP ON PUBCHEM")
         smol = get_smol_from_pubchem(identifier, show_spinner)
 
     # Try creating molecule object with RDKit.
@@ -266,7 +270,9 @@ def get_smol_from_mws(identifier: str, ignore_synonyms: bool = False) -> dict | 
     dict
         The OpenAD smol dictionary if found, otherwise None.
     """
-    print("\n----- get_smol_from_mws()", identifier, ignore_synonyms)
+    logger.info(
+        f"\n----- get_smol_from_mws() - identifier: {identifier} - ignore_synonyms: {ignore_synonyms}"
+    )
 
     smol = get_smol_from_list(identifier, ctx().mws(), ignore_synonyms=ignore_synonyms)
     if smol is not None:
@@ -284,7 +290,7 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         The small molecule identifier to search for.
         Valid inputs: InChI, SMILES, InChIKey, name, CID.
     """
-    print("\n----- get_smol_from_pubchem()")
+    logger.info(f"\n----- get_smol_from_pubchem() - identifier: {identifier}")
 
     error_msg = "<error>x</error> <soft>{} search on PubChem returned empty</soft>"
 
@@ -387,25 +393,25 @@ def _get_pubchem_compound(identifier: str, identifier_type: str) -> dict | None:
     identifier_type: str
         The type of identifier to search for (see PCY_IDFR).
     """
-    print("\n----- _get_pubchem_compound()")
+    logger.info("\n----- _get_pubchem_compound()")
 
     mol_pcy = None
 
     try:
         # Find molecule on PubChem
-        print("- Looking up compound")
+        logger.info("- Looking up compound")
         compounds = pcy.get_compounds(identifier, identifier_type)
         if len(compounds) == 0:
-            print("- No compound found")
+            logger.info("- No compound found")
             return None
         else:
-            print("- Compound found:")
+            logger.info("- Compound found:")
             mol_pcy = compounds[0].to_dict()
-            print(f"  - CID: {mol_pcy.get('cid', 'N/A')}")
+            logger.info(f"  - CID: {mol_pcy.get('cid', 'N/A')}")
 
         # Create OpenAD smol dict
         if mol_pcy:
-            print("- Merging pubchenmpy data")
+            logger.info("- Merging pubchem data")
             smol = deepcopy(OPENAD_SMOL_DICT)
             smol = _add_pcy_data(smol, mol_pcy, identifier, identifier_type)
             return smol
@@ -441,7 +447,7 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
     identifier_type: str
         The type of identifier to search for (see PCY_IDFR).
     """
-    print("----- _add_pcy_data()")
+    logger.info("----- _add_pcy_data()")
 
     smol["enriched"] = True
 
@@ -450,10 +456,8 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
     smol["synonyms"] = (
         synonyms[0].get("Synonym") if synonyms and len(synonyms) > 0 else []
     )
-    print(
-        "Added synonyms:",
-        smol["synonyms"][:3],
-        "..." if len(smol["synonyms"]) > 3 else "",
+    logger.info(
+        f"Added synonyms: {smol['synonyms'][:3]} {'...' if len(smol['synonyms']) > 3 else ''}"
     )
 
     if identifier_type == PCY_IDFR["name"]:
@@ -482,16 +486,16 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
     # - After: { 'label': 'IUPAC Name', 'name': 'Preferred', 'datatype': 1, 'version': '2.7.0',
     #            'software': 'Lexichem TK', 'source': 'OpenEye Scientific Software', 'release': '2021.10.14'}
 
-    print("- Adding property sources:")
+    logger.info("- Adding property sources:")
     for x in SMOL_PROPERTIES:
-        print("--", x)
+        logger.info(f"-- {x}")
         smol["property_sources"][x] = {"source": "PubChem"}
         for prop_name, prop_name_key in MOL_PROPERTY_SOURCES.items():
             if prop_name_key == x:
                 if len(prop_name.split("-")) > 0:
 
                     for y in smol_pcy.get("record", {}).get("props", []):
-                        print("---", y)
+                        logger.info(f"--- {y}")
 
                         if "label" not in y["urn"]:
                             pass
@@ -506,9 +510,9 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
                         ):
                             smol["property_sources"][x] = y["urn"]
 
-                        print("---->", smol["property_sources"][x])
+                        logger.info(f"----> {smol['property_sources'][x]}")
 
-    print("- Returning smol!")
+    logger.info("- Returning smol!")
     return smol
 
 
