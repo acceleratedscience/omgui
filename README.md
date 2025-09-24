@@ -2,10 +2,12 @@
 
 ### _Open-source Molecular Graphical User Interface_
 
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/omgui)](https://pypi.org/project/omgui/)
-[![PyPI version](https://img.shields.io/pypi/v/omgui)](https://pypi.org/project/omgui/)
+<!-- [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/omgui)](https://pypi.org/project/omgui/) -->
+<!-- [![PyPI version](https://img.shields.io/pypi/v/omgui)](https://pypi.org/project/omgui/) -->
+
 [![License MIT](https://img.shields.io/github/license/acceleratedscience/openad-toolkit)](https://opensource.org/licenses/MIT)
-[![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/)
+
+<!-- [![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/) -->
 
 OMGUI makes it dead-simple to visualize and triage your molecule results in Python.  
 It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](docs/functionality.md).
@@ -13,8 +15,7 @@ It supports small molecules as well as macromolecules like proteins, plus it doe
 Run it from a Jupyter Notebook or any python script.
 
 ```shell
-# pip install omgui # To be published
-pip install git+https://github.com/themoenen/omgui@gui_merge
+pip install git+https://github.com/themoenen/omgui@v0.1
 ```
 
 <br>
