@@ -92,6 +92,11 @@ class Config:
     log_level: str, default "INFO" / .env: OMGUI_LOG_LEVEL
         Log level for the server. One of "DEBUG", "INFO",
         "WARNING", "ERROR", "CRITICAL".
+
+    viz_deps: bool, default False / .env: NOT APPLICABLE!
+        Whether the optional visualization dependencies are installed.
+        This is automatically set to True when you install, and should
+        not be set manually.
     """
 
     # Singleton instance
@@ -113,6 +118,7 @@ class Config:
         "base_path": "",
         "sample_files": True,
         "log_level": "INFO",
+        "viz_deps": False,
     }
 
     # Config settings set via omgui.configure() during runtime

@@ -38,6 +38,7 @@ def configure(
     port: int | None = None,
     base_path: str | None = None,
     log_level: str | None = None,
+    viz_deps: bool | None = None,
 ) -> None:
     """
     Optional config options to be set right after import.
@@ -79,6 +80,9 @@ def configure(
         if not nb_mode():
             logger = get_logger()
             logger.setLevel(log_level)
+
+    if viz_deps is not None:
+        _config().set("viz_deps", viz_deps)
 
     # Update the global config
     global config

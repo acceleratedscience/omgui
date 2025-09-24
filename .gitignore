@@ -4,6 +4,7 @@
 # Python build artifacts
 __pycache__
 .ipynb_checkpoints
+/build/
 
 # Package distribution files
 **/dist/

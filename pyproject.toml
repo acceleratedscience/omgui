@@ -26,15 +26,13 @@ classifiers = [
 ]
 dependencies = [
   "aiofiles>=22.1.0",
-  "CairoSVG>=2.8.2",
   "cinemol>=1.0.2",
   "fastapi>=0.115.7",
   "gemmi>=0.6.7",
   "IPython>=9.5.0",
   "Jinja2>=3.1.6",
-  "kaleido>=1.0.0",
+  
   "pandas>=2.3.2",
-  "plotly>=6.3.0",
   "pydantic>=2.11.9",
   "PyYAML>=6.0.2",
   "pubchempy>=1.0.5",
@@ -49,6 +47,17 @@ dependencies = [
 Homepage = "https://github.com/acceleratedscience/omgui"
 "Bug Tracker" = "https://github.com/acceleratedscience/omgui/issues"
 
-# pip install omgui[dev]
 [project.optional-dependencies]
+
+# pip install omgui[dev]
 dev = []
+
+# pip install omgui[viz]
+viz = [
+  # chartviz + molviz --> SVG/PNG export
+  "CairoSVG>=2.8.2",
+
+  # chartviz
+  "kaleido>=1.0.0",
+  "plotly>=6.3.0",
+]

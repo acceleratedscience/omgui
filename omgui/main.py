@@ -32,7 +32,7 @@ import redis.asyncio as aioredis
 import redis.exceptions
 
 # OMGUI
-from omgui import config, ctx
+from omgui import config, ctx, configure
 from omgui.util import gui_install
 from omgui.util.jupyter import nb_mode
 from omgui.util.logger import get_logger
@@ -47,6 +47,21 @@ from omgui.molviz.molviz_routes import molviz_router
 
 # Logger
 logger = get_logger()
+
+# Check if [viz] optional dependencies are installed
+# and set config.viz_deps accordingly
+try:
+    import plotly  # pylint: disable=unused-import
+    import kaleido  # pylint: disable=unused-import
+    import cairosvg  # pylint: disable=unused-import
+
+    configure(viz_deps=True)
+    logger.info("Optional [viz] dependencies are installed")
+except ImportError:
+    configure(viz_deps=False)
+    logger.warning(
+        "Optional [viz] dependencies are not installed - install with `pip install omgui[viz]`"
+    )
 
 GUI_SERVER = None
 NOTEBOOK_MODE = nb_mode()

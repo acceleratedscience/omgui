@@ -7,7 +7,7 @@ into user-friendly JSON responses.
 
 # pylint: disable=missing-function-docstring, unused-argument
 
-# FastAPI
+# FastAPI exceptions
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.status import (
@@ -17,9 +17,10 @@ from starlette.status import (
     HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_503_SERVICE_UNAVAILABLE,
 )
 
-# OMGUI
+# OMGUI exceptions
 from omgui.util import exceptions as omg_exc
 
 
@@ -77,6 +78,18 @@ async def cache_file_not_found_handler(
         status_code=HTTP_400_BAD_REQUEST,
         content={
             "message": "The cached working copy is not found.",
+            "error": str(err),
+        },
+    )
+
+
+async def missing_dependencies_viz(
+    request: Request, err: omg_exc.MissingDependenciesViz
+):
+    return JSONResponse(
+        status_code=HTTP_503_SERVICE_UNAVAILABLE,
+        content={
+            "message": "Optional dependencies for /viz routes are not installed. Install with `pip install omgui[viz]`.",
             "error": str(err),
         },
     )
@@ -142,6 +155,7 @@ def register_exception_handlers(app):
     app.add_exception_handler(omg_exc.NoResult, no_result_handler)
     app.add_exception_handler(omg_exc.FailedOperation, failed_operation_handler)
     app.add_exception_handler(omg_exc.CacheFileNotFound, cache_file_not_found_handler)
+    app.add_exception_handler(omg_exc.MissingDependenciesViz, missing_dependencies_viz)
 
     app.add_exception_handler(ValueError, value_error_handler)
     app.add_exception_handler(FileExistsError, save_file_exists_handler)

@@ -32,3 +32,9 @@ class CacheFileNotFound(Exception):
     """Exception for when a cache file cannot be found."""
 
     pass
+
+
+class MissingDependenciesViz(Exception):
+    """Exception for when optional dependencies for /viz routes are not installed."""
+
+    pass

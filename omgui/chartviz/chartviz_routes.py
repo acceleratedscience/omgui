@@ -3,7 +3,6 @@ Chart visualization API routes.
 """
 
 # Std
-import os
 import json
 from enum import Enum
 from typing import Literal
@@ -13,16 +12,18 @@ from urllib.parse import unquote
 # FastAPI
 from fastapi import APIRouter
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import Response, HTMLResponse, PlainTextResponse
+from fastapi.responses import Response, HTMLResponse
 from fastapi import Request, HTTPException, status, Query, Body, Depends
 
 # 3rd party
-import kaleido
+import kaleido  # We need this
 import plotly.graph_objects as go
 
 # OMGUI
+from omgui import config
 from omgui.util.logger import get_logger
 from omgui.chartviz import chart_sampler
+from omgui.util import exceptions as omg_exc
 from omgui.util.general import deep_merge, is_dates, hash_data
 
 
@@ -559,6 +560,9 @@ def demo_charts(request: Request):
     Interactive HTML demo page for the Charts API.
     Provides a user interface with controls for all API parameters.
     """
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
     return templates.TemplateResponse("demo-charts.html", {"request": request})
 
 
@@ -569,6 +573,9 @@ def demo_charts(request: Request):
 async def random_data(
     request: Request, chart_type: ChartType | Literal["boxplot-group"]
 ):
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
     chart_data = None
     if chart_type == ChartType.SCATTER:
         chart_data = chart_sampler.scatter()
@@ -611,6 +618,8 @@ async def post_chart_data(
     Takes chart data from the request body, stores it in Redis (or in-memory fallback),
     and returns a unique ID for the data.
     """
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
 
     unique_id = hash_data(data)
     key = f"input_data:{unique_id}"
@@ -656,6 +665,8 @@ async def chart_bar(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)
@@ -714,6 +725,9 @@ async def chart_line(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)
 
@@ -771,6 +785,8 @@ async def chart_scatter(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)
@@ -818,6 +834,8 @@ async def chart_bubble(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)
@@ -864,6 +882,8 @@ async def chart_pie(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)
@@ -913,6 +933,8 @@ async def chart_boxplot(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)
@@ -990,6 +1012,8 @@ async def chart_histogram(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
 
     # Parse data
     input_data = await parse_input_data(request, data_json, data_id)

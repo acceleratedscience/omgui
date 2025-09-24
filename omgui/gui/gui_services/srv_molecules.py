@@ -6,7 +6,7 @@ import os
 import json
 import shutil
 
-# Small molecule functions
+# OMGUI - Small molecule functions
 from omgui.gui.workers.smol_functions import (
     get_smol_from_pubchem,
     create_molset_cache_file,
@@ -29,11 +29,11 @@ from omgui.gui.workers.smol_transformers import (
 )
 
 
-# Macromolecule functions
+# OMGUI - Macromolecule functions
 from omgui.gui.workers.mmol_functions import mmol_from_identifier
 from omgui.gui.workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
 
-# Various
+# OMGUI
 from omgui import ctx
 from omgui.util.json_decimal_encoder import JSONDecimalEncoder
 from omgui.util.mol_utils import create_molset_response

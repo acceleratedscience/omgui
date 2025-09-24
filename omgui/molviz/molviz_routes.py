@@ -3,7 +3,6 @@ Molecule-related API routes.
 """
 
 # Std
-import logging
 from io import BytesIO
 from typing import Literal
 
@@ -17,8 +16,10 @@ from fastapi import APIRouter, Request
 from cairosvg import svg2png
 
 # OMGUI
-from omgui.molviz import svgmol_2d, svgmol_3d
+from omgui import config
 from omgui.util.logger import get_logger
+from omgui.util import exceptions as omg_exc
+from omgui.molviz import svgmol_2d, svgmol_3d
 
 
 # Setup
@@ -49,6 +50,8 @@ def demo_molecules(request: Request):
     Interactive HTML demo page for the Molecule Visualization API.
     Provides a user interface with controls for all API parameters.
     """
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
     return templates.TemplateResponse("demo-molecules.html", {"request": request})
 
 
@@ -80,6 +83,8 @@ def visualize_molecule(
     Examples:
     http://localhost:8034/?smiles=C1=CC=CC=C1
     """
+    if not config.viz_deps:
+        raise omg_exc.MissingDependenciesViz
 
     # Render molecule SVG
     if d3 is True:
