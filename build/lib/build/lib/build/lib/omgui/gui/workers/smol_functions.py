@@ -379,35 +379,41 @@ def _get_pubchem_compound(identifier: str, identifier_type: str) -> dict | None:
     identifier_type: str
         The type of identifier to search for (see PCY_IDFR).
     """
+    print("\n----- _get_pubchem_compound()")
 
     mol_pcy = None
 
     try:
         # Find molecule on PubChem
+        print("- Looking up compound")
         compounds = pcy.get_compounds(identifier, identifier_type)
         if len(compounds) == 0:
+            print("- No compound found")
             return None
         else:
+            print("- Compound found:")
             mol_pcy = compounds[0].to_dict()
+            print(f"  - CID: {mol_pcy.get('cid', 'N/A')}")
 
         # Create OpenAD smol dict
         if mol_pcy:
+            print("- Merging pubchenmpy data")
             smol = deepcopy(OPENAD_SMOL_DICT)
             smol = _add_pcy_data(smol, mol_pcy, identifier, identifier_type)
             return smol
 
     except Exception as err:  # pylint: disable=broad-exception-caught
-        pass
+        # pass
 
-        # # Keep here for debugging
-        # spf.error(
-        #     [
-        #         "Error _get_pubchem_compound()",
-        #         f"identifier: {identifier}",
-        #         f"identifier_type: {identifier_type}",
-        #         err,
-        #     ]
-        # )
+        # Keep here for debugging
+        spf.error(
+            [
+                "Error _get_pubchem_compound()",
+                f"identifier: {identifier}",
+                f"identifier_type: {identifier_type}",
+                err,
+            ]
+        )
 
     return None
 
@@ -427,6 +433,7 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
     identifier_type: str
         The type of identifier to search for (see PCY_IDFR).
     """
+    print("----- _add_pcy_data()")
 
     smol["enriched"] = True
 
@@ -434,6 +441,11 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
     synonyms = pcy.get_synonyms(smol_pcy["iupac_name"], "name")
     smol["synonyms"] = (
         synonyms[0].get("Synonym") if synonyms and len(synonyms) > 0 else []
+    )
+    print(
+        "Added synonyms:",
+        smol["synonyms"][:3],
+        "..." if len(smol["synonyms"]) > 3 else "",
     )
 
     if identifier_type == PCY_IDFR["name"]:
@@ -462,16 +474,18 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
     # - After: { 'label': 'IUPAC Name', 'name': 'Preferred', 'datatype': 1, 'version': '2.7.0',
     #            'software': 'Lexichem TK', 'source': 'OpenEye Scientific Software', 'release': '2021.10.14'}
 
+    print("- Adding property sources:")
     for x in SMOL_PROPERTIES:
+        print("--", x)
         smol["property_sources"][x] = {"source": "PubChem"}
         for prop_name, prop_name_key in MOL_PROPERTY_SOURCES.items():
             if prop_name_key == x:
                 if len(prop_name.split("-")) > 0:
 
                     for y in smol_pcy.get("record", {}).get("props", []):
+                        print("---", y)
 
                         if "label" not in y["urn"]:
-
                             pass
                         elif (
                             y["urn"]["label"] == prop_name.split("-", maxsplit=1)[0]
@@ -484,6 +498,9 @@ def _add_pcy_data(smol, smol_pcy, identifier, identifier_type):
                         ):
                             smol["property_sources"][x] = y["urn"]
 
+                        print("---->", smol["property_sources"][x])
+
+    print("- Returning smol!")
     return smol
 
 

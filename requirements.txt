@@ -1,18 +1,18 @@
-# Core
-fastapi
-uvicorn[standard]
-jinja2
-redis
-pandas
-
-# Molecule rendering
-rdkit
-cinemol
-cairosvg
-
-# Chart rendering
-plotly
-kaleido
-
-# Other
-tabulate
+aiofiles>=22.1.0
+CairoSVG>=2.8.2
+cinemol>=1.0.2
+fastapi>=0.115.7
+gemmi>=0.6.7
+IPython>=9.5.0
+Jinja2>=3.1.6
+kaleido>=1.0.0
+pandas>=2.3.2
+plotly>=6.3.0
+pydantic>=2.11.9
+PyYAML>=6.0.2
+pubchempy>=1.0.5
+requests>=2.32.4
+rdkit>=2024.9.6
+redis>=6.2.0
+tabulate>=0.9.0
+uvicorn>=0.34.2

@@ -217,12 +217,18 @@ def find_smol(
     smol: dict
         The OpenAD small molecule dictionary if found, otherwise None.
     """
+    print("\n----- find_smol()", identifier, enrich)
 
     # Look for molecule in the working set
     smol = get_smol_from_mws(identifier)
+    print("- get_smol_from_mws -->", smol is not None)
+
+    if smol:
+        print("- >>>> SMOL FROM MWS:", smol)
 
     # Look for molecule on PubChem
     if not smol and enrich:
+        print("- LOOKUP ON PUBCHEM")
         smol = get_smol_from_pubchem(identifier, show_spinner)
 
     # Try creating molecule object with RDKit.
@@ -260,6 +266,7 @@ def get_smol_from_mws(identifier: str, ignore_synonyms: bool = False) -> dict | 
     dict
         The OpenAD smol dictionary if found, otherwise None.
     """
+    print("\n----- get_smol_from_mws()", identifier, ignore_synonyms)
 
     smol = get_smol_from_list(identifier, ctx().mws(), ignore_synonyms=ignore_synonyms)
     if smol is not None:
@@ -277,6 +284,7 @@ def get_smol_from_pubchem(identifier: str, show_spinner: bool = False) -> dict |
         The small molecule identifier to search for.
         Valid inputs: InChI, SMILES, InChIKey, name, CID.
     """
+    print("\n----- get_smol_from_pubchem()")
 
     error_msg = "<error>x</error> <soft>{} search on PubChem returned empty</soft>"
 
