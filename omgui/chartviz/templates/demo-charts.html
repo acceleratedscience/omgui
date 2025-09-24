@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart Visualization API Demo</title>
+    <link rel="stylesheet" href="/static/viz-demos.css">
+    <style>
+        #link-preview-wrap {
+            position: sticky;
+            top: -20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: white;
+            padding: 20px;
+            margin: -20px;
+            border-bottom: solid 1px #ddd;
+        }
+        #link-preview-wrap .btn-wrap {
+            margin-top: 0;
+        }
+
+        #generate-data-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0;
+        }
+        #generate-data-section label {
+            margin: 10px 0 15px 0;
+
+        }
+        #generate-data-section select {
+            margin-top: 5px;
+        }
+
+        #data-preview {
+            height: 200px;
+            font-size: 0.7rem;
+            font-family: monospace;
+        }
+        #generate-chart-btns {
+            display: flex;
+            gap: 10px;
+            margin: 0;
+        }
+        #generate-chart-btns button {
+            flex: 50% 1 1;
+            margin: 0;
+        }
+        
+        #about-generating-chart {
+            font-size: 12px;
+            color: #777;
+        }
+        #about-generating-chart summary {
+            cursor: pointer;
+            user-select: none;
+        }
+        #about-generating-chart ul {
+            padding-inline-start: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="demo-container">
+            <div id="control-panel" class="control-panel">
+                <h1>Chart Visualization API Demo</h1>
+
+                <div id="link-preview-wrap">
+                    <div id="url-preview">
+                        <pre id="url-preview-text"></pre>
+                        <button class="copy-btn" id="copy-url-btn" type="button">Copy</button>
+                    </div>
+                    
+                    <div class="btn-wrap">
+                        <button id="open-btn" type="button" disabled>Open URL</button>
+                        <button type="submit" id="update-btn" class="shake" disabled>Update</button>
+                    </div>
+                </div>
+
+                {# <div class="example-section"></div> #}
+
+                <h3>Generate Chart Data</h3>
+                <div id="generate-data-section">
+                    <select id="chart-type-dropdown">
+                        <option data-url="/generate/bar" data-chart-type="bar">Bar chart</option>
+                        <option data-url="/generate/line" data-chart-type="line">Line chart</option>
+                        <option data-url="/generate/scatter" data-chart-type="scatter">Scatter plot</option>
+                        <option data-url="/generate/bubble" data-chart-type="bubble">Bubble chart</option>
+                        <option data-url="/generate/pie" data-chart-type="pie">Pie chart</option>
+                        <option data-url="/generate/boxplot" data-chart-type="boxplot">Box plot basic</option>
+                        <option data-url="/generate/boxplot-group" data-chart-type="boxplot-group">Box plot grouped</option>
+                        <option data-url="/generate/histogram" data-chart-type="histogram">Histogram</option>
+                    </select>
+
+                    <label id="bar-options" style="display:none">
+                        Bar chart options
+                        <select class="chart-option">
+                            <option value='{"h":null}'>Vertical (default)</option>
+                            <option value='{"h":1}'>Horizontal</option>
+                        </select>
+                        <select class="chart-option">
+                            <option value='{"barmode":null}'>Group (default)</option>
+                            <option value='{"barmode":"stack"}'>Stacked</option>
+                            {# <option value='{"barmode":"overlay"}'>Overlay</option> #}
+                            {# <option value='{"barmode":"relative"}'>Relative</option> #}
+                        </select>
+                    </label>
+                    <label id="line-options" style="display:none">
+                        Line chart options
+                        <select class="chart-option">
+                            <option value='{"h":null}'>Vertical (default)</option>
+                            <option value='{"h":1}'>Horizontal</option>
+                        </select>
+                    </label>
+                    <label id="boxplot-options" style="display:none">
+                        Boxplot options
+                        <select class="chart-option">
+                            <option value='{"h":null}'>Vertical (default)</option>
+                            <option value='{"h":1}'>Horizontal</option>
+                        </select>
+                        <select class="chart-option">
+                            <option value='{"show_points":null}'>Exclude data points (default)</option>
+                            <option value='{"show_points":1}'>Show data points</option>
+                        </select>
+                        <select class="chart-option">
+                            <option value='{"boxmean":null}'>Exclude deviation (default)</option>
+                            <option value='{"boxmean":1}'>Include mean deviation</option>
+                            <option value='{"boxmean":"sd"}'>Include mean & standard deviation</option>
+                        </select>
+                    </label>
+                    <label id="histogram-options" style="display:none">
+                        Histogram options
+                        <select class="chart-option">
+                            <option value='{"h":null}'>Vertical (default)</option>
+                            <option value='{"h":1}'>Horizontal</option>
+                        </select>
+                    </label>
+                    <!-- Apply button removed: example is generated when dropdown changes (and on initial load) -->
+                
+
+                    <textarea id="data-preview">Data will appear here</textarea>
+                    
+                    <div id="generate-chart-btns" class="btn-wrap">
+                        <button id="generate-chart-direct-btn">Generate chart directly</button>
+                        <button id="generate-chart-post-btn">Generate chart via POST</button>
+
+                    </div>
+                    <details id="about-generating-chart">
+                        <summary>What's the difference?</summary>
+                        <ul>
+                            <li><b>Direct generation:</b> For small datasets, you can pass data directly to the URL with the <i>data</i> parameter.</li>
+                            <li><b>POST generation:</b> For larger datasets, you can POST the data which stored the data in memory and returns an ID, which is then used to see the chart</li>
+                        </ul>
+                    </details>
+
+                </div>
+                
+                <form id="chart-form">
+                    <h3>Display Options</h3>
+ 					<div class="form-group">
+                        <label for="title">Title:</label>
+                        <input type="text" id="title" name="title" value="Demo Chart" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subtitle">Subtitle:</label>
+                        <input type="text" id="subtitle" name="subtitle" value="Some subtitle" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="body">Body:</label>
+                        <textarea id="body" name="body" rows="4">Hello world</textarea>
+                    </div>
+
+                    <!-- Added axis titles / prefixes / suffixes -->
+                    <div class="form-group">
+                        <label for="x_title">X axis title:</label>
+                        <input type="text" id="x_title" name="x_title" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="y_title">Y axis title:</label>
+                        <input type="text" id="y_title" name="y_title" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="x_prefix">X axis prefix:</label>
+                        <input type="text" id="x_prefix" name="x_prefix" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="x_suffix">X axis suffix:</label>
+                        <input type="text" id="x_suffix" name="x_suffix" value="" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="y_prefix">Y axis prefix:</label>
+                        <input type="text" id="y_prefix" name="y_prefix" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="y_suffix">Y axis suffix:</label>
+                        <input type="text" id="y_suffix" name="y_suffix" value="" />
+                    </div>
+
+                    <h3>Rendering Options</h3>
+                    <div class="form-group">
+                        <label for="width">Width (pixels):</label>
+                        <input type="text" id="width" name="width" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height">Height (pixels):</label>
+                        <input type="text" id="height" name="height" value="" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="omit_legend">Omit legend:</label>
+                        <select id="omit_legend" name="omit_legend">
+                            <option value="">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="output">Output:</label>
+                        <select id="output" name="output">
+                            <option value="" selected>HTML</option>
+                            <option value="png">PNG</option>
+                            <option value="svg">SVG</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="scale-option" style="display:none">
+                        <label for="scale">PNG Scale:</label>
+                        <input type="number" id="scale" name="scale" value="2" min="1" />
+                    </div>
+                </form>
+            </div>
+
+            <div class="preview-panel">
+                <iframe id="preview-frame" title="Chart Visualization"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const previewFrame = document.getElementById('preview-frame');
+            const urlPreview = document.getElementById('url-preview');
+            const urlPreviewText = document.getElementById('url-preview-text');
+            const btnCopyUrl = document.getElementById('copy-url-btn');
+            const btnOpen = document.getElementById('open-btn');
+            const btnUpdate = document.getElementById('update-btn');
+            
+            const chartTypeDropdown = document.getElementById('chart-type-dropdown');
+            const dataPreview = document.getElementById('data-preview');
+            const generateBtns = document.getElementById('generate-chart-btns');
+            const generateBtnPost = document.getElementById('generate-chart-post-btn');
+            const generateBtnDirect = document.getElementById('generate-chart-direct-btn');
+            
+            const form = document.getElementById('chart-form');
+            const scaleOption = document.getElementById('scale-option');
+
+            /**
+             * Initiation
+             */
+
+            // Display default chart on page load
+            displayDefaultChart()
+            async function displayDefaultChart() {
+                const selectedOption = chartTypeDropdown.children[0];
+                await fetchDummyData(selectedOption)
+                generateChartPost()
+            }
+
+            /**
+             * Dummy data
+             */
+
+ 			// Dropdown: Chart type
+            // --> Generate data
+ 			chartTypeDropdown.addEventListener('change', () => {
+ 				const opt = chartTypeDropdown.options[chartTypeDropdown.selectedIndex];
+ 				// Clear previous URL preview and hide open buttons when selecting a new example
+				urlPreviewText.textContent = ''
+				btnOpen.disabled = true
+                btnUpdate.disabled = true
+                // generateBtns.style.display = 'flex'
+                generateBtnPost.type = 'submit'
+                generateBtnDirect.type = 'submit'
+				fetchDummyData(opt);
+ 			});
+
+            // Fetch dummy data
+            async function fetchDummyData(opt) {
+ 				if (!opt) return;
+                
+ 				// Derive chart type from data-url (e.g. "/generate/bar" -> "bar")
+ 				const urlPath = opt.dataset.url;
+ 				const parts = urlPath.split('/').filter(Boolean);
+ 				const chartType = opt.dataset.chartType
+
+                // Update visibility of option panels for this chart type
+                _toggleChartOptions(chartType);
+
+                // Compose URL
+                let url = `/viz/chart/generate/${encodeURIComponent(chartType)}`
+
+ 				// Fetch generated example JSON
+ 				try {
+ 					const resp = await fetch(url);
+ 					const json = await resp.json();
+ 					// Display JSON with indent=2
+                    dataPreview.value = JSON.stringify(json, null, 2);
+ 				} catch (err) {
+					const errMsg = `Error fetching example for "${chartType}": ${err.message || err}`;
+					if (urlPreviewText) urlPreviewText.textContent = errMsg; else urlPreviewText.textContent = errMsg; // %%
+ 				}
+ 				// Ensure copy button remains available
+				if (!urlPreview.contains(btnCopyUrl)) urlPreview.appendChild(btnCopyUrl);
+ 			}
+            
+            // Toggle chart option panels based on chart type
+			function _toggleChartOptions(chartType) {
+				const barOpts = document.getElementById('bar-options');
+				const lineOpts = document.getElementById('line-options');
+				const boxOpts = document.getElementById('boxplot-options');
+                const histOption = document.getElementById('histogram-options');
+				// If elements missing, do nothing
+				if (!barOpts || !lineOpts || !boxOpts || !histOption) return;
+				barOpts.style.display = (chartType === 'bar') ? 'block' : 'none';
+				lineOpts.style.display = (chartType === 'line') ? 'block' : 'none';
+				boxOpts.style.display = (chartType === 'boxplot' || chartType === 'boxplot-group') ? 'block' : 'none';
+                histOption.style.display = (chartType === 'histogram') ? 'block' : 'none';
+			}
+
+            /**
+             * Chart options
+             */
+
+            // Dropdowns: Chart options
+            // --> Update URL preview with appropriate parameters
+            // --> Enable the 'Update' button
+            const chartOptionDropdowns = document.querySelectorAll('#bar-options select, #line-options select, #boxplot-options select')
+            Array.from(chartOptionDropdowns).forEach((optDropdown) => initOptDropdown(optDropdown))
+			function initOptDropdown(optDropdown) {
+				optDropdown.addEventListener('change', () => updateUrl());
+			}
+
+            /**
+             * Display & Rendering options
+             */
+            
+            // Input: any 
+            // --> Enable 'Update' button on edit
+            form.addEventListener('input', () => {
+                // Toggle PNG scale only if output is 'png'
+ 				const output = document.getElementById('output').value;
+ 				if (output === 'png') {
+ 					scaleOption.style.display = 'block';
+ 				    const controlPanel = document.getElementById('control-panel')
+ 					controlPanel.scrollTo(0, controlPanel.scrollHeight);
+ 				} else {
+ 					scaleOption.style.display = 'none';
+ 				}
+
+                updateUrl()
+            })
+
+            // Update URL
+            // --> Consolidate all options
+            // --> Generate & display URL
+            function updateUrl(path = null, enableUpdateBtn = true, data=null) {
+                console.log(path)
+                // Show shaking "Update" buttons
+                if (enableUpdateBtn && urlPreviewText.textContent) {
+                    btnUpdate.disabled = false
+                }
+
+                let qParams = {}
+
+                // If no URL is passed, create base URL
+                if (!path) {
+                    let currentUrl = urlPreviewText.textContent.trim()
+                    if (!currentUrl) return
+                    try {
+                        currentUrl = new URL(currentUrl);
+                        path = currentUrl.pathname;
+
+                        // If data parameter is present, pass it on to the new query parameters
+                        if (currentUrl.search) {
+                            const _qParams = new URLSearchParams(currentUrl.search)
+                            if (_qParams.get('data')) {
+                                qParams.data = _qParams.get('data')
+                            }
+                        }
+                    } catch(err) {
+                        alert('Current URL is invalid, please regenerate chart')
+                        return false
+                    }
+                }
+                
+
+                // Display options
+                qParams.title = document.getElementById('title').value;
+                qParams.subtitle = document.getElementById('subtitle').value;
+                qParams.body = document.getElementById('body').value;
+                qParams.x_title = document.getElementById('x_title').value;
+                qParams.y_title = document.getElementById('y_title').value;
+                qParams.x_prefix = document.getElementById('x_prefix').value;
+                qParams.y_prefix = document.getElementById('y_prefix').value;
+                qParams.x_suffix = document.getElementById('x_suffix').value;
+                qParams.y_suffix = document.getElementById('y_suffix').value;
+
+                // Render options
+                qParams.width = document.getElementById('width').value;
+                qParams.height = document.getElementById('height').value;
+                qParams.output = document.getElementById('output').value;
+                if (qParams.output == 'png') qParams.scale = document.getElementById('scale').value;
+                qParams.omit_legend = document.getElementById('omit_legend').value;
+
+                // Chart-specific options
+                const optionDropdowns = document.getElementsByClassName('chart-option')
+                Array.from(optionDropdowns).forEach(dd => {
+                    if (dd.parentNode.style.display != 'none') {
+                        if (dd.value) {
+                            const valueDict = JSON.parse(dd.value)
+                            for (const key of Object.keys(valueDict)) {
+                                qParams[key] = valueDict[key]
+                            }
+                        }
+                    }
+                })
+
+                // Add data if defined
+                // This is when you generata a chart directly, passing the data in the URL
+                if (data) {
+                    qParams.data = JSON.stringify(data)
+                }
+
+                // Filter out empty/null values
+                for (const key in qParams) {
+                    if (!qParams[key]) delete qParams[key]
+                }
+
+                // Compile URL
+                qParams = new URLSearchParams(qParams)
+                qParamsStr = qParams.toString()
+                if (qParamsStr) {
+                    path += `?${qParamsStr}`
+                }
+
+                // Update preview URL (displayed in the <pre> to preserve indentation)
+                console.log(1111)
+                urlPreviewText.textContent = window.location.origin + path;
+                // ensure copy button remains inside container
+                if (!urlPreview.contains(btnCopyUrl)) urlPreview.appendChild(btnCopyUrl);
+            }
+
+            /**
+             * URL preview
+             */
+
+            // Button: Open URL
+            // --> Open URL in new window
+            btnOpen.addEventListener('click', openUrl)
+            function openUrl(e) {
+                const success = updatePreview();
+                if (success) {
+                    const url = (urlPreviewText && urlPreviewText.textContent) ? urlPreviewText.textContent.trim() : ''
+                    window.open(url)
+                }
+            }
+
+            // Button: Copy URL
+            // --> Copy URL to clipboard
+            btnCopyUrl.addEventListener('click', () => {
+                const url = (urlPreviewText && urlPreviewText.textContent) ? urlPreviewText.textContent.trim() : ''
+                navigator.clipboard.writeText(url).then(() => {
+                    const originalText = btnCopyUrl.textContent
+                    btnCopyUrl.textContent = '✅ Copied'
+                    setTimeout(() => {
+                        btnCopyUrl.textContent = originalText
+                    }, 2000)
+                })
+            })
+
+            // Button: Update
+            // --> Update the iframe with chart data
+            btnUpdate.addEventListener('click', (e) => {
+                btnUpdate.disabled = true
+                updatePreview();
+            });
+
+            /**
+             * Display chart
+             */
+
+            // Button: Generate chart via POST
+            // --> POST data to /viz/chart/{chart_type}
+            // --> Fetch & display returned URL
+			generateBtnPost.addEventListener('click', generateChartPost);
+            async function generateChartPost(e) {
+				const chartType = _getChartType()
+				const payload = _getPayload()
+
+				// POST to /viz/chart/{chart_type}
+                // --> Create chart, store it in Redis
+                // --> return URL path with Redis ID
+                // --> Update URL + preview
+				try {
+					const resp = await fetch(`/viz/chart/${encodeURIComponent(chartType)}`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(payload)
+					});
+					if (!resp.ok) {
+						const txt = await resp.text();
+						throw new Error(txt || resp.statusText || 'Server error');
+					}
+					const json = await resp.json();
+					if (json && json.url) {
+                        console.log(200, json)
+                        updateUrl(json.url, false)
+						updatePreview();
+                        // generateBtns.style.display = 'none'
+                        generateBtnPost.type = 'button'
+                        generateBtnDirect.type = 'button'
+					} else {
+						throw new Error('Invalid response from server');
+					}
+				} catch (err) {
+					const msg = err && err.message ? err.message : String(err);
+					alert(`Error creating chart: ${msg}`);
+					console.error(err);
+				}
+			}
+
+            // Button: Generate chart directly
+            generateBtnDirect.addEventListener('click', generateChartDirectly);
+            async function generateChartDirectly(e) {
+                const chartType = _getChartType()
+				const payload = _getPayload()
+                updateUrl(`/viz/chart/${chartType}`, false, payload)
+                updatePreview()
+                // generateBtns.style.display = 'none'
+                generateBtnPost.type = 'button'
+                generateBtnDirect.type = 'button'
+            }
+
+            // Read chartType from selected dropdown
+            function _getChartType() {
+				const opt = chartTypeDropdown.options[chartTypeDropdown.selectedIndex];
+				let chartType = opt.dataset.chartType
+                if (chartType == 'boxplot-group') chartType = 'boxplot' // Group is defined in data, /viz/chart/ endpoint only knows boxplot
+                return chartType
+            }
+
+            // Read payload from textarea
+            function _getPayload() {
+				const payloadStr = (dataPreview && dataPreview.value) ? dataPreview.value.trim() : '';
+				if (!payloadStr) {
+                    const msg = 'No data present in the data-preview textarea'
+					alert(msg);
+					throw new Error(msg);
+				}
+
+				// Validate JSON
+				let payload;
+				try {
+					payload = JSON.parse(payloadStr);
+				} catch (err) {
+                    msg = 'Invalid JSON in data-preview textarea'
+					alert(msg);
+                    throw new Error(msg);
+				}
+                
+                return payload
+            }
+            
+            // Update URL & iframe with new chart 
+            function updatePreview(path=null) {
+                // Update the iframe src
+                console.log(2222)
+                previewFrame.src = urlPreviewText.textContent.trim();
+
+                // Enable open button
+                btnOpen.disabled = false
+
+                // console.clear()
+
+                return true
+            }
+
+        })
+
+    </script>
+</body>
+</html>

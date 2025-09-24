@@ -1,39 +1,59 @@
-<!-- source ../agenv/bin/activate -->
+# OMGUI
 
-# Data Visualization
+### _Open-source Molecular Graphical User Interface_
 
-Application to visualize data on the fly.
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/omgui)](https://pypi.org/project/omgui/)
+[![PyPI version](https://img.shields.io/pypi/v/omgui)](https://pypi.org/project/omgui/)
+[![License MIT](https://img.shields.io/github/license/acceleratedscience/openad-toolkit)](https://opensource.org/licenses/MIT)
+[![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/)
 
--   [Charting API](https://omgui.onrender.com/demo/charts) to turn JSON into charts on the fly
--   [Molecules API](https://omgui.onrender.com/demo) to visualize SMILES in 2D and 3D
+OMGUI makes it dead-simple to visualize and triage your molecule results in Python.  
+It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](docs/functionality.md).
+
+Run it from a Jupyter Notebook or any python script.
+
+```shell
+# pip install omgui # To be published
+pip install git+https://github.com/themoenen/omgui@gui_merge
+```
 
 <br>
 
-### Install
+> [!WARNING]  
+> OMGUI is in active development. Not all described functionality is implemented yet.
 
-> [!NOTE]  
-> _Optional: create virtual environment_
->
-> ```shell
-> python -m venv .venv
-> ```
->
-> ```shell
-> source .venv/bin/activate
-> ```
+<br>
 
-```shell
-pip install -r requirements.txt
+## Quick Start
+
+### Inspect a Set of Molecules
+
+```python
+import omgui
+
+omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ```
 
-```shell
-yes | plotly_get_chrome
+<kbd><img src="docs/assets/gui-molset.png" /></kbd>
+
+<br>
+
+### Inspect a Single Molecule
+
+```python
+omgui.show_mol('dopamine')
 ```
 
-```
-uvicorn 'app.main:app' --host=0.0.0.0 --port=8034 --reload  --no-access-log
-```
+<kbd><img src="docs/assets/gui-molecule.png" /></kbd>
 
-### Deploy
+<br><br>
 
-To deploy this app, use the [Dockerfile](Dockerfile), as it installs some system requirements for the Plotly PNG/SVG output to work.
+To discover what else **omgui** can do for you, jump to [Functionality](docs/functionality.md).
+
+<!-- ```shell
+yes | plotly_get_cxrome
+``` -->
+
+<!-- source ../agenv/bin/activate -->
+
+<!-- python -m test -->

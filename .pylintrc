@@ -1,0 +1,9 @@
+# Reason for ignoring:
+# - no-member: RDKit & IPython members are often not recognized by pylint
+# - import-error: Same 
+# - broad-except: Often justified to fail more elegantly
+# - import-outside-toplevel: Necessary for lazy loading and to avoid circular imports
+# - missing-module-docstring: Many modules are self-explanatory
+
+[MESSAGES]
+disable=no-member, import-error, broad-except, import-outside-toplevel, missing-module-docstring

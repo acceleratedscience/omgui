@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     libasound2
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /omgui
 
 # Copy the requirements file and install Python dependencies
 COPY requirements.txt .
@@ -31,4 +31,5 @@ RUN yes | plotly_get_chrome
 COPY . .
 
 # Set the command to run your application with uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["uvicorn", "omgui.main:app", "--host", "0.0.0.0", "--port", "8000"]
+RUN python -c "import omgui; omgui.launch()"

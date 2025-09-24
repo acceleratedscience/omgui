@@ -1,11 +1,24 @@
+# System artifacts
 .DS_Store
+
+# Python build artifacts
 __pycache__
+.ipynb_checkpoints
+/build/
+
+# Package distribution files
+**/client/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# Secret files
+.env
+
+# Custom ignores
 _*
 !__init__.py
-.venv
 test*
 todo.txt
-data_files/*
-!data_files/sample-*
-!data_files/README.md
-.env
