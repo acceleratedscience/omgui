@@ -31,21 +31,23 @@ omgui.launch()
 
 The file browser lets your browse the files in your workspace. It lets you open molecule files directly into the molecule viewer.
 
-| File type               | Suffix       | Type            | Description                                                                                                                                                                         |
-| ----------------------- | ------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| JSON for small molecule | .smol.json   | Small molecules | OMGUI's JSON schema for individual small molecules, can be exported to SDF or CSV                                                                                                   |
-| JSON for macromolecule  | .mmol.json   | Macromolecules  | OMGUI's JSON schema for individual macromolecules, can be exported to CIF or PDB or CSV                                                                                             |
-| JSON for molecule sets  | .molset.json | Molecule sets   | OMGUI's JSON schema for a set of small molecules. Sets of macromolecules are not supported at this time.                                                                            |
-| ----------------------- | ------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MDL                     | .mol         | Small molecules | Small molecule file holding information about the atoms, bonds, connectivity and coordinates of a molecule - [Wikipedia](https://en.wikipedia.org/wiki/Chemical_table_file#Molfile) |
-| SDF                     | .sdf         | Molecule sets   | Multi-molecule version of an MDL file - [Wikipedia](https://en.wikipedia.org/wiki/Chemical_table_file#SDF)                                                                          |
-| SMI                     | .smi         | Molecule sets   | A basic text file with a SMILES string per line                                                                                                                                     |
-| CIF                     | .cif         | Macromolecules  | Stands for "Crystallographic Information File" and was intended as a successor to the PDB format - [Wikipedia](https://en.wikipedia.org/wiki/Crystallographic_Information_File)     |
-| PDB                     | .pdb         | Macromolecules  | Stands for "Protein Data Bank" - [Wikipedia](<https://en.wikipedia.org/wiki/Protein_Data_Bank_(file_format)>)                                                                       |
-| JSON                    | .json        | Data            | Open standard data serialization format [Wikipedia](https://en.wikipedia.org/wiki/JSON)                                                                                             |
-| YAML                    | .yml         | Data            | Human-readable data serialization format - [Wikepedia](https://simple.wikipedia.org/wiki/YAML)                                                                                      |
-| CSV                     | .csv         | Data            | Comma-separated text data format - [Wikipedia](https://en.wikipedia.org/wiki/Comma-separated_values)                                                                                |
-| TEXT                    | .text        | Text            | Basic text format                                                                                                                                                                   |
+| File type | Suffix       | Type            | Description                                                                                              |
+| --------- | ------------ | --------------- | -------------------------------------------------------------------------------------------------------- |
+| JSON      | .smol.json   | Small molecules | OMGUI's JSON schema for individual small molecules, can be exported to SDF or CSV                        |
+| JSON      | .mmol.json   | Macromolecules  | OMGUI's JSON schema for individual macromolecules, can be exported to CIF or PDB or CSV                  |
+| JSON      | .molset.json | Molecule sets   | OMGUI's JSON schema for a set of small molecules. Sets of macromolecules are not supported at this time. |
+
+| File type | Suffix | Type            | Description                                                                                                                                                                         |
+| --------- | ------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MDL       | .mol   | Small molecules | Small molecule file holding information about the atoms, bonds, connectivity and coordinates of a molecule - [Wikipedia](https://en.wikipedia.org/wiki/Chemical_table_file#Molfile) |
+| SDF       | .sdf   | Molecule sets   | Multi-molecule version of an MDL file - [Wikipedia](https://en.wikipedia.org/wiki/Chemical_table_file#SDF)                                                                          |
+| SMI       | .smi   | Molecule sets   | A basic text file with a SMILES string per line                                                                                                                                     |
+| CIF       | .cif   | Macromolecules  | Stands for "Crystallographic Information File" and was intended as a successor to the PDB format - [Wikipedia](https://en.wikipedia.org/wiki/Crystallographic_Information_File)     |
+| PDB       | .pdb   | Macromolecules  | Stands for "Protein Data Bank" - [Wikipedia](<https://en.wikipedia.org/wiki/Protein_Data_Bank_(file_format)>)                                                                       |
+| JSON      | .json  | Data            | Open standard data serialization format [Wikipedia](https://en.wikipedia.org/wiki/JSON)                                                                                             |
+| YAML      | .yml   | Data            | Human-readable data serialization format - [Wikepedia](https://simple.wikipedia.org/wiki/YAML)                                                                                      |
+| CSV       | .csv   | Data            | Comma-separated text data format - [Wikipedia](https://en.wikipedia.org/wiki/Comma-separated_values)                                                                                |
+| TEXT      | .text  | Text            | Basic text format                                                                                                                                                                   |
 
 Files can easily be opened in your default system app, which is the default for any unsupported file formats.
 
