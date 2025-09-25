@@ -17,6 +17,8 @@ pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 
 ### Supported Chart Types
 
+See [examples](#examples) below.
+
 -   bar charts
 -   line charts
 -   pie charts
@@ -25,7 +27,7 @@ pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 -   box plots
 -   histograms
 
-Jump to [examples](#examples).
+<br>
 
 ## Instructions
 
@@ -49,6 +51,14 @@ Use the demo interface to see how to compose your URL and structure your data fo
 
 ![chartviz demo UI](assets/chartviz-demo-ui.png)
 
+<br>
+
+## Deployment
+
+Because the chart visualization depends on some system requirements for the Plotly PNG/SVG output to work, it's recommended to deploy it using Docker or Podman, as the [Dockerfile](Dockerfile) takes care of installing these dependencies. See `apt-get` and `plotly_get_chrome`.
+
+<br>
+
 ## Examples
 
 ![Example chart: Line chart](assets/chart-example-line.svg)
@@ -58,10 +68,6 @@ Use the demo interface to see how to compose your URL and structure your data fo
 ![Example chart: Bar chart](assets/chart-example-bar.svg)
 ![Example chart: Bubble chart](assets/chart-example-bubble.svg)
 ![Example chart: Pie chart](assets/chart-example-pie.svg)
-
-## Deployment
-
-Because the chart visualization depends on some system requirements for the Plotly PNG/SVG output to work, it's recommended to deploy it using Docker or Podman, as the [Dockerfile](Dockerfile) takes care of installing these dependencies. See `apt-get` and `plotly_get_chrome`.
 
 <!--
 ```python
