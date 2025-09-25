@@ -1,6 +1,6 @@
 <sub>[&larr; BACK](../)</sub>
 
-# OMGUI - `chartviz` - Chart Visualization
+# OMGUI - `chartviz` Chart Visualization
 
 ![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.chartviz-yellow)
 
