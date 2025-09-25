@@ -9,18 +9,20 @@
 
 <!-- [![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/) -->
 
-> [!IMPORTANT]
-> OMGUI is in active development. Not all described functionality is implemented yet.
-> A stable version will be released on Pypi in due time.
-
 OMGUI makes it dead-simple to visualize and triage your molecule results in Python.  
 It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](docs/functionality.md).
 
-Run it from a Jupyter Notebook or any python script.
+Run it from a **Jupyter Notebook** or any **Python** script.
+
+### Installation
 
 ```shell
 pip install git+https://github.com/themoenen/omgui.git@v0.1
 ```
+
+> [!IMPORTANT]
+> OMGUI is in active development. Not all described functionality is implemented yet.  
+> A stable version will be released on PyPI in due time.
 
 <br>
 
@@ -41,6 +43,8 @@ omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ### Inspect a Single Molecule
 
 ```python
+import omgui
+
 omgui.show_mol('dopamine')
 ```
 
