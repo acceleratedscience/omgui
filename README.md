@@ -66,11 +66,3 @@ omgui.show_mol('dopamine')
 <br><br>
 
 To discover what else **omgui** can do, [continue here](docs/readme.md).
-
-<!-- ```shell
-yes | plotly_get_cxrome
-``` -->
-
-<!-- source ../agenv/bin/activate -->
-
-<!-- python -m test -->
