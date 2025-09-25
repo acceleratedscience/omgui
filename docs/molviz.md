@@ -20,7 +20,7 @@ pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 
 In order to use the molecule visualization, simply start the server in the background, then compose your url:
 
-`/viz/mol/<chart_type>?data=<your_data>&output=<svg/png>`
+`/viz/mol/<SMILES>&output=<svg/png>`
 
 ```python
 import omgui
