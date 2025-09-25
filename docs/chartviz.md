@@ -4,9 +4,6 @@
 
 ![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.chartviz-yellow)
 
-<!-- > [!WARNING]
-> More advanced API coming soon. -->
-
 The `chartviz` sub-module lets you visualize various types of data charts on the fly, either as HTML page, SVG or PNG.
 
 Note that the chart & [molecule](molviz.md) visualization requires additional dependencies:
@@ -14,6 +11,8 @@ Note that the chart & [molecule](molviz.md) visualization requires additional de
 ```shell
 pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 ```
+
+![Chart Visualization with omgui.chartviz](assets/chart-preview.svg)
 
 ### Supported Chart Types
 
@@ -33,7 +32,7 @@ See [examples](#examples) below.
 
 In order to use the chart visualization, simply start the server in the background, then compose your url:
 
-`/viz/chart/<chart_type>?data=<your_data>`
+`/viz/chart/<chart_type>?data=<your_data>&output=<svg/png>`
 
 ```python
 import omgui
@@ -47,7 +46,7 @@ http://localhost:8024/viz/chart/boxplot?data=%5B%7B%22name%22%3A%22Lion%22%2C%22
 
 ### Demo Interface
 
-Use the demo interface to see how to compose your URL and structure your data for each type of chart.
+Use the demo interface to see what options are available, how to compose your URL and how to structure your data for each type of chart.
 
 ![chartviz demo UI](assets/chartviz-demo-ui.png)
 
