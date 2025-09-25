@@ -18,7 +18,6 @@ omgui.launch()
 - [1. File Browser](#1-file-browser)
   - [Supported File Formats](#supported-file-formats)
 - [2. Molecule Viewer](#2-molecule-viewer)
-- [3. Molset Viewer](#3-molset-viewer)
 - [4. Data Viewer](#4-data-viewer)
 - [5. Molecule Working Set](#5-molecule-working-set)
 - [6. Results](#6-results)
@@ -69,16 +68,27 @@ omgui.open_file('my_candidates/batch_1.sdf')
 
 The molecule viewer gives you an at-a-glance overview of all available information on a particular molecule, as well as a 2D and interactive 3D visualization.
 
-New molecules are prepopulated with data from RDKit and (when available) PubChem by default, and can have custom properties added via the [molecule working set](#5-molecule-working-set).
+New molecules are by default prepopulated with data from RDKit and (when available) PubChem, while custom properties can be added via the [molecule working set](#5-molecule-working-set).
+
+```python
+import omgui
+
+omgui.show_mol("dopamine")
+omgui.show_mol("C1=CC(=C(C=C1CCN)O)O") # SMILES
+omgui.show_mol("InChI=1S/C8H11NO2/c9-4-3-6-1-2-7(10)8(11)5-6/h1-2,5,10-11H,3-4,9H2") # InChI
+omgui.show_mol("VYFYYTLLBUKUHU-UHFFFAOYSA-N") # InChIKey
+omgui.show_mol(681) # PubChem CID
+omgui.open_file('dopamine.smol.json') # Molecule file formats
+```
 
 <kbd><img src="assets/gui-molecule-viewer.png" alt="GUI Molecule viewer"></kbd>
 
 <br>
 
-## 3. Molset Viewer
+<!-- ## 3. Molset Viewer -->
 
 <details>
-<summary>About</summary>
+<summary>3. Molset Viewer</summary>
 
 <p>The molset viewer is replacing the widely used "mols2grid" package. It runs a lot faster and has improved usability.</p>
 
