@@ -2,7 +2,7 @@
 
 # OMGUI - Installation
 
-> [!NOTE - TEST]  
+> [!TIP]  
 > _Recommended: create a virtual environment_
 >
 > ```shell
@@ -13,7 +13,14 @@
 > source .venv/bin/activate
 > ```
 
+### Basic Install
+
 ```shell
-# pip install omgui # To be published
-pip install git+https://github.com/themoenen/omgui@gui_merge
+pip install git+https://github.com/themoenen/omgui.git@v0.1
+```
+
+### Full Install
+
+```shell
+pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 ```
