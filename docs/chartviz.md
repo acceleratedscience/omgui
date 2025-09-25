@@ -1,41 +1,47 @@
 <sub>[&larr; BACK](../)</sub>
 
-# OMGUI - `chartviz` Chart Visualization
+# OMGUI - `chartviz` - Chart Visualization
 
 ![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.chartviz-yellow)
 
-Application to visualize data on the fly.
+> [!WARNING]  
+> More advanced API coming soon.
 
--   [Charting API](https://omgui.onrender.com/demo/charts) to turn JSON into charts on the fly
--   [Molecules API](https://omgui.onrender.com/demo) to visualize SMILES in 2D and 3D
+The `chartviz` sub-module lets you visualize various types of data charts on the fly.
 
-<br>
+Supported chart types:
 
-### Install
+-   bar charts
+-   line charts
+-   pie charts
+-   scatter plots
+-   bubble charts
+-   box plots
+-   histograms
 
-> [!NOTE]  
-> _Optional: create virtual environment_
->
-> ```shell
-> python -m venv .venv
-> ```
->
-> ```shell
-> source .venv/bin/activate
-> ```
+<!--
+```python
+from omgui import chartviz
 
-```shell
-pip install -r requirements.txt
+groups = ["Group A", "Group B", "Group C"]
+data = [
+    {
+        "keys": groups,
+        "name": "Flamingo",
+        "data": [ 56, 79, 10 ]
+    },
+    {
+        "keys": groups,
+        "name": "Possum",
+        "data": [ 81, 10, 50 ]
+    },
+    {
+        "keys": groups,
+        "name": "Shrew",
+        "data": [ 99, 20, 45 ]
+    }
+]
+
+chartviz.boxplot(data)
 ```
-
-```shell
-yes | plotly_get_chrome
-```
-
-```
-uvicorn 'app.main:app' --host=0.0.0.0 --port=8034 --reload  --no-access-log
-```
-
-### Deploy
-
-To deploy this app, use the [Dockerfile](Dockerfile), as it installs some system requirements for the Plotly PNG/SVG output to work.
+-->
