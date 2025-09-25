@@ -4,5 +4,5 @@
 
 -   [Installation](installation.md)
 -   [GUI](gui.md)
--   [Molecule Visualization](molviz.md)
--   [Chart Vizualisation](chartviz.md)
+-   [MOLVIZ - Molecule Visualization](molviz.md)
+-   [CHARTVIZ - Chart Vizualisation](chartviz.md)
