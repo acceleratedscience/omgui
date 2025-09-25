@@ -1,8 +1,6 @@
 <sub>[&larr; BACK](../)</sub>
 
-# OMGUI - Functionality <!-- omit in toc -->
-
-<!--  ### Table of Contents omit in toc -->
+# OMGUI - Docuemntation<!-- omit in toc -->
 
 - [Molecule viewer](#molecule-viewer)
 - [Molecule Working Set](#molecule-working-set)
