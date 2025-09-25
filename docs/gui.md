@@ -1,11 +1,17 @@
-<!-- When doing changes to this file, please keep them in sync with the _gui-demo.ipynb Notebook file. -->
+# OMGUI - GUI<!-- omit in toc -->
 
-# OpenAD GUI
+The GUI provides a visual window onto your data, helping you with evaluation and triage.
 
-The OpenAD GUI provides a visual window onto your data, helping you with evaluation and triage.
+### Table of Contents<!-- omit in toc -->
 
-The code base for the GUI lives in a separate (not yet public) repository:<br>
-[https://github.com/acceleratedscience/openad-gui]()
+- [How it works](#how-it-works)
+- [Components](#components)
+  - [1. File Browser](#1-file-browser)
+  - [2. Molecule Viewer](#2-molecule-viewer)
+  - [3. Molset Viewer](#3-molset-viewer)
+  - [4. Data Viewer](#4-data-viewer)
+  - [5. "My Molecules" Working Set](#5-my-molecules-working-set)
+  - [6. Results](#6-results)
 
 <br>
 
