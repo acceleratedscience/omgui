@@ -4,8 +4,14 @@ The GUI provides a visual window onto your data, helping you with evaluation and
 
 #### How it works<!-- omit in toc -->
 
-The GUI can be launched from the CLI (in the browser) or a Jupyter Notebook (in an iFrame).
-Any command that requires the GUI will start the server, which will then keep on running until the application or Notebook is shut down.
+The GUI can be launched from any Python script (in the browser) or from a **Jupyter Notebook** (in an iframe).  
+Any function that requires the GUI will start the server, which will then keep on running until the application or Notebook is shut down.
+
+If you wish to start the server in the background, you can run:
+
+```
+omgui.launch()
+```
 
 ### Components<!-- omit in toc -->
 
