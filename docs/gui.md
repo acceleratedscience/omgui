@@ -168,5 +168,5 @@ Your results page will hold a history of result sets that were saved.
 import omgui.results
 
 results.add(["C(C(=O)O)N", "C1=CC=CC=C1"]) # To be inmplemented
-results.show() # To be inmplemented
+results.open() # To be inmplemented
 ```
