@@ -1,33 +1,18 @@
 <sub>[&larr; BACK](../)</sub>
 
-# OMGUI - `chartviz` - Chart Visualization
+# OMGUI - `molviz` - Molecule Visualization
 
-![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.chartviz-yellow)
+![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.molviz-yellow)
 
-<!-- > [!WARNING]
-> More advanced API coming soon. -->
+The `molviz` sub-module lets you visualize molecules on the fly, in 2D and 3D, either as SVG or PNG.
 
-The `chartviz` sub-module lets you visualize various types of data charts on the fly, either as HTML page, SVG or PNG.
-
-Note that the chart & [molecule](molviz.md) visualization requires additional dependencies:
+Note that the [chart](chartviz) & molecule visualization requires additional dependencies:
 
 ```shell
 pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 ```
 
-### Supported Chart Types
-
--   bar charts
--   line charts
--   pie charts
--   scatter plots
--   bubble charts
--   box plots
--   histograms
-
-### Examples
-
-![example chart: pie chart](assets/chart-expl-pie.png)
+## Examples
 
 ## Instructions
 
