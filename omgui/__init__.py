@@ -73,7 +73,7 @@ def show_mol(molecule_identifier: str = "") -> None:
     _gui_init(path)
 
 
-def show_molset(smiles_or_inchi: list[str]) -> None:
+def show_mols(smiles_or_inchi: list[str]) -> None:
     """
     Open the molecule set viewer for a list of SMILES or InChI strings.
     """

@@ -161,13 +161,12 @@ def _launch(path=None, query="", hash=""):
         """
         Manages the lifecycle of the application, including Redis connection.
         """
-        redis_url = os.getenv("OMGUI_REDIS_URL")
 
-        if redis_url:
+        if config.redis_url:
             try:
-                logger.info("OMGUI_REDIS_URL: %s", redis_url)
+                logger.info("OMGUI_REDIS_URL: %s", config.redis_url)
                 app.state.redis = aioredis.from_url(
-                    redis_url, encoding="utf-8", decode_responses=True
+                    config.redis_url, encoding="utf-8", decode_responses=True
                 )
                 await app.state.redis.ping()
                 logger.info("📀 Redis connection successful")

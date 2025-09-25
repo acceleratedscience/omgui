@@ -37,14 +37,19 @@ def config():
 
 
 def configure(
-    session: bool | None = None,
-    prompt: bool | None = None,
-    workspace: str | None = None,
-    data_dir: str | None = None,
+    title: str | None = None,
     host: str | None = None,
     port: int | None = None,
-    base_path: str | None = None,
+    session: bool | None = None,
+    workspace: str | None = None,
     log_level: str | None = None,
+    stateless: bool | None = None,
+    # Advanced:
+    base_path: str | None = None,
+    redis_url: str | None = None,
+    data_dir: str | None = None,
+    prompt: bool | None = None,
+    sample_files: bool | None = None,
     _viz_deps: bool | None = None,
 ) -> None:
     """
@@ -54,21 +59,8 @@ def configure(
     See configuration.py for details.
     """
 
-    if session:
-        from omgui import context
-
-        config().set("session", True)
-        context.new_session()  # Create a new session-only context
-
-    if prompt:
-        config().set("prompt", prompt)
-
-    if workspace:
-        # Workspace gets created in startup()
-        config().set("workspace", workspace)
-
-    if data_dir:
-        config().set("data_dir", data_dir)
+    if title:
+        config().set("title", title)
 
     if host:
         config().set("host", host)
@@ -76,8 +68,15 @@ def configure(
     if port:
         config().set("port", port)
 
-    if base_path:
-        config().set("base_path", base_path)
+    if session:
+        from omgui import context
+
+        config().set("session", True)
+        context.new_session()
+
+    if workspace:
+        # Note: workspace gets created in startup()
+        config().set("workspace", workspace)
 
     if log_level:
         config().set("log_level", log_level)
@@ -86,6 +85,26 @@ def configure(
 
         if not nb_mode():
             logger.setLevel(log_level)
+
+    if stateless:
+        config().set("stateless", stateless)
+
+    # -- Advanced --
+
+    if base_path:
+        config().set("base_path", base_path)
+
+    if redis_url:
+        config().set("redis_url", redis_url)
+
+    if data_dir:
+        config().set("data_dir", data_dir)
+
+    if prompt:
+        config().set("prompt", prompt)
+
+    if sample_files is not None:
+        config().set("sample_files", sample_files)
 
     if _viz_deps is not None:
         config().set("_viz_deps", _viz_deps)
@@ -104,54 +123,29 @@ class Config:
         3. Configuration file (omgui.config.yml)
         4. Default values
 
-    Options
-    -------
-    session: bool, default False / .env: OMGUI_SESSION
-        By default, all omgui instances share a global context,
-        with a persistent molecule working set per workspace.
-        When you switch workspace, this affects all sessions.
-        When you set session=True, a new session-only context
-        is created, which does not affect other sessions. Your
-        molecule working set will reset when you exit this session.
+    For option descriptions, please consult:
+    /docs/config.md
 
-    prompt: bool, default True / .env: OMGUI_PROMPT
-        Whether to show confirmation prompts for certain actions.
-        If set to False, all prompts will be skipped and the
-        default action will be taken.
 
-    workspace: str, default "DEFAULT" / .env: OMGUI_WORKSPACE
-        Set workspace on startup. If the given workspace doesn't
-        exist, it will be created.
+    Option         Type   Default       Env variable
+    ------------------------------------------------------
+    session        bool   False         OMGUI_SESSION
+    prompt         bool   True          OMGUI_PROMPT
+    workspace      str    "DEFAULT"     OMGUI_WORKSPACE
+    data_dir       str    "~/.omgui"    OMGUI_DATA_DIR
+    host           str    "localhost"   OMGUI_HOST
+    port           int    8024          OMGUI_PORT
+    base_path      str    ""            OMGUI_BASE_PATH
+    sample_files   bool   True          OMGUI_SAMPLE_FILES
+    log_level      str    "INFO"        OMGUI_LOG_LEVEL
+    ------------------------------------------------------
 
-    data_dir: str, default "~/.omgui" / .env: OMGUI_DATA_DIR
-        Data directory for the application storage.
-
-    host: str, default "localhost" / .env: OMGUI_HOST
-        Hostname for the GUI server. Use "0.0.0.0" to
-        allow external access.
-
-    port: int, default 8024 / .env: OMGUI_PORT
-        Port for the GUI server. If occupied, the next
-        available port will be used, so 8025 etc.
-
-    base_path: str, default "" / .env: OMGUI_BASE_PATH
-        Base path for the GUI server. If you are running
-        the server behind a reverse proxy, you might need
-        to set this to the subpath where the server is reachable.
-        For example, if the server is reachable at
-        "https://mydomain.com/omgui/", set base_path to "/omgui".
-
-    sample_files: bool, default True / .env: OMGUI_SAMPLE_FILES
-        Whether to add file samples to DEFAULT workspace on first run.
-
-    log_level: str, default "INFO" / .env: OMGUI_LOG_LEVEL
-        Log level for the server. One of "DEBUG", "INFO",
-        "WARNING", "ERROR", "CRITICAL".
-
+    System flags
+    ------------
     _viz_deps: bool, default False / .env: n/a
         Whether the optional visualization dependencies are installed.
-        This is automatically set to True when you install, and should
-        not be set manually.
+        This is automatically set to True when the required dependencies
+        are detected, and should not be set manually.
     """
 
     # Singleton instance
@@ -164,15 +158,19 @@ class Config:
 
     # Default config
     default_config = {
-        "session": False,
-        "prompt": True,
-        "workspace": "DEFAULT",
-        "data_dir": "~/.omgui",
+        "title": "omgui",
         "host": "localhost",
         "port": 8024,
-        "base_path": "",
-        "sample_files": True,
+        "session": False,
+        "workspace": "DEFAULT",
         "log_level": "INFO",
+        "stateless": False,
+        # Advanced:
+        "base_path": "",
+        "redis_url": None,
+        "data_dir": "~/.omgui",
+        "prompt": True,
+        "sample_files": True,
         "_viz_deps": False,
     }
 

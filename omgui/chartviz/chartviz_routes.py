@@ -649,7 +649,7 @@ async def post_chart_data(
     return {
         "id": unique_id,
         "url": f"/viz/chart/{chart_type.value}/{unique_id}",
-        "note": "Data stored in in-memory cache (no expiry, not persistent). Configure OMGUI_REDIS_URL to enable Redis storage.",
+        "note": "Data stored in in-memory cache (no expiry, not persistent). Configure config.redis_url to enable Redis storage.",
     }
 
 
