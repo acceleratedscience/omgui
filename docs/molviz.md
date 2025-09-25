@@ -38,7 +38,7 @@ Use the demo interface to see how to compose your URL and structure your data fo
 
 http://localhost:8024/viz/mol
 
-![chartviz demo UI](assets/chartviz-demo-ui.png)
+![chartviz demo UI](assets/molviz-demo-ui.png)
 
 <br>
 
