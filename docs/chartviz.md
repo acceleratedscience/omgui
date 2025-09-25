@@ -12,7 +12,7 @@ Note that the chart & [molecule](molviz.md) visualization requires additional de
 pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 ```
 
-![Chart Visualization with omgui.chartviz](assets/chart-preview.svg)
+![Chart visualization with omgui.chartviz](assets/chart-preview.svg)
 
 ### Supported Chart Types
 
@@ -47,6 +47,8 @@ http://localhost:8024/viz/chart/boxplot?data=%5B%7B%22name%22%3A%22Lion%22%2C%22
 ### Demo Interface
 
 Use the demo interface to see what options are available, how to compose your URL and how to structure your data for each type of chart.
+
+http://localhost:8024/viz/chart
 
 ![chartviz demo UI](assets/chartviz-demo-ui.png)
 
