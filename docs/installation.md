@@ -1,9 +1,9 @@
-[&larr; back](../)
+<sub>[&larr; BACK](../)</sub>
 
 # OMGUI - Installation
 
-> [!NOTE]  
-> _Optional: create virtual environment_
+> [!OPTIONAL]  
+> _Recommended: create a virtual environment_
 >
 > ```shell
 > python -m venv .venv

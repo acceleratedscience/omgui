@@ -1,4 +1,4 @@
-[&larr; back](../)
+<sub>[&larr; BACK](../)</sub>
 
 # OMGUI - Configuration
 
