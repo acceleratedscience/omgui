@@ -34,7 +34,7 @@ http://localhost:8024/viz/mol/C1=CC(=C(C=C1C2=C(C(=O)C3=C(C=C(C=C3O2)O)O)O)O)O?h
 
 ### Demo Interface
 
-Use the demo interface to see how to compose your URL and structure your data for each type of chart.
+Use the demo interface to see what options are available and how to compose your URL.
 
 http://localhost:8024/viz/mol
 
@@ -49,3 +49,10 @@ Because the chart visualization depends on some system requirements for the Plot
 <br>
 
 ## Examples
+
+![Example molecules: argipressin 2D](assets/mol-example-argipressin--2d.svg)
+![Example molecules: argipressin 3D](assets/mol-example-argipressin--3d.svg)
+![Example molecules: quercetin 2D](assets/mol-example-quercetin--2d.svg)
+![Example molecules: quercetin 3D](assets/mol-example-quercetin--3d.svg)
+![Example molecules: vitamin B6 2D](assets/mol-example-vitamin-b6--2d.svg)
+![Example molecules: vitamin B6 3D](assets/mol-example-vitamin-b6--3d.svg)
