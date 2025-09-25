@@ -46,7 +46,7 @@ omgui.show_mol('dopamine')
 ```python
 import omgui
 
-omgui.show_molset(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
+omgui.show_mols(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ```
 
 <kbd><img src="docs/assets/gui-molset.png" /></kbd>

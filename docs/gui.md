@@ -55,8 +55,8 @@ omgui.open_file('my_candidates/batch_1.sdf')
 | PDB        | .pdb              | Macromolecule  | Stands for "Protein Data Bank" and described the three-dimensional structures of molecules - [learn more](<https://en.wikipedia.org/wiki/Protein_Data_Bank_(file_format)>)           |
 | JSON       | .json             | Data           | Open standard data serialization format [learn more](https://en.wikipedia.org/wiki/JSON)                                                                                             |
 | YAML       | .yml              | Data           | Human-readable data serialization format - [learn more](https://simple.wikipedia.org/wiki/YAML)                                                                                      |
-| CSV        | .csv              | Data           | Comma-separated text data format - [learn more](https://en.wikipedia.org/wiki/Comma-separated_values)                                                                                |
 | TEXT       | .text             | Text           | Basic text format                                                                                                                                                                    |
+| CSV        | .csv              | Data           | `COMING SOON` Comma-separated text data format - [learn more](https://en.wikipedia.org/wiki/Comma-separated_values)                                                                  |
 | PDF        | .pdf              | Rich document  | `COMING SOON` Standard documents including text formatting and images - [learn more](https://en.wikipedia.org/wiki/PDF)                                                              |
 | SVG        | .svg              | Vector image   | `COMING SOON` XML-based vector graphics format for defining two-dimensional graphics - [learn more](https://en.wikipedia.org/wiki/SVG)                                               |
 | IMG        | .png/jpg/gif/webp | Bitmap image   | `COMING SOON` Various standard web image formats                                                                                                                                     |
@@ -75,9 +75,9 @@ import omgui
 omgui.show_mol("dopamine")
 omgui.show_mol("C1=CC(=C(C=C1CCN)O)O") # SMILES
 omgui.show_mol("InChI=1S/C8H11NO2/c9-4-3-6-1-2-7(10)8(11)5-6/h1-2,5,10-11H,3-4,9H2") # InChI
-omgui.show_mol("VYFYYTLLBUKUHU-UHFFFAOYSA-N") # InChIKey
-omgui.show_mol(681) # PubChem CID
-omgui.open_file('dopamine.smol.json') # Molecule file formats
+omgui.show_mol("VYFYYTLLBUKUHU-UHFFFAOYSA-N") # InChIKey - only when available on PubChem
+omgui.show_mol(681) # PubChem CID - only when available on PubChem
+omgui.open_file('dopamine.smol.json') # Molecule file formats - only when available on PubChem
 ```
 
 <kbd><img src="assets/gui-molecule-viewer.png" alt="GUI Molecule viewer"></kbd>
@@ -90,78 +90,83 @@ The molset viewer lets you view, sort and triage a paginated set of molecules.
 
 In the future you can expect more advanced functionality like filtering, subsetting, merging and data visualizations.
 
+```python
+import omgui
+
+omgui.show_mols(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
+omgui.show_file("neurotransmitters.molset.json")
+omgui.show_file("neurotransmitters.sdf")
+omgui.show_file("neurotransmitters.smi")
+omgui.show_file("neurotransmitters.csv") # Support coming soon
+```
+
 <kbd><img src="assets/gui-molset-viewer.png" alt="GUI Molset viewer"></kbd>
 
 <br>
 
 ## 4. Data Viewer
 
-<details>
-<summary>About</summary>
+> [!IMPORTANT]  
+> Not yet implemented, coming soon.
 
-The data viewer lets you review, sort and triage data from a CSV file or a dataframe.
-
-<span style="color: #d00">The data viewer is not yet ported into the new GUI. It still uses the deprecated Flask app architecture.</span>
-
-</details>
-
-<details>
-<summary>Command</summary>
-
-`display data '<filename.csv>'` + `result open`
-
-Example: `display data 'demo/my-data.csv'` + `result open`
-
-</details>
-
-| ![Data Viewer](readme/data-viewer.png) |
-| -------------------------------------- |
+The data viewer will let you easily view an edit data from a CSV file. This includes editing values as well as adding, removing and renaming rows or columns.
 
 <br>
 
 ## 5. Molecule Working Set
 
-<details>
-<summary>About</summary>
+Your molecules working set (or "MWS") functions as a basket for storing selected candidate molecules for further processing.
 
-Your working set of molecules(\*) is a molset that lives in memory and is meant as a bucket for gathering candidates from various processesses and sources, before storing them into a new file and processing them further.
+Each workspace has their own MWS. The MWS lets you easily fetch your molecules as a list of SMILES to be processed by your software, model or function of choice, and then lets you update your molecules with the newly calculated properties.
 
-\(\*) Currently the working set is called "mymols", but this name may change.
+> [!IMPORTANT]  
+> Partly implemented.
 
-<span style="color: #d00">Note: loading and merging molecule sets is still using a different architecture which is not compatible with the GUI.</span>
+```python
+from omgui import mws
 
-</details>
+# Add some molecules and inspect them in the GUI
+mws.add("C(C(=O)O)N")
+mws.add("C1=CC=CC=C1")
+mws.open()
+```
 
-<details>
-<summary>About</summary>
+```python
+# Get a list of your molecules as SMILES
+my_candidates = mws.get_smiles()
 
-`show mols`
+# Perform any type of property calculation
+my_calculated_prop_result = [
+    { "foo": 0.729 },
+    { "foo": 1.235 }
+]
 
-</details>
+# Update the molecules in your working set
+mws.add_props(my_calculated_prop_result) # To be inmplemented
 
-| ![My Molecules](readme/my-mols.png) |
-| ----------------------------------- |
+# Export your results as SDF file
+mws.export(format="sdf")
+```
+
+```python
+# Clear your working set to start over
+mws.clear()
+```
+
+<kbd><img src="assets/gui-mws.png" alt="GUI Molset viewer"></kbd>
 
 <br>
 
 ## 6. Results
 
-<details>
-<summary>About</summary>
+> [!IMPORTANT]  
+> Not yet implemented, coming soon.
 
-Whenever data is displayed in the CLI or a Notebook using `output_table()`, the data is stored in memory so it can be used for follow up commands like `result open`, `result edit`, `result copy` etc.
+Your results page will hold a history of result sets that were saved.
 
-The result dataset stored in memory can also be viewed and manipulated in the GUI, either through the molecule viewer or the data viewer (yet to be implemented).
+```python
+import omgui.results
 
-</details>
-
-<details>
-<summary>About</summary>
-
-`display data '<molecule_data.csv>'` + `result open`
-
-Example: `display data 'demo/my-mols.csv'` + `result open`
-
-</details>
-
-![Results](readme/results.png)
+results.add(["C(C(=O)O)N", "C1=CC=CC=C1"]) # To be inmplemented
+results.show() # To be inmplemented
+```
