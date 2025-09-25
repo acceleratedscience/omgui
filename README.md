@@ -14,7 +14,11 @@ It supports small molecules as well as macromolecules like proteins, plus it doe
 
 Run it from a **Jupyter Notebook** or any **Python** script.
 
+<br>
+
 ### Installation
+
+More details under [Installation](docs/installation.md).
 
 ```shell
 pip install git+https://github.com/themoenen/omgui.git@v0.1
@@ -29,6 +33,8 @@ omgui.show_mol('dopamine')
 > [!IMPORTANT]
 > OMGUI is in active development. Not all described functionality is implemented yet.  
 > A stable version will be released on PyPI in due time.
+
+<br>
 
 ### Sub-Modules
 
