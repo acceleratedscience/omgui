@@ -65,7 +65,7 @@ omgui.show_mol('dopamine')
 
 <br><br>
 
-To discover what else **omgui** can do for you, jump to [Functionality](docs/functionality.md).
+To discover what else **omgui** can do, [continue here](docs/readme.md).
 
 <!-- ```shell
 yes | plotly_get_cxrome
