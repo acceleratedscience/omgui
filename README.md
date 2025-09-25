@@ -17,6 +17,10 @@ Run it from a **Jupyter Notebook** or any **Python** script.
 [![Documentation](docs/assets/btn-docs.svg)](docs/readme.md#omgui---documentation)
 [![Quick start](docs/assets/btn-quick-start.svg)](#quick-start)
 
+> [!IMPORTANT]
+> OMGUI is in active development. Not all described functionality is implemented yet.  
+> A stable version will be released on PyPI in due time.
+
 <br>
 
 ### Installation
@@ -32,21 +36,6 @@ import omgui
 
 omgui.show_mol('dopamine')
 ```
-
-> [!IMPORTANT]
-> OMGUI is in active development. Not all described functionality is implemented yet.  
-> A stable version will be released on PyPI in due time.
-
-<br>
-
-### Sub-Modules
-
--   `mws` / Molecule Working Set
-    A basket to store & process selected molecule candidates.
--   `chartviz`
-    Visualize various types of data charts on the fly, either as HTML page, SVG or PNG.
--   `molviz`
-    Visualize molecules on the fly, in 2D and 3D, either as SVG or PNG.
 
 <br>
 
