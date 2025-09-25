@@ -16,6 +16,7 @@ omgui.launch()
 ### Components<!-- omit in toc -->
 
 - [1. File Browser](#1-file-browser)
+  - [Supported File Formats](#supported-file-formats)
 - [2. Molecule Viewer](#2-molecule-viewer)
 - [3. Molset Viewer](#3-molset-viewer)
 - [4. Data Viewer](#4-data-viewer)
@@ -40,6 +41,8 @@ omgui.open_file('my_candidates/batch_1.sdf')
 <!-- ![File Browser](assets/gui-file-browser.png) -->
 
 <kbd><img src="assets/gui-file-browser.png" alt="GUI File browser"></kbd>
+
+### Supported File Formats
 
 | Filetype   | Suffix            | Content        | Description                                                                                                                                                                          |
 | :--------- | :---------------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
