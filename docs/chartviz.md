@@ -9,7 +9,13 @@
 
 The `chartviz` sub-module lets you visualize various types of data charts on the fly.
 
-Supported chart types:
+Note that the chart visualization requires additional dependencies:
+
+```shell
+pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
+```
+
+### Supported Chart Types
 
 -   bar charts
 -   line charts
@@ -37,7 +43,7 @@ http://localhost:8024/viz/chart/boxplot?data=%5B%7B%22name%22%3A%22Lion%22%2C%22
 
 ### Demo Interface
 
-OMGUI comes with a useful demo interface where you can see how to structure your data for each type of chart.
+Use the demo interface to see how to compose your URL and structure your data for each type of chart.
 
 ![chartviz demo UI](assets/chartviz-demo-ui.png)
 
