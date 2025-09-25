@@ -67,26 +67,11 @@ omgui.open_file('my_candidates/batch_1.sdf')
 
 ## 2. Molecule Viewer
 
-<details>
-<summary>About</summary>
+The molecule viewer gives you an at-a-glance overview of all available information on a particular molecule, as well as a 2D and interactive 3D visualization.
 
-The molecule viewer gives you an at-a-glance overview of all the information you have gathered on a particular molecule.
+New molecules are prepopulated with data from RDKit and (when available) PubChem by default, and can have custom properties added via the [molecule working set](#5-molecule-working-set).
 
-New molecules are prepopulated with data from RDKit and PubChem by default
-
-</details>
-
-<details>
-<summary>Command</summary>
-
-`show molecule|mol <name> | <smiles> | <inchi> | <inchikey> | <cid>`
-
-Example: `show mol dopamine`
-
-</details>
-
-| ![Molecule Viewer](readme/molecule-viewer.png) |
-| ---------------------------------------------- |
+<kbd><img src="assets/gui-molecule-viewer.png" alt="GUI Molecule viewer"></kbd>
 
 <br>
 
