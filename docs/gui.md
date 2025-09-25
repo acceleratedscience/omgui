@@ -2,34 +2,19 @@
 
 The GUI provides a visual window onto your data, helping you with evaluation and triage.
 
-### Table of Contents<!-- omit in toc -->
-
-- [How it works](#how-it-works)
-- [Components](#components)
-  - [1. File Browser](#1-file-browser)
-  - [2. Molecule Viewer](#2-molecule-viewer)
-  - [3. Molset Viewer](#3-molset-viewer)
-  - [4. Data Viewer](#4-data-viewer)
-  - [5. "My Molecules" Working Set](#5-my-molecules-working-set)
-  - [6. Results](#6-results)
-
-<br>
-
-## How it works
+#### How it works<!-- omit in toc -->
 
 The GUI can be launched from the CLI (in the browser) or a Jupyter Notebook (in an iFrame).
 Any command that requires the GUI will start the server, which will then keep on running until the application or Notebook is shut down.
 
-<br>
+### Components<!-- omit in toc -->
 
-## Components
-
-1. File browser
-1. Molecule viewer
-1. Molecule set viewer
-1. Data viewer (to be implemented)
-1. "My molecules" working set
-1. Results
+- [1. File Browser](#1-file-browser)
+- [2. Molecule Viewer](#2-molecule-viewer)
+- [3. Molset Viewer](#3-molset-viewer)
+- [4. Data Viewer](#4-data-viewer)
+- [5. Molecule Working Set](#5-molecule-working-set)
+- [6. Results](#6-results)
 
 <br>
 
@@ -146,7 +131,7 @@ Example: `display data 'demo/my-data.csv'` + `result open`
 
 <br>
 
-### 5. "My Molecules" Working Set
+### 5. Molecule Working Set
 
 <details>
 <summary>About</summary>
