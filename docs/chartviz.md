@@ -29,6 +29,10 @@ pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 
 ![example chart: pie chart](assets/chart-expl-pie.svg)
 
+![example chart: scatter plot](chart-example-scatter-plot.svg)
+
+<kdb>![example chart: scatter plot](chart-example-scatter-plot.svg)</kdb>
+
 ## Instructions
 
 In order to use the chart visualization, simply start the server in the background, then compose your url:
