@@ -12,6 +12,10 @@ In order of priority:
 1. Configuration file (`omgui.config.yml`)
 1. Default values
 
+<br>
+
+## Configuration Options
+
 | Option       | Env                | Default   | Advanced | Description                                                                                                                                                                                                                                                                                                                                  |
 | :----------- | :----------------- | :-------- | :------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | session      | OMGUI_SESSION      | False     |          | When set to True, your actions are isolated to your sessions. This means that changing your workspace or storing molecules in your working set won't affect other sessions, and your molecule working set will be cleared at the end of the session. This can be useful when working in Jupyter Notebook across multiple workspaces at once. |
@@ -25,6 +29,8 @@ In order of priority:
 | log_level    | OMGUI_LOG_LEVEL    | INFO      |          | Choose what [logging level](https://docs.python.org/3/library/logging.html#logging-levels) is used. Choose from `NOT_SET`, `DEBUG`, `INFO`, `WARNING`, `ERROR` or `CRITICAL`.                                                                                                                                                                |
 
 <br>
+
+## Setting Configuration
 
 ### 1. Runtime configuration
 
