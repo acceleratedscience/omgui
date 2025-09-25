@@ -3,7 +3,7 @@
 # OMGUI - Installation
 
 > [!TIP]  
-> _Recommended: create a virtual environment_
+> _**Recommended:** create a virtual environment_
 >
 > ```shell
 > python -m venv .venv
