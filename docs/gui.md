@@ -18,6 +18,7 @@ omgui.launch()
 - [1. File Browser](#1-file-browser)
   - [Supported File Formats](#supported-file-formats)
 - [2. Molecule Viewer](#2-molecule-viewer)
+- [3. Molset Viewer](#3-molset-viewer)
 - [4. Data Viewer](#4-data-viewer)
 - [5. Molecule Working Set](#5-molecule-working-set)
 - [6. Results](#6-results)
@@ -36,8 +37,6 @@ import omgui
 omgui.show_files()
 omgui.open_file('my_candidates/batch_1.sdf')
 ```
-
-<!-- ![File Browser](assets/gui-file-browser.png) -->
 
 <kbd><img src="assets/gui-file-browser.png" alt="GUI File browser"></kbd>
 
@@ -85,30 +84,13 @@ omgui.open_file('dopamine.smol.json') # Molecule file formats
 
 <br>
 
-<!-- ## 3. Molset Viewer -->
+## 3. Molset Viewer
 
-<details>
-<summary>3. Molset Viewer</summary>
+The molset viewer lets you view, sort and triage a paginated set of molecules.
 
-<p>The molset viewer is replacing the widely used "mols2grid" package. It runs a lot faster and has improved usability.</p>
+In the future you can expect more advanced functionality like filtering, subsetting, merging and data visualizations.
 
-<p>In the future we'll also load this with more advanced functionality like filtering, subsetting, merging etc.</p>
-
-<p><span style="color: #d00">Note: viewing molecule sets from a dataframe is not yet implemented.</span></p>
-
-</details>
-
-<details>
-<summary>Command</summary>
-
-`show molset|molecule set '<molset_or_sdf_or_smi_path>' | using dataframe <dataframe>`
-
-Example: `show molset 'my_mols.molset.json'`
-
-</details>
-
-| ![Molset Viewer](readme/molset-viewer.png) |
-| ------------------------------------------ |
+<kbd><img src="assets/gui-molset-viewer.png" alt="GUI Molset viewer"></kbd>
 
 <br>
 
