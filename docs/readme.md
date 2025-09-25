@@ -5,5 +5,5 @@
 1.  [Installation](installation.md)
 1.  [Configuration](config.md)
 1.  [GUI](gui.md) - Graphical user interface for molecules and data
-1.  [molviz](molviz.md) - Molecule visualization sub-module
-1.  [chartviz](chartviz.md) - Chart visualisation sub-module
+1.  [molviz](molviz.md) - Sub-module for molecule visualization
+1.  [chartviz](chartviz.md) - Sub-module for chart visualisation
