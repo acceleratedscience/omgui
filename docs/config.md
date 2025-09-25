@@ -12,6 +12,19 @@ In order of priority:
 1. Configuration file (`omgui.config.yml`)
 1. Default values
 
+| Option       | Env var            | Default value |
+| ------------ | ------------------ | ------------- |
+| session      | OMGUI_SESSION      | False         |
+| prompt       | OMGUI_PROMPT       | True          |
+| workspace    | OMGUI_WORKSPACE    | DEFAULT       |
+| data_dir     | OMGUI_DATA_DIR     | ~/.omgui      |
+| host         | OMGUI_HOST         | localhost     |
+| port         | OMGUI_PORT         | 8024          |
+| base_path    | OMGUI_BASE_PATH    | <empty>       |
+| sample_files | OMGUI_SAMPLE_FILES | True          |
+| log_level    | OMGUI_LOG_LEVEL    | INFO          |
+| viz_deps     |                    | False         |
+
 <br>
 
 ### 1. Runtime configuration
