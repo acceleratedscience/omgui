@@ -12,18 +12,19 @@ In order of priority:
 1. Configuration file (`omgui.config.yml`)
 1. Default values
 
-| Option       | Env var            | Default value |
-| ------------ | ------------------ | ------------- |
-| session      | OMGUI_SESSION      | False         |
-| prompt       | OMGUI_PROMPT       | True          |
-| workspace    | OMGUI_WORKSPACE    | DEFAULT       |
-| data_dir     | OMGUI_DATA_DIR     | ~/.omgui      |
-| host         | OMGUI_HOST         | localhost     |
-| port         | OMGUI_PORT         | 8024          |
-| base_path    | OMGUI_BASE_PATH    | <empty>       |
-| sample_files | OMGUI_SAMPLE_FILES | True          |
-| log_level    | OMGUI_LOG_LEVEL    | INFO          |
-| viz_deps     |                    | False         |
+| Option  | Env var       | Default value | Description                                                                                                                                                                                                                                                                                                                                  |
+| ------- | ------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| session | OMGUI_SESSION | False         | By default, all omgui instances share a global context, with a persistent molecule working set per workspace. When you switch workspace, this affects all sessions. When you set session=True, a new session-only context is created, which does not affect other sessions. Your molecule working set will reset when you exit this session. |
+
+| prompt | OMGUI_PROMPT | True | |
+| workspace | OMGUI_WORKSPACE | DEFAULT | |
+| data_dir | OMGUI_DATA_DIR | ~/.omgui | |
+| host | OMGUI_HOST | localhost | |
+| port | OMGUI_PORT | 8024 | |
+| base_path | OMGUI_BASE_PATH | <empty> | |
+| sample_files | OMGUI_SAMPLE_FILES | True | |
+| log_level | OMGUI_LOG_LEVEL | INFO | |
+| viz_deps | n/a | False | |
 
 <br>
 
