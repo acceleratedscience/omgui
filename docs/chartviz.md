@@ -1,5 +1,7 @@
 [&larr; back](../)
 
+![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.chartviz-yellow)
+
 # OMGUI - chartviz
 
 Application to visualize data on the fly.
