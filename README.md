@@ -14,7 +14,8 @@ It supports small molecules as well as macromolecules like proteins, plus it doe
 
 Run it from a **Jupyter Notebook** or any **Python** script.
 
-[![Documentation](docs/assets/btn-docs.svg)](docs/functionality) [![Quick start](docs/assets/btn-quick-start.svg)](#quick-start)
+[![Documentation](docs/assets/btn-docs.svg)](docs)
+[![Quick start](docs/assets/btn-quick-start.svg)](#quick-start)
 
 <br>
 
