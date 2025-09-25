@@ -1,4 +1,4 @@
-# OMGUI
+# 😱 OMGUI
 
 ### _Open-source Molecular Graphical User Interface_
 
@@ -20,9 +20,24 @@ Run it from a **Jupyter Notebook** or any **Python** script.
 pip install git+https://github.com/themoenen/omgui.git@v0.1
 ```
 
+```python
+import omgui
+
+omgui.show_mol('dopamine')
+```
+
 > [!IMPORTANT]
 > OMGUI is in active development. Not all described functionality is implemented yet.  
 > A stable version will be released on PyPI in due time.
+
+### Sub-Modules
+
+-   `mws` / Molecule Working Set
+    A basket to store & process selected molecule candidates.
+-   `chartviz`
+    Visualize various types of data charts on the fly, either as HTML page, SVG or PNG.
+-   `molviz`
+    Visualize molecules on the fly, in 2D and 3D, either as SVG or PNG.
 
 <br>
 
