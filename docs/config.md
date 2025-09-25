@@ -7,9 +7,9 @@ These can be set in different ways, depending on your preferences or needs.
 
 In order of priority:
 
-1. Runtime configuration (`omgui.configure(...)`)
-1. Environment variables (`OMGUI_*`)
-1. Configuration file (`omgui.config.yml`)
+1. [Runtime configuration](#1-runtime-configuration) (`omgui.configure(...)`)
+1. [Environment variables](#2-environment-variables) (`OMGUI_*`)
+1. [Configuration file](#3-configuration-file) (`omgui.config.yml`)
 1. Default values
 
 <br>
