@@ -203,8 +203,7 @@ class Config:
 
         # Write to self
         for key, value in _config.items():
-            if self.default_config.get(key) is not None:
-                setattr(self, key, value)
+            setattr(self, key, value)
 
         # Create the data directory if it doesn't exist
         if not Path(_config.get("data_dir")).expanduser().exists():

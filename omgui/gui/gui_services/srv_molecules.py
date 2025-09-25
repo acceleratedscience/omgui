@@ -37,6 +37,7 @@ from omgui.gui.workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
 from omgui import ctx
 from omgui.util.json_decimal_encoder import JSONDecimalEncoder
 from omgui.util.mol_utils import create_molset_response
+from omgui.util.general import confirm_prompt
 from omgui.util import exceptions as omg_exc
 from omgui.spf import spf
 
@@ -617,16 +618,18 @@ def check_mol_in_mws(smol):
     return present
 
 
-def clear_mws():
+def clear_mws(force: bool = False):
     """
     Clear the molecule working set.
     """
-    if len(ctx().mws()) == 0:
+    count = len(ctx().mws())
+    if count == 0:
         spf.warning("No molecules to clear")
         return True
-    ctx().mws_clear()
-    spf.success("✅ Molecule working set cleared")
-    return True
+    if force or confirm_prompt(f"Are you sure you want to clear {count} molecules?"):
+        ctx().mws_clear()
+        spf.success("✅ Molecule working set cleared")
+        return True
 
 
 # endregion

@@ -1712,7 +1712,7 @@ def load_mols_to_mws(inp):
     Load a batch of molecules into the molecule working set.
     """
     # Prevent circular import
-    from omgui.gui_services import srv_molecules
+    from omgui.gui.gui_services import srv_molecules
 
     molset = None
     df_name = inp.as_dict().get("in_dataframe", None)
@@ -1848,7 +1848,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
     The property values will then be added to each molecule's properties.
     """
     # Prevent circular import
-    from omgui.gui_services import srv_molecules
+    from omgui.gui.gui_services import srv_molecules
 
     if dataframe is None and inp is None:
         return False

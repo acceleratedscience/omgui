@@ -113,6 +113,7 @@ def gui_init(path=None, data=None):
         If True, we'll start the server without opening the browser.
         This is used when restarting the server.
     """
+
     # Jupyter: wrap up immediately
     if NOTEBOOK_MODE:
         _gui_init(path, data)

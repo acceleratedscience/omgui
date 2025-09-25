@@ -1,6 +1,7 @@
 # Std
 import os
 import re
+from pathlib import Path
 
 # OMGUI
 from omgui import ctx
@@ -14,7 +15,7 @@ NOT_ALLOWED_ERR = [
 ]
 
 
-def prepare_file_path(file_path, fallback_ext=None, force_ext=None):
+def prepare_file_path(file_path: Path | str, fallback_ext=None, force_ext=None):
     """
     prepare a file path for saving.
 
@@ -29,6 +30,7 @@ def prepare_file_path(file_path, fallback_ext=None, force_ext=None):
                 - if yes, return the file path
                 - if no, print error and return None
     """
+    file_path = Path(file_path)
     file_path = parse_path(file_path, fallback_ext, force_ext)
     file_path = _ensure_file_path(file_path)
     # if not file_path:
@@ -37,7 +39,11 @@ def prepare_file_path(file_path, fallback_ext=None, force_ext=None):
     return file_path
 
 
-def parse_path(file_path, fallback_ext=None, force_ext=None) -> str:
+def parse_path(
+    file_path: Path | str,
+    fallback_ext: str = None,
+    force_ext: str = None,
+) -> str:
     """
     Parse a path string to a path object.
 
@@ -48,32 +54,31 @@ def parse_path(file_path, fallback_ext=None, force_ext=None) -> str:
     if not file_path:
         return None
 
-    # Detect path type
-    is_absolute = file_path.startswith(("/", "\\"))
-    is_cwd = file_path.startswith(("./", ".\\"))
+    file_path = Path(file_path)
 
-    # Normalize the path string to use the appropriate
-    # separator for the current system
-    file_path = os.path.normpath(file_path)
+    # Detect path type
+    is_absolute = file_path.is_absolute()
+    is_cwd = file_path.parts[0] in (".", "..")
 
     # Expand user path: ~/... --> /Users/my-username/...
-    file_path = os.path.expanduser(file_path)
+    file_path = file_path.expanduser()
 
     # Separate filename from path
-    path = os.path.dirname(file_path)
-    filename = os.path.basename(file_path)
+    path = file_path.parent
+    filename = file_path.name
 
     # Force extension
     new_ext = None
     if force_ext:
-        stem, ext = os.path.splitext(filename)
+        stem = file_path.stem
+        ext = file_path.suffix
         filename = stem + "." + force_ext
         if ext and ext[1:] != force_ext:
             new_ext = force_ext
 
     # Fallback to default extension if none provided
     elif fallback_ext:
-        ext = os.path.splitext(filename)[1]
+        ext = file_path.suffix
         filename = filename if ext else filename + "." + fallback_ext
 
     # Absolute path
@@ -84,11 +89,11 @@ def parse_path(file_path, fallback_ext=None, force_ext=None) -> str:
         # if is_proxy():
         #     spf.error(NOT_ALLOWED_ERR)
         #     return None
-        path = os.path.join(path, filename)
+        path = path / filename
 
     # Current working directory path
     elif is_cwd:
-        path = os.path.normpath(os.path.join(os.getcwd(), path, filename))
+        path = Path.cwd() / path / filename
 
     # Default: workspace path
     else:
@@ -105,57 +110,62 @@ def parse_path(file_path, fallback_ext=None, force_ext=None) -> str:
     return path
 
 
-def _ensure_file_path(file_path) -> bool:
+def _ensure_file_path(file_path: Path, force: bool = False) -> bool:
     """
     Ensure a file_path is valid.
 
     - Make sure we won't override an existing file
     - Create folder structure if it doesn't exist yet
     """
-    if os.path.exists(file_path):
+    if file_path.exists():
         # File already exists --> overwrite?
-        if not confirm_prompt("The destination file already exists, overwrite?"):
+        if not force and not confirm_prompt(
+            "The destination file already exists, overwrite?"
+        ):
             return _next_available_filename(file_path)
-    elif not os.path.exists(os.path.dirname(file_path)):
+    elif not file_path.parent.exists():
         # Directory doesn't exist --> create?
-        if not confirm_prompt("The destination directory does not exist, create it?"):
+        if not force and confirm_prompt(
+            "The destination directory does not exist, create it?"
+        ):
             return False
         try:
-            os.makedirs(os.path.dirname(file_path))
+            file_path.parent.mkdir(parents=True, exist_ok=True)
         except OSError as err:
             spf.error(["Error creating directory", err])
             return False
     return file_path
 
 
-def _next_available_filename(file_path) -> str:
+def _next_available_filename(file_path: Path) -> str:
     """
     Returns the file path with next available filename by appending a number to the filename.
     """
-    if not os.path.exists(file_path):
+    if not file_path.exists():
         return file_path
 
-    base = None
+    stem = None
     ext = None
     if file_path.lower().endswith(".mol.json"):
-        base = re.sub(r"(\.mol\.json)$", "", file_path)
+        stem = re.sub(r"(\.mol\.json)$", "", file_path)
         ext = ".mol.json"
     elif file_path.lower().endswith(".smol.json"):
-        base = re.sub(r"(\.smol\.json)$", "", file_path)
+        stem = re.sub(r"(\.smol\.json)$", "", file_path)
         ext = ".smol.json"
     elif file_path.lower().endswith(".mmol.json"):
-        base = re.sub(r"(\.mmol\.json)$", "", file_path)
+        stem = re.sub(r"(\.mmol\.json)$", "", file_path)
         ext = ".mmol.json"
     elif file_path.lower().endswith(".molset.json"):
-        base = re.sub(r"(\.molset\.json)$", "", file_path)
+        stem = re.sub(r"(\.molset\.json)$", "", file_path)
         ext = ".molset.json"
     else:
-        base, ext = os.path.splitext(file_path)
+        stem = file_path.stem
+        ext = file_path.suffix
 
     i = 1
-    while os.path.exists(f"{base}-{i}{ext}"):
+    while Path(f"{stem}-{i}{ext}").exists():
         i += 1
-    return f"{base}-{i}{ext}"
+    return f"{stem}-{i}{ext}"
 
 
 def block_absolute(file_path) -> bool:

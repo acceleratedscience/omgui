@@ -6,7 +6,7 @@ def add(identifier: str, basic: bool = False) -> None:
     """
     Add a molecule to the current workspace's working set.
     """
-    from omgui.gui_services import srv_molecules
+    from omgui.gui.gui_services import srv_molecules
 
     enrich = not basic
     srv_molecules.add_mol_to_mws(identifier, enrich=enrich)
@@ -16,18 +16,18 @@ def remove(identifier: str) -> None:
     """
     Remove a molecule from the current workspace's working set.
     """
-    from omgui.gui_services import srv_molecules
+    from omgui.gui.gui_services import srv_molecules
 
     srv_molecules.remove_mol_from_mws(identifier)
 
 
-def clear() -> None:
+def clear(force: bool = False) -> None:
     """
     Clear the current molecule working set.
     """
-    from omgui.gui_services import srv_molecules
+    from omgui.gui.gui_services import srv_molecules
 
-    srv_molecules.clear_mws()
+    srv_molecules.clear_mws(force)
 
 
 def get() -> list[dict[str, Any]]:

@@ -1,4 +1,4 @@
-<sub>[&larr; BACK](../#readme)</sub>
+<sub>[&larr; BACK](readme.md)</sub>
 
 # OMGUI - Configuration
 
@@ -50,7 +50,7 @@ omgui.configure(session=True, workspace="MY_WORKSPACE")
 
 Every colnfiguration option has a matching environment variable in SCREAMING_SNAKE_CASE with the "OMGUI\_" prefix.
 
-So for example, `config.session` corresponds to `OMGUI_SESSION`, `config.workspace` to `OMGUI_WORKSPACE`, etc.
+For example, `config.session` corresponds to `OMGUI_SESSION`, `config.workspace` to `OMGUI_WORKSPACE`, etc.
 
 <br>
 
