@@ -29,9 +29,9 @@ pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 
 ![example chart: pie chart](assets/chart-expl-pie.svg)
 
-![example chart: scatter plot](chart-example-scatter-plot.svg)
+![example chart: scatter plot](assets/chart-example-scatter-plot.svg)
 
-<kdb>![example chart: scatter plot](chart-example-scatter-plot.svg)</kdb>
+<kdb>![example chart: scatter plot](assets/chart-example-scatter-plot.svg)</kdb>
 
 ## Instructions
 
