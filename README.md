@@ -10,7 +10,7 @@
 <!-- [![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/) -->
 
 OMGUI makes it dead-simple to visualize and triage your molecule results in Python.  
-It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](docs/functionality.md).
+It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](docs/readme.md).
 
 Run it from a **Jupyter Notebook** or any **Python** script.
 
