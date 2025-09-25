@@ -1,4 +1,4 @@
-<sub>[&larr; BACK](../)</sub>
+<sub>[&larr; B A C K](../)</sub>
 
 # OMGUI - `chartviz` - Chart Visualization
 
