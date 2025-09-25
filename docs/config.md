@@ -2,7 +2,8 @@
 
 # OMGUI - Configuration
 
-OMGUI comes with a number of configurable options. These can be set in different ways, depending on your preferences or needs.
+OMGUI comes with a number of configurable options.  
+These can be set in different ways, depending on your preferences or needs.
 
 In order of priority:
 
@@ -13,7 +14,7 @@ In order of priority:
 
 ### 1. Runtime configuration
 
-You can call `omgui.configure(...)` right after import:
+Call `omgui.configure(...)` right after import:
 
 ```python
 import omgui
@@ -22,7 +23,9 @@ omgui.configure(session=True, workspace="MY_WORKSPACE")
 
 ### 2. Environment variables (`OMGUI_*`)
 
-Abc
+Every colnfiguration option has a matching environment variable in SCREAMING_SNAKE_CASE with the "OMGUI\*" prefix.
+
+So for example, `config.session` corresponds to `OMGUI_SESSION`, `config.workspace` to `OMGUI_WORKSPACE`, etc.
 
 ### 3. Configuration file (`omgui.config.yml`)
 
