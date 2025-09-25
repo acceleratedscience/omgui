@@ -26,40 +26,39 @@ omgui.launch()
 
 ## 1. File Browser
 
-<details>
-<summary>About</summary>
-
 The file browser lets your browse the files in your workspace. It lets you open molecule files directly into the molecule viewer.
 
-| Filetype   | Suffix       | Content         | Description                                                                                                                                                                          |
-| :--------- | :----------- | :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| OMGUI_JSON | .smol.json   | Small molecules | OMGUI's JSON schema for individual small molecules, can be exported to SDF or CSV                                                                                                    |
-| OMGUI_JSON | .mmol.json   | Macromolecules  | OMGUI's JSON schema for individual macromolecules, can be exported to CIF or PDB or CSV                                                                                              |
-| OMGUI_JSON | .molset.json | Molecule sets   | OMGUI's JSON schema for a set of small molecules. Sets of macromolecules are not supported at this time.                                                                             |
-|            |              |                 |                                                                                                                                                                                      |
-| MDL        | .mol         | Small molecules | Small molecule file holding information about the atoms, bonds, connectivity and coordinates of a molecule - [learn more](https://en.wikipedia.org/wiki/Chemical_table_file#Molfile) |
-| SDF        | .sdf         | Molecule sets   | Multi-molecule version of an MDL file - [learn more](https://en.wikipedia.org/wiki/Chemical_table_file#SDF)                                                                          |
-| SMI        | .smi         | Molecule sets   | A basic text file with a SMILES string per line                                                                                                                                      |
-| CIF        | .cif         | Macromolecules  | Stands for "Crystallographic Information File" and was intended as a successor to the PDB format - [learn more](https://en.wikipedia.org/wiki/Crystallographic_Information_File)     |
-| PDB        | .pdb         | Macromolecules  | Stands for "Protein Data Bank" - [learn more](<https://en.wikipedia.org/wiki/Protein_Data_Bank_(file_format)>)                                                                       |
-| JSON       | .json        | Data            | Open standard data serialization format [learn more](https://en.wikipedia.org/wiki/JSON)                                                                                             |
-| YAML       | .yml         | Data            | Human-readable data serialization format - [learn more](https://simple.wikipedia.org/wiki/YAML)                                                                                      |
-| CSV        | .csv         | Data            | Comma-separated text data format - [learn more](https://en.wikipedia.org/wiki/Comma-separated_values)                                                                                |
-| TEXT       | .text        | Text            | Basic text format                                                                                                                                                                    |
+Files can easily be opened in their default system app, which is also the default for any unsupported file formats.
 
-Files can easily be opened in your default system app, which is the default for any unsupported file formats.
+```python
+import omgui
 
-</details>
+omgui.show_files()
+omgui.open_file('my_candidates/batch_1.sdf')
+```
 
-<details>
-<summary>Command</summary>
+<!-- ![File Browser](assets/gui-file-browser.png) -->
 
-`launch gui`
+<kbd><img src="assets/gui-file-browser.png" alt="GUI File browser"></kbd>
 
-</details>
-
-| ![File Browser](readme/file-browser.png) |
-| ---------------------------------------- |
+| Filetype   | Suffix            | Content        | Description                                                                                                                                                                          |
+| :--------- | :---------------- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OMGUI_JSON | .smol.json        | Small molecule | OMGUI's JSON schema for individual small molecules, can be exported to SDF or CSV format                                                                                             |
+| OMGUI_JSON | .mmol.json        | Macromolecule  | OMGUI's JSON schema for individual macromolecules, can be exported to CIF, PDB or CSV format                                                                                         |
+| OMGUI_JSON | .molset.json      | Molecule set   | OMGUI's JSON schema for a set of small molecules.<br>Sets of macromolecules are not supported at this time.                                                                          |
+|            |                   |                |                                                                                                                                                                                      |
+| MDL        | .mol              | Small molecule | Small molecule file holding information about the atoms, bonds, connectivity and coordinates of a molecule - [learn more](https://en.wikipedia.org/wiki/Chemical_table_file#Molfile) |
+| SDF        | .sdf              | Molecule set   | Multi-molecule version of an MDL file - [learn more](https://en.wikipedia.org/wiki/Chemical_table_file#SDF)                                                                          |
+| SMI        | .smi              | Molecule set   | A basic text file with a SMILES string per line                                                                                                                                      |
+| CIF        | .cif              | Macromolecule  | Stands for "Crystallographic Information File" and is intended as a successor to the PDB format - [learn more](https://en.wikipedia.org/wiki/Crystallographic_Information_File)      |
+| PDB        | .pdb              | Macromolecule  | Stands for "Protein Data Bank" and described the three-dimensional structures of molecules - [learn more](<https://en.wikipedia.org/wiki/Protein_Data_Bank_(file_format)>)           |
+| JSON       | .json             | Data           | Open standard data serialization format [learn more](https://en.wikipedia.org/wiki/JSON)                                                                                             |
+| YAML       | .yml              | Data           | Human-readable data serialization format - [learn more](https://simple.wikipedia.org/wiki/YAML)                                                                                      |
+| CSV        | .csv              | Data           | Comma-separated text data format - [learn more](https://en.wikipedia.org/wiki/Comma-separated_values)                                                                                |
+| TEXT       | .text             | Text           | Basic text format                                                                                                                                                                    |
+| PDF        | .pdf              | Rich document  | `COMING SOON` Standard documents including text formatting and images - [learn more](https://en.wikipedia.org/wiki/PDF)                                                              |
+| SVG        | .svg              | Vector image   | `COMING SOON` XML-based vector graphics format for defining two-dimensional graphics - [learn more](https://en.wikipedia.org/wiki/SVG)                                               |
+| IMG        | .png/jpg/gif/webp | Bitmap image   | `COMING SOON` Various standard web image formats                                                                                                                                     |
 
 <br>
 
