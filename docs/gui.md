@@ -32,10 +32,10 @@ omgui.launch()
 The file browser lets your browse the files in your workspace. It lets you open molecule files directly into the molecule viewer.
 
 | Filetype   | Suffix       | Content         | Description                                                                                                                                                                          |
-| ---------- | ------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OMGUI-JSON | .smol.json   | Small molecules | OMGUI's JSON schema for individual small molecules, can be exported to SDF or CSV                                                                                                    |
-| OMGUI-JSON | .mmol.json   | Macromolecules  | OMGUI's JSON schema for individual macromolecules, can be exported to CIF or PDB or CSV                                                                                              |
-| OMGUI-JSON | .molset.json | Molecule sets   | OMGUI's JSON schema for a set of small molecules. Sets of macromolecules are not supported at this time.                                                                             |
+| :--------- | :----------- | :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OMGUI_JSON | .smol.json   | Small molecules | OMGUI's JSON schema for individual small molecules, can be exported to SDF or CSV                                                                                                    |
+| OMGUI_JSON | .mmol.json   | Macromolecules  | OMGUI's JSON schema for individual macromolecules, can be exported to CIF or PDB or CSV                                                                                              |
+| OMGUI_JSON | .molset.json | Molecule sets   | OMGUI's JSON schema for a set of small molecules. Sets of macromolecules are not supported at this time.                                                                             |
 |            |              |                 |                                                                                                                                                                                      |
 | MDL        | .mol         | Small molecules | Small molecule file holding information about the atoms, bonds, connectivity and coordinates of a molecule - [learn more](https://en.wikipedia.org/wiki/Chemical_table_file#Molfile) |
 | SDF        | .sdf         | Molecule sets   | Multi-molecule version of an MDL file - [learn more](https://en.wikipedia.org/wiki/Chemical_table_file#SDF)                                                                          |
