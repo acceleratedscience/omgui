@@ -53,7 +53,7 @@ def demo_molecules(request: Request):
     Interactive HTML demo page for the Molecule Visualization API.
     Provides a user interface with controls for all API parameters.
     """
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
     return templates.TemplateResponse("demo-molecules.html", {"request": request})
 
@@ -86,7 +86,7 @@ def visualize_molecule(
     Examples:
     http://localhost:8034/?smiles=C1=CC=CC=C1
     """
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     # Render molecule SVG

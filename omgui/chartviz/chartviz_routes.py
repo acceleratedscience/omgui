@@ -563,7 +563,7 @@ def demo_charts(request: Request):
     Interactive HTML demo page for the Charts API.
     Provides a user interface with controls for all API parameters.
     """
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     return templates.TemplateResponse("demo-charts.html", {"request": request})
@@ -576,7 +576,7 @@ def demo_charts(request: Request):
 async def random_data(
     request: Request, chart_type: ChartType | Literal["boxplot-group"]
 ):
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     chart_data = None
@@ -621,7 +621,7 @@ async def post_chart_data(
     Takes chart data from the request body, stores it in Redis (or in-memory fallback),
     and returns a unique ID for the data.
     """
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     unique_id = hash_data(data)
@@ -668,7 +668,7 @@ async def chart_bar(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     # Parse data
@@ -728,7 +728,7 @@ async def chart_line(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     # Parse data
@@ -788,7 +788,7 @@ async def chart_scatter(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     # Parse data
@@ -837,7 +837,7 @@ async def chart_bubble(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     # Parse data
@@ -885,7 +885,7 @@ async def chart_pie(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     # Parse data
@@ -936,7 +936,7 @@ async def chart_boxplot(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     # Parse data
@@ -1015,7 +1015,7 @@ async def chart_histogram(
     output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
     # fmt: on
 ):
-    if not config.viz_deps:
+    if not config._viz_deps:
         raise omg_exc.MissingDependenciesViz
 
     # Parse data

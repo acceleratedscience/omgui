@@ -45,7 +45,7 @@ def configure(
     port: int | None = None,
     base_path: str | None = None,
     log_level: str | None = None,
-    viz_deps: bool | None = None,
+    _viz_deps: bool | None = None,
 ) -> None:
     """
     Optional config options to be set right after import.
@@ -87,8 +87,8 @@ def configure(
         if not nb_mode():
             logger.setLevel(log_level)
 
-    if viz_deps is not None:
-        config().set("viz_deps", viz_deps)
+    if _viz_deps is not None:
+        config().set("_viz_deps", _viz_deps)
 
 
 class Config:
@@ -148,7 +148,7 @@ class Config:
         Log level for the server. One of "DEBUG", "INFO",
         "WARNING", "ERROR", "CRITICAL".
 
-    viz_deps: bool, default False / .env: NOT APPLICABLE!
+    _viz_deps: bool, default False / .env: n/a
         Whether the optional visualization dependencies are installed.
         This is automatically set to True when you install, and should
         not be set manually.
@@ -173,7 +173,7 @@ class Config:
         "base_path": "",
         "sample_files": True,
         "log_level": "INFO",
-        "viz_deps": False,
+        "_viz_deps": False,
     }
 
     # Config settings set via omgui.configure() during runtime

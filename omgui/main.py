@@ -181,7 +181,7 @@ def _launch(path=None, query="", hash=""):
             # No Redis URL provided, default to in-memory cache
             app.state.redis = None
             app.state.in_memory_cache = {}
-            if config.viz_deps:
+            if config._viz_deps:
                 logger.info(
                     "💾 OMGUI_REDIS_URL not available, defaulting to in-memory cache for /viz routes"
                 )

@@ -23,16 +23,16 @@ def startup():
     # ------------------------------------
 
     # Check if [viz] optional dependencies are installed
-    # and set config.viz_deps accordingly
+    # and set config._viz_deps accordingly
     try:
         import plotly  # pylint: disable=unused-import
         import kaleido  # pylint: disable=unused-import
         import cairosvg  # pylint: disable=unused-import
 
-        configure(viz_deps=True)
+        configure(_viz_deps=True)
         logger.info("Optional [viz] dependencies are installed")
     except ImportError:
-        configure(viz_deps=False)
+        configure(_viz_deps=False)
         logger.warning(
             "Optional [viz] dependencies are not installed - install with `pip install omgui[viz]`"
         )
