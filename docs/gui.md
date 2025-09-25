@@ -109,7 +109,7 @@ omgui.show_file("neurotransmitters.csv") # Support coming soon
 > [!IMPORTANT]  
 > Not yet implemented, coming soon.
 
-The data viewer will let you easily view an edit data from a CSV file. This includes editing values as well as adding, removing and renaming rows or columns.
+The data viewer will let you easily view an edit data from a CSV or YAML file. This includes editing values as well as adding, removing and renaming rows or columns.
 
 <br>
 
