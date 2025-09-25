@@ -161,11 +161,11 @@ def _launch(path=None, query="", hash=""):
         """
         Manages the lifecycle of the application, including Redis connection.
         """
-        redis_url = os.getenv("REDIS_URL")
+        redis_url = os.getenv("OMGUI_REDIS_URL")
 
         if redis_url:
             try:
-                logger.info("REDIS_URL: %s", redis_url)
+                logger.info("OMGUI_REDIS_URL: %s", redis_url)
                 app.state.redis = aioredis.from_url(
                     redis_url, encoding="utf-8", decode_responses=True
                 )
@@ -181,7 +181,10 @@ def _launch(path=None, query="", hash=""):
             # No Redis URL provided, default to in-memory cache
             app.state.redis = None
             app.state.in_memory_cache = {}
-            logger.info("💾 REDIS_URL not available, defaulting to in-memory cache")
+            if config.viz_deps:
+                logger.info(
+                    "💾 OMGUI_REDIS_URL not available, defaulting to in-memory cache for /viz routes"
+                )
 
         # Application will run from here
         yield

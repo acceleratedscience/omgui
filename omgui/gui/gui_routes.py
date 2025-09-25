@@ -318,7 +318,7 @@ async def post_molset(
     return {
         "id": unique_id,
         "url": f"/molset/{unique_id}",
-        "note": "Molset stored in in-memory cache (no expiry, not persistent). Configure REDIS_URL to enable Redis storage.",
+        "note": "Molset stored in in-memory cache (no expiry, not persistent). Configure OMGUI_REDIS_URL to enable Redis storage.",
     }
 
 
