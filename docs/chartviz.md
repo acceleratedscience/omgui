@@ -21,7 +21,9 @@ Supported chart types:
 
 ## Instructions
 
-In order to use the chart visualization, simply start the server in the background, then pass your data to the /viz/chart/<chart_type> path.
+In order to use the chart visualization, simply start the server in the background, then compose your url:
+
+`/viz/chart/<chart_type>?data=<your_data>`
 
 ```python
 import omgui
