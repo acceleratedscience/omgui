@@ -1,10 +1,10 @@
 # OMGUI - GUI<!-- omit in toc -->
 
-The GUI provides a visual window onto your data, helping you with evaluation and triage.
+The GUI provides a visual window onto your molecular data, helping you with evaluation and triage.
 
 #### How it works<!-- omit in toc -->
 
-The GUI can be launched from any Python script (in the browser) or from a **Jupyter Notebook** (in an iframe).  
+It can be launched from any **Python** script (in the browser) or from a **Jupyter Notebook** (in an iframe).  
 Any function that requires the GUI will start the server, which will then keep on running until the application or Notebook is shut down.
 
 If you wish to start the server in the background, you can run:
@@ -24,7 +24,7 @@ omgui.launch()
 
 <br>
 
-### 1. File Browser
+## 1. File Browser
 
 <details>
 <summary>About</summary>
@@ -58,7 +58,7 @@ Files can easily be opened in your default system app, which is the default for 
 
 <br>
 
-### 2. Molecule Viewer
+## 2. Molecule Viewer
 
 <details>
 <summary>About</summary>
@@ -83,9 +83,7 @@ Example: `show mol dopamine`
 
 <br>
 
-<br>
-
-### 3. Molset Viewer
+## 3. Molset Viewer
 
 <details>
 <summary>About</summary>
@@ -112,7 +110,7 @@ Example: `show molset 'my_mols.molset.json'`
 
 <br>
 
-### 4. Data Viewer
+## 4. Data Viewer
 
 <details>
 <summary>About</summary>
@@ -137,7 +135,7 @@ Example: `display data 'demo/my-data.csv'` + `result open`
 
 <br>
 
-### 5. Molecule Working Set
+## 5. Molecule Working Set
 
 <details>
 <summary>About</summary>
@@ -162,7 +160,7 @@ Your working set of molecules(\*) is a molset that lives in memory and is meant 
 
 <br>
 
-### 6. Results
+## 6. Results
 
 <details>
 <summary>About</summary>
