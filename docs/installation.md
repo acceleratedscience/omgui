@@ -2,7 +2,7 @@
 
 # OMGUI - Installation
 
-> [!OPTIONAL]  
+> [!NOTE - TEST]  
 > _Recommended: create a virtual environment_
 >
 > ```shell
