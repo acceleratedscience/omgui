@@ -12,6 +12,8 @@ In order of priority:
 1. Configuration file (`omgui.config.yml`)
 1. Default values
 
+<br>
+
 ### 1. Runtime configuration
 
 Call `omgui.configure(...)` right after import:
@@ -21,16 +23,21 @@ import omgui
 omgui.configure(session=True, workspace="MY_WORKSPACE")
 ```
 
-### 2. Environment variables (`OMGUI_*`)
+<br>
+
+### 2. Environment variables
 
 Every colnfiguration option has a matching environment variable in SCREAMING_SNAKE_CASE with the "OMGUI\*" prefix.
 
 So for example, `config.session` corresponds to `OMGUI_SESSION`, `config.workspace` to `OMGUI_WORKSPACE`, etc.
 
-### 3. Configuration file (`omgui.config.yml`)
+<br>
 
-Abc
+### 3. Configuration file
 
-### 4. Default values
+For permanent preferences, it's recommended to use a `omgui.config.yml` configuration file stored in the root of your application.
 
-Abd
+```yaml
+log_level: ERROR
+sample_files: false
+```
