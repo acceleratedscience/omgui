@@ -56,7 +56,7 @@ http://localhost:8024/viz/chart
 
 ## Deployment
 
-Because the chart visualization depends on some system requirements for the Plotly PNG/SVG output to work, it's recommended to deploy it using Docker or Podman, as the [Dockerfile](Dockerfile) takes care of installing these dependencies. See `apt-get` and `plotly_get_chrome`.
+Because the chart visualization depends on some system requirements for the PNG/SVG output to work, it's recommended to deploy it using Docker or Podman, as the [Dockerfile](Dockerfile) takes care of installing these dependencies. See `apt-get` and `plotly_get_chrome`.
 
 <br>
 
