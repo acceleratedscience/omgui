@@ -25,13 +25,7 @@ pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 -   box plots
 -   histograms
 
-### Examples
-
-![example chart: pie chart](assets/chart-expl-pie.svg)
-
-![example chart: scatter plot](assets/chart-example-scatter-plot.svg)
-
-<kdb>![example chart: scatter plot](assets/chart-example-scatter-plot.svg)</kdb>
+Jump to [examples](#examples).
 
 ## Instructions
 
@@ -55,7 +49,17 @@ Use the demo interface to see how to compose your URL and structure your data fo
 
 ![chartviz demo UI](assets/chartviz-demo-ui.png)
 
-### Deployment
+## Examples
+
+![Example chart: Line chart](assets/chart-example-line.svg)
+![Example chart: Box plot](assets/chart-example-box-plot.svg)
+![Example chart: Scatter chart](assets/chart-example-scatter-plot.svg)
+![Example chart: Histogram](assets/chart-example-histogram.svg)
+![Example chart: Bar chart](assets/chart-example-bar.svg)
+![Example chart: Bubble chart](assets/chart-example-bubble.svg)
+![Example chart: Pie chart](assets/chart-example-pie.svg)
+
+## Deployment
 
 Because the chart visualization depends on some system requirements for the Plotly PNG/SVG output to work, it's recommended to deploy it using Docker or Podman, as the [Dockerfile](Dockerfile) takes care of installing these dependencies. See `apt-get` and `plotly_get_chrome`.
 
