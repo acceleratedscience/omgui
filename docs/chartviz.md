@@ -27,7 +27,7 @@ pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
 
 ### Examples
 
-![example chart: pie chart](assets/chart-expl-pie.png)
+![example chart: pie chart](assets/chart-expl-pie.svg)
 
 ## Instructions
 
