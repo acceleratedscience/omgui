@@ -1,6 +1,6 @@
 <sub>[&larr; BACK](../)</sub>
 
-# OMGUI - Documntation<!-- omit in toc -->
+# OMGUI - Documentation<!-- omit in toc -->
 
 ### Table of Contents<!-- omit in toc -->
 
