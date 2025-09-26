@@ -68,15 +68,14 @@ omgui.show_mol('dopamine')
 ## Troubleshooting
 
 <details>
-<summary>Shutting down a blocked port</summary>
-
+<summary>Shutting down a blocked port</summary><br>
 If the OMGUI server didn't shut down properly and is occupying a port, you can shut it down by visiting:
 
 ```
 http://localhost:8024/shutdown
 ```
 
-<details>
+</details>
 
 <br><br>
 
