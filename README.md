@@ -67,6 +67,7 @@ omgui.show_mol('dopamine')
 
 ## Troubleshooting
 
+<!-- Blocker port -->
 <details>
 <summary>Shutting down a blocked port</summary>
 <br>
@@ -75,6 +76,37 @@ omgui.show_mol('dopamine')
 >
 > ```
 > http://localhost:8024/shutdown
+> ```
+
+</details>
+
+<!-- Inspect config -->
+<details>
+<summary>Inspecting config</summary>
+<br>
+
+> To get an overview of your current configuration including the source of each value, you can run:
+>
+> ```python
+> from omgui import config
+>
+> config.report()
+> ```
+>
+> For more, visit [config documentation](docs/config.md)
+
+</details>
+
+<details>
+<summary>Inspecting context</summary>
+<br>
+
+> To see your current context (which sets your workspace and holds your molecule working set), you can run:
+>
+> ```
+> import omgui
+>
+> omgui.get_context()
 > ```
 
 </details>
