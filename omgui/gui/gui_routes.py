@@ -24,7 +24,6 @@ from omgui.gui.gui_services import srv_dataframe
 from omgui import ctx
 from omgui.util.logger import get_logger
 from omgui.util import exceptions as omg_exc
-from omgui.util.general import deep_merge, is_dates, hash_data
 
 logger = get_logger()
 
@@ -200,6 +199,25 @@ async def get_molset(request: Request):
     return srv_molecules.get_molset(cache_id, query)
 
 
+@gui_router.post(f"{api_v1}/get-molset-adhoc")
+async def get_molset_adhoc(request: Request):
+    body = await request.json()
+    identifiers = body.get("identifiers", [])
+    query = body.get("query", {})
+    return srv_molecules.get_molset_adhoc(identifiers, query)
+
+
+@gui_router.post(
+    f"{api_v1}/post-molset-adhoc",
+    summary="Create an on-the-fly molset and return the Redis/memory ID",
+)
+async def post_molset_adhoc(request: Request):
+    body = await request.json()
+    identifiers = body.get("identifiers", [])
+    query = body.get("query", {})
+    return srv_molecules.post_molset_adhoc(identifiers, query)
+
+
 @gui_router.post(f"{api_v1}/remove-from-molset")
 async def remove_from_molset(request: Request):
     body = await request.json()
@@ -279,49 +297,6 @@ async def replace_mol_in_molset(request: Request):
     return srv_molecules.replace_mol_in_molset(cache_id, path, mol, format_as)
 
 
-@gui_router.post(
-    f"{api_v1}/molset",
-    summary="Create an on-the-fly molset and return the Redis/memory ID",
-)
-async def post_molset(
-    request: Request,
-    inchi_or_smiles: list[str] = Body(...),
-):
-    """
-    Takes a list of InChI or SMILES strings, creates a molset and stores it in Redis or in-memory cache.
-    """
-    unique_id = hash_data(str(inchi_or_smiles))
-    key = f"input_data:{unique_id}"
-
-    # Assemble molset
-    molset = srv_molecules.get_molset_adhoc(inchi_or_smiles)
-
-    # Use Redis when available
-    redis_client = request.app.state.redis
-    if redis_client:
-        await redis_client.set(key, json.dumps(molset), ex=86400)
-        logger.info("Molset stored in Redis as '%s'", unique_id)
-        return {"id": unique_id, "url": f"/molset/{unique_id}"}
-
-    # In-memory fallback
-    cache = getattr(request.app.state, "in_memory_cache", None)
-    if cache is None:
-        request.app.state.in_memory_cache = {}
-        cache = request.app.state.in_memory_cache
-
-    cache[key] = json.dumps(molset)
-
-    logger.info(
-        "Molset stored in in-memory cache as '%s' (no Redis configured)", unique_id
-    )
-
-    return {
-        "id": unique_id,
-        "url": f"/molset/{unique_id}",
-        "note": "Molset stored in in-memory cache (no expiry, not persistent). Configure config.redis_url to enable Redis storage.",
-    }
-
-
 # endregion
 # ------------------------------------
 # region - Molecules - Macromolecules
@@ -387,14 +362,6 @@ async def get_molset_mws(request: Request):
     body = await request.json()
     query = body.get("query", {})
     return srv_molecules.get_molset_mws(query)
-
-
-@gui_router.post(f"{api_v1}/get-molset-adhoc")
-async def get_molset_adhoc(request: Request):
-    body = await request.json()
-    identifiers = body.get("identifiers", [])
-    query = body.get("query", {})
-    return srv_molecules.get_molset_adhoc(identifiers, query)
 
 
 @gui_router.post(f"{api_v1}/update-molset-mws")

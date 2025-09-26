@@ -222,6 +222,9 @@ def _launch(path=None, query="", hash=""):
     app.include_router(chartviz_router, prefix="/viz/chart", tags=["Chart Visualization"])
     # fmt: on
 
+    logger.error("A ERROR")
+    logger.info("B INFO")
+
     # Shutdown route
     @app.get("/shutdown", tags=["Core"])
     async def shut_down():
@@ -248,7 +251,9 @@ def _launch(path=None, query="", hash=""):
     # because this conflicts with FastAPI's handling of
     # redirecting routes with slashes (redirect_slashes).
     # fmt: off
-    @app.get("/", tags=["GUI"], summary="Serve the GUI")
+    @app.get("/", tags=["GUI"], summary="Serve the GUI root")
+    @app.get("/headless", tags=["GUI"], summary="Serve the headless GUI root")
+    @app.get("/headless/{path:path}", tags=["GUI"], summary="Serve the headless GUI")
     @app.get("/~/{path:path}", tags=["GUI"], summary="Serve the GUI filebrowser")
     @app.get("/mol/{path:path}", tags=["GUI"], summary="Serve the GUI molecule viewer")
     @app.get("/smol/{path:path}", tags=["GUI"], summary="Serve the GUI small molecule viewer")
@@ -269,6 +274,7 @@ def _launch(path=None, query="", hash=""):
     # @app.get("/{path:path}", tags=["GUI"], summary="Serve the GUI") # Only for testing, do not enable
     # fmt: on
     async def serve(request: Request, path: str = ""):
+        # logger.error("Serving path: /%s", path)
         try:
             gui_build_dir = Path(__file__).parents[0].resolve() / "gui" / "client"
             path = request.url.path.lstrip("/")  # We need the full path

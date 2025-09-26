@@ -63,6 +63,19 @@ omgui.show_mol('dopamine')
 
 <kbd><img src="docs/assets/gui-molecule.png" /></kbd>
 
+## Troubleshooting
+
+<details>
+<summary>Shutting down a blocked port</summary>
+
+If the OMGUI server didn't shut down properly and is occupying a port, you can shut it down by visiting:
+
+```
+http://localhost:8024/shutdown
+```
+
+<details>
+
 <br><br>
 
 To discover what else **omgui** can do, [continue here](docs/readme.md).

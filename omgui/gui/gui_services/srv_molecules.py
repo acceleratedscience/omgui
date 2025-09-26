@@ -37,7 +37,7 @@ from omgui.gui.workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
 from omgui import ctx
 from omgui.util.json_decimal_encoder import JSONDecimalEncoder
 from omgui.util.mol_utils import create_molset_response
-from omgui.util.general import confirm_prompt
+from omgui.util.general import confirm_prompt, hash_data
 from omgui.util import exceptions as omg_exc
 from omgui.spf import spf
 
@@ -305,7 +305,7 @@ def get_molset_adhoc_v1(identifiers, query=None):
     return create_molset_response(molset, query, cache_id)
 
 
-def get_molset_adhoc(inchi_or_smiles, query=None):
+def get_molset_adhoc(inchi_or_smiles, query=None, return_cache_id=False):
     """
     Get an ad-hoc molset from a list of identifiers provided in the query.
     """
@@ -325,11 +325,32 @@ def get_molset_adhoc(inchi_or_smiles, query=None):
     cache_id = create_molset_cache_file(molset)
     print("cache_id", cache_id)
 
+    # When posting a molset, we just need the cache ID to serve it
+    if return_cache_id:
+        return cache_id
+
     # Read molset from cache
     molset = read_molset_from_cache(cache_id)
 
     # Formulate response object
     return create_molset_response(molset, query, cache_id)
+
+
+def post_molset_adhoc(inchi_or_smiles, query=None):
+    """
+    Post an ad-hoc molset provided in the request body.
+    This is needed when the molset is too large to be passed as a query parameter.
+    """
+    # unique_id = hash_data(str(inchi_or_smiles))
+    # key = f"input_data:{unique_id}"
+
+    # Assemble molset
+    cache_id = get_molset_adhoc(inchi_or_smiles, query, return_cache_id=True)
+
+    return {
+        "id": cache_id,
+        "url": f"/molset/id/{cache_id}",
+    }
 
 
 ##

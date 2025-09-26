@@ -23,7 +23,7 @@ import yaml
 
 # OMGUI
 from omgui.spf import spf
-from omgui.util.logger import get_logger
+from omgui.util.logger import get_logger, set_log_level
 
 
 logger = get_logger()
@@ -80,11 +80,7 @@ def configure(
 
     if log_level:
         config().set("log_level", log_level)
-
-        from omgui.util.jupyter import nb_mode
-
-        if not nb_mode():
-            logger.setLevel(log_level)
+        set_log_level(log_level)
 
     if stateless:
         config().set("stateless", stateless)
@@ -108,6 +104,9 @@ def configure(
 
     if _viz_deps is not None:
         config().set("_viz_deps", _viz_deps)
+
+    # Re-initialize config to apply changes
+    config().re_init()
 
 
 class Config:
@@ -177,7 +176,7 @@ class Config:
     # Config settings set via omgui.configure() during runtime
     config_runtime = {}
 
-    def __new__(cls):
+    def __new__(cls, **args):
         """
         Control singleton instance creation.
         """
@@ -185,7 +184,7 @@ class Config:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self, defaults: bool = False):
         """
         Initialize the configuration by loading from environment variables,
         configuration file, and setting defaults.
@@ -194,12 +193,19 @@ class Config:
         if self._initialized:
             return
 
-        _config = (
-            self.default_config  # Base: defaults
-            | self.config_file()  # 3nd priority: omgui.config.yml
-            | self.config_env()  # 2nd priority: environment variables
-            | self.config_runtime  # 1st priority: set via omgui.configure()
-        )
+        # When running config.reset(defaults=True)
+        # --> set config to default values only
+        if defaults:
+            _config = self.default_config
+
+        # Normal initialization
+        else:
+            _config = (
+                self.default_config  # Base: defaults
+                | self.config_file()  # 3nd priority: omgui.config.yml
+                | self.config_env()  # 2nd priority: environment variables
+                | self.config_runtime  # 1st priority: set via omgui.configure()
+            )
 
         # Write to self
         for key, value in _config.items():
@@ -213,6 +219,18 @@ class Config:
             Path(_config.get("data_dir")).expanduser().mkdir(
                 parents=True, exist_ok=True
             )
+
+    @classmethod
+    def re_init(cls, defaults: bool = False):
+        """
+        Re-initialize the singleton instance.
+        This is used after config values are changed
+        via omgui.configure() or config.reset().
+        """
+        instance = cls._instance
+        if instance is not None:
+            instance._initialized = False
+            instance.__init__(defaults=defaults)
 
     def config_file(self):
         """
@@ -293,6 +311,19 @@ class Config:
         else:
             logger.warning("Config key '%s' not recognized.", key)
 
+    def reset(self, defaults: bool = False):
+        """
+        Resets the configuration to default values.
+        """
+        self.config_runtime = {}
+        self._config_env = None
+        self._config_file = None
+        self.re_init(defaults)
+        if defaults:
+            logger.info("Configuration reset to default values")
+        else:
+            logger.info("Configuration reset")
+
     def report(self):
         """
         Prints an overview of the current configuration.
@@ -310,7 +341,8 @@ class Config:
 
         _report.append("  1. Config runtime")
         for key, val in self.config_runtime.items():
-            _report.append(f"     {key:12}: {val}")
+            if not key.startswith("_"):
+                _report.append(f"     {key:12}: {val}")
         if len(self.config_runtime.items()) == 0:
             _report.append("     <soft>None</soft>")
 

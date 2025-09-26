@@ -1,12 +1,17 @@
+#  if file_path.lower().endswith(".mol.json"):
+
 # Std
-import os
 import re
 from pathlib import Path
 
 # OMGUI
 from omgui import ctx
+from omgui.util.logger import get_logger
 from omgui.util.general import confirm_prompt
 from omgui.spf import spf
+
+# Logger
+logger = get_logger()
 
 
 NOT_ALLOWED_ERR = [
@@ -83,12 +88,6 @@ def parse_path(
 
     # Absolute path
     if is_absolute:
-        # TODO: used to be jup_is_proxy, need to figure out what
-        # to do with file paths in proxy, maybe this shoudl be
-        # blocked with dedicated env bar instead.
-        # if is_proxy():
-        #     spf.error(NOT_ALLOWED_ERR)
-        #     return None
         path = path / filename
 
     # Current working directory path
@@ -117,23 +116,28 @@ def _ensure_file_path(file_path: Path, force: bool = False) -> bool:
     - Make sure we won't override an existing file
     - Create folder structure if it doesn't exist yet
     """
+
+    # File already exists? --> overwrite?
     if file_path.exists():
-        # File already exists --> overwrite?
         if not force and not confirm_prompt(
             "The destination file already exists, overwrite?"
         ):
             return _next_available_filename(file_path)
-    elif not file_path.parent.exists():
-        # Directory doesn't exist --> create?
+
+    # Parent directory doesn't exist --> create?
+    if not file_path.parent.exists():
         if not force and confirm_prompt(
-            "The destination directory does not exist, create it?"
+            f"The destination directory <reset>{file_path.parent.name}</reset> does not exist, create it?"
         ):
-            return False
-        try:
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-        except OSError as err:
-            spf.error(["Error creating directory", err])
-            return False
+            try:
+                logger.info("Creating directory: %s", file_path.parent)
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+                return file_path
+            except OSError as err:
+                spf.error(["Error creating directory", err])
+
+        return False
+
     return file_path
 
 
@@ -144,28 +148,37 @@ def _next_available_filename(file_path: Path) -> str:
     if not file_path.exists():
         return file_path
 
-    stem = None
-    ext = None
-    if file_path.lower().endswith(".mol.json"):
-        stem = re.sub(r"(\.mol\.json)$", "", file_path)
-        ext = ".mol.json"
-    elif file_path.lower().endswith(".smol.json"):
-        stem = re.sub(r"(\.smol\.json)$", "", file_path)
-        ext = ".smol.json"
-    elif file_path.lower().endswith(".mmol.json"):
-        stem = re.sub(r"(\.mmol\.json)$", "", file_path)
-        ext = ".mmol.json"
-    elif file_path.lower().endswith(".molset.json"):
-        stem = re.sub(r"(\.molset\.json)$", "", file_path)
-        ext = ".molset.json"
+    if file_path.suffix == ".json" and file_path.suffixes[-2] in [
+        ".mol",
+        ".smol",
+        ".mmol",
+        ".molset",
+    ]:
+        # Double suffix: "foo.bar", ".mol.json"
+        stem, ext = __split_double_suffix_filename(file_path)
     else:
-        stem = file_path.stem
-        ext = file_path.suffix
+        # Regular single suffix: "foo.bar", ".txt"
+        stem, ext = [file_path.stem, file_path.suffix]
 
     i = 1
-    while Path(f"{stem}-{i}{ext}").exists():
+    while Path(f"{file_path.parent}/{stem}-{i}{ext}").exists():
         i += 1
-    return f"{stem}-{i}{ext}"
+    return f"{file_path.parent}/{stem}-{i}{ext}"
+
+
+def __split_double_suffix_filename(file_path: Path):
+    """
+    Returns the filename stem plus two suffixes.
+
+    Eg.
+    foo.mol.json --> "foo.bar", ".mol.json"
+    foo.bar.mol.json --> "foo.bar", ".txt"
+    """
+    stem = file_path.name
+    # Remove two suffixes from the stem
+    for suffix in reversed(file_path.suffixes[-2:]):
+        stem = stem.removesuffix(suffix)
+    return stem, "".join(file_path.suffixes[-2:])
 
 
 def block_absolute(file_path) -> bool:

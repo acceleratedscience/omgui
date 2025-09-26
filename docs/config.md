@@ -62,3 +62,85 @@ For permanent preferences, it's recommended to use a `omgui.config.yml` configur
 log_level: ERROR
 sample_files: false
 ```
+
+## Debugging
+
+### Config Report
+
+To get an overview of your current configuration including the source of each value, you can run:
+
+```python
+from omgui import config
+
+config.report()
+```
+
+<details>
+<summary>Print output</summary>
+
+```text
+
+|    Compiled config
+|    ---------------
+|    title       : omgui
+|    host        : localhost
+|    port        : 8034
+|    session     : False
+|    workspace   : MY_WORKSPACE
+|    log_level   : ERROR
+|    stateless   : False
+|    base_path   :
+|    redis_url   : None
+|    data_dir    : ~/.omgui
+|    prompt      : True
+|    sample_files: False
+
+
+Configuration Sources:
+
+  1. Config runtime
+     workspace   : MY_WORKSPACE
+
+  2. Config env
+     log_level   : ERROR
+
+  3. Config file
+     sample_files: False
+     port        : 8034
+
+  4. Default config:
+     title       : omgui
+     host        : localhost
+     port        : 8024
+     session     : False
+     workspace   : DEFAULT
+     log_level   : INFO
+     stateless   : False
+     base_path   :
+     redis_url   : None
+     data_dir    : ~/.omgui
+     prompt      : True
+     sample_files: True
+     _viz_deps   : False
+
+```
+
+</details>
+
+### Reset Config
+
+You can reset your configuration, which will remove all runtime options and re-load the config file and environment variables:
+
+```python
+from omgui import config
+
+config.reset()
+```
+
+You can also set all configuration variables to their default, for your current session:
+
+```python
+from omgui import config
+
+config.report(defaults=True)
+```

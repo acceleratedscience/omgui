@@ -68,7 +68,7 @@ if nb_mode():
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter("%(message)s"))
 
-    # Never print info/debug logs
+    # Don't print info/debug logs unless explicitly set at runtime.
     root.setLevel(logging.ERROR)
 
 # Standard terminal
@@ -93,3 +93,10 @@ def get_logger():
     name = module.__name__ if module else "__main__"
 
     return logging.getLogger(name)
+
+
+def set_log_level(level):
+    """
+    Set the global logging level.
+    """
+    root.setLevel(level)
