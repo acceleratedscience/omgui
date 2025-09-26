@@ -63,6 +63,8 @@ omgui.show_mol('dopamine')
 
 <kbd><img src="docs/assets/gui-molecule.png" /></kbd>
 
+<br>
+
 ## Troubleshooting
 
 <details>
