@@ -23,9 +23,8 @@ omgui.launch()
 - [3. Molset Viewer](#3-molset-viewer)
 - [4. Data Viewer](#4-data-viewer)
 - [5. Molecule Working Set](#5-molecule-working-set)
-  - [Adding \& Removing Molecules](#adding--removing-molecules)
   - [Adding a Property](#adding-a-property)
-    - [Formatting results](#formatting-results)
+    - [How to Format Property Data](#how-to-format-property-data)
 - [6. Results](#6-results)
 
 <br>
@@ -127,10 +126,6 @@ Each workspace has their own MWS. The MWS lets you easily fetch your molecules a
 > [!IMPORTANT]  
 > Partly implemented.
 
-<br>
-
-### Adding & Removing Molecules
-
 ```python
 from omgui import mws
 
@@ -139,8 +134,12 @@ mws.add("C1=CC=CC=C1")
 mws.add("dopamine")
 mws.remove("C1=CC=CC=C1")
 
+mws.add_prop(my_results)
+
 mws.open()
 ```
+
+<kbd><img src="assets/gui-mws.png" alt="GUI Molset viewer"></kbd>
 
 <br>
 
@@ -156,7 +155,7 @@ my_candidates = mws.get_smiles()
 results = some_processing_here(my_candidates)
 
 # Update the molecules in your working set
-mws.add_props(results)
+mws.add_prop(results)
 
 # Export your results as SDF file
 mws.export(format="sdf") # To be implemented
@@ -169,50 +168,49 @@ mws.clear()
 
 <br>
 
-#### Formatting results
+#### How to Format Property Data
 
-The `add_props()` function supports result data in various different formats. Which format you use is up to you.
+The `add_prop()` function supports result data in various formats. Which format you use is up to you.
 
 There's two ways:
 
-1. **Sequential input:**
+1. **Sequential input:**  
    Update all molecules at once, where the length of the input should match the length of the MWS.
 
     ```python
     # Option 1.1 - A list of dicts
     results_1 = [
-        { "foo_1": 0.729 },
-        { "foo_1": 1.235 }
+       { "foo_1": 0.729 },
+       { "foo_1": 1.235 }
     ]
     mws.add_prop(results_1)
+
     # Option 1.2 - A list of values and a property name
     results_2 = [0.238, 0.598]
     mws.add_prop(results_2, prop_name="foo_2")
     ```
 
-1. **Subject input:**
-   Update select molecules, which are identified by the 'subject' identifier.
+2. **Subject input:**  
+   Update select molecules, which are identified by the 'subject' identifier containing the canonical SMILES.
 
     ```python
     # Option 2.1 - A list of dicts
     results_3 = [
-        { "foo_3": 0.729, "subject": "NCC(=O)O" },
-        { "foo_3": 1.235, "subject": "CC(O)CC(=O)O" }
+       { "foo_3": 0.729, "subject": "NCC(=O)O" },
+       { "foo_3": 1.235, "subject": "CC(O)CC(=O)O" }
     ]
     mws.add_prop(results_3)
 
     # Option 2.2 - A dataframe with subject, prop, val columns
     import pandas as pd
     results_4 = {
-        "subject": ["NCC(=O)O", "CC(O)CC(=O)O"],
-        "prop": ["foo_4"] * len(subjects),
-        "val": [0.526, 0.192],
+       "subject": ["NCC(=O)O", "CC(O)CC(=O)O"],
+       "prop": ["foo_4"] * len(subjects),
+       "val": [0.526, 0.192],
     }
     df = pd.DataFrame(results_4)
-    mws.add_props(df)
+    mws.add_prop(df)
     ```
-
-<kbd><img src="assets/gui-mws.png" alt="GUI Molset viewer"></kbd>
 
 <br>
 
