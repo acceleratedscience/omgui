@@ -32,14 +32,7 @@ from omgui.util.general import pretty_date, is_numeric, merge_dict_lists
 from omgui.util.logger import get_logger
 from omgui.gui.workers import smol_transformers
 from omgui.gui.workers.data_structures import OPENAD_SMOL_DICT
-from omgui.gui.workers.smol_transformers import (
-    molset2dataframe,
-    write_dataframe2sdf,
-    write_dataframe2csv,
-    sdf_path2molset,
-    csv_path2molset,
-    smiles_path2molset,
-)
+from omgui.gui.workers import smol_transformers
 from omgui.spf import spf
 
 # Logger
@@ -853,15 +846,15 @@ def load_mols_from_file(file_path):
 
         # SDF
         elif file_path.endswith(".sdf"):
-            molset = sdf_path2molset(file_path)
+            molset = smol_transformers.sdf_path2molset(file_path)
 
         # CSV
         elif file_path.endswith(".csv"):
-            molset = csv_path2molset(file_path)
+            molset = smol_transformers.csv_path2molset(file_path)
 
         # SMILES
         elif file_path.endswith(".smi"):
-            molset = smiles_path2molset(file_path)
+            molset = smol_transformers.smiles_path2molset(file_path)
 
         # Unsupported file type
         else:
@@ -920,10 +913,10 @@ def save_molset_as_sdf(molset: list, path: str, remove_invalid_mols=False):
     Save a molset as an SDF file.
     """
     try:
-        df = molset2dataframe(
+        df = smol_transformers.molset2dataframe(
             molset, remove_invalid_mols=remove_invalid_mols, include_romol=True
         )
-        write_dataframe2sdf(df, path)
+        smol_transformers.write_dataframe2sdf(df, path)
         return True, None
     except ValueError as err:
         return False, {
@@ -937,8 +930,8 @@ def save_molset_as_csv(molset: list, path: str, remove_invalid_mols=False):
     Save a molset as a CSV file.
     """
     try:
-        df = molset2dataframe(molset, remove_invalid_mols)
-        write_dataframe2csv(df, path)
+        df = smol_transformers.molset2dataframe(molset, remove_invalid_mols)
+        smol_transformers.write_dataframe2csv(df, path)
         return True, None
     except ValueError as err:
         return False, {
@@ -1712,7 +1705,7 @@ def load_mols_to_mws(inp):
     Load a batch of molecules into the molecule working set.
     """
     # Prevent circular import
-    from omgui.gui.gui_services import srv_molecules
+    from omgui.gui.gui_services import srv_mws
 
     molset = None
     df_name = inp.as_dict().get("in_dataframe", None)
@@ -1743,7 +1736,7 @@ def load_mols_to_mws(inp):
     added_count = 0
     failed_count = 0
     for smol in molset:
-        success = srv_molecules.add_mol_to_mws(smol=smol, silent=True)
+        success = srv_mws.add_mol(smol=smol, silent=True)
         if success:
             added_count += 1
         else:
@@ -1848,7 +1841,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
     The property values will then be added to each molecule's properties.
     """
     # Prevent circular import
-    from omgui.gui.gui_services import srv_molecules
+    from omgui.gui.gui_services import srv_mws
 
     if dataframe is None and inp is None:
         return False
@@ -1933,7 +1926,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
             smol = merge_molecule_properties(row, merge_smol)
             # GLOBAL_SETTINGS["grammar_refresh"] = True # TODO: replace with callback
             if update_flag is True:
-                srv_molecules.remove_mol_from_mws(smol=merge_smol, silent=True)
+                srv_mws.remove_mol(smol=merge_smol, silent=True)
             ctx().mws_add(smol)
 
     spf.success("Data merged into your working set")

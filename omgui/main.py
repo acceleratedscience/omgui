@@ -36,7 +36,7 @@ from omgui import config, ctx
 from omgui.util import gui_install
 from omgui.util.jupyter import nb_mode
 from omgui.util.logger import get_logger
-from omgui.util.general import next_avail_port, wait_for_port
+from omgui.util.general import is_port_available, next_avail_port, wait_for_port
 from omgui.util.exception_handlers import register_exception_handlers
 from omgui.spf import spf
 
@@ -50,6 +50,7 @@ logger = get_logger()
 
 GUI_SERVER = None
 NOTEBOOK_MODE = nb_mode()
+ABORT_LAUNCH = False
 
 # Optional BASE_PATH configuration
 # We always want it w/o leading slash, but with trailing slash
@@ -123,7 +124,7 @@ def gui_init(path=None, data=None):
     # --> allow Ctrl+C to stop it elegantly
     try:
         _gui_init(path, data)
-        while True:
+        while not ABORT_LAUNCH:
             time.sleep(1)
     except KeyboardInterrupt:
         # Ctrl+C was pressed --> atexit handles this
@@ -181,10 +182,13 @@ def _launch(path=None, query="", hash=""):
             # No Redis URL provided, default to in-memory cache
             app.state.redis = None
             app.state.in_memory_cache = {}
-            if config._viz_deps:
-                logger.info(
-                    "💾 OMGUI_REDIS_URL not available, defaulting to in-memory cache for /viz routes"
-                )
+
+            # Disabling this message until we decide to make Redis a requirement
+            # Otherewise people would think something is wrong.
+            # if config._viz_deps:
+            #     logger.info(
+            #         "💾 OMGUI_REDIS_URL not available, defaulting to in-memory cache for /viz routes"
+            #     )
 
         # Application will run from here
         yield
@@ -221,9 +225,6 @@ def _launch(path=None, query="", hash=""):
     app.include_router(molviz_router, prefix="/viz/mol", tags=["Molecule Visualization"])
     app.include_router(chartviz_router, prefix="/viz/chart", tags=["Chart Visualization"])
     # fmt: on
-
-    logger.error("A ERROR")
-    logger.info("B INFO")
 
     # Shutdown route
     @app.get("/shutdown", tags=["Core"])
@@ -317,7 +318,17 @@ def _launch(path=None, query="", hash=""):
         return Response(content="index.html not found", status_code=404)
 
     # Determine port and host
-    host, port = next_avail_port(host=config.host, port=config.port)
+    host = config.host
+    port = config.port
+    if config.fixed_port():
+        # Custom port not available --> fail & abort
+        if not is_port_available(host, port):
+            _print_launch_fail_msg(host, port)
+            global ABORT_LAUNCH
+            ABORT_LAUNCH = True
+            return
+    else:
+        port = next_avail_port(config.host, config.port)
 
     # Remove logging of warning & informational messages
     log = logging.getLogger("uvicorn")
@@ -458,6 +469,21 @@ def _print_launch_msg(url, background=False):
             ],
             pad=1,
         )
+
+
+def _print_launch_fail_msg(host, port):
+    spf.error(
+        [
+            f"💀 Failed to launch OMGUI server at {host}:{port}",
+            f"<yellow>Port {port} is already in use</yellow>",
+            "If the port is occupied by another OMGUI server, you can",
+            f"shut it down by visiting <link>http://{host}:{port}/shutdown</link>",
+            "---",
+            "Note that if you don't configure a custom port, OMGUI will",
+            "look for the next available port by itself.",
+        ],
+        pad=1,
+    )
 
 
 # Stylized shutdown message for the web server

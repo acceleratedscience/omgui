@@ -498,3 +498,14 @@ def molset_to_names_list(molset):
         names.append(name)
 
     return names
+
+
+def molset_to_smiles_list(molset):
+    """
+    Takes a molset and returns a list of molecule SMILES.
+    """
+    smiles = []
+    for mol in molset:
+        smile = smol_functions.get_best_available_smiles(mol)
+        smiles.append(smile if smile else "")
+    return smiles

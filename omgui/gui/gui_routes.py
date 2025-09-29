@@ -17,11 +17,12 @@ from fastapi import APIRouter, Request, status, Query, Body, Depends
 from omgui.gui.gui_services import srv_general
 from omgui.gui.gui_services import srv_file_system
 from omgui.gui.gui_services import srv_molecules
+from omgui.gui.gui_services import srv_mws
 from omgui.gui.gui_services import srv_result
 from omgui.gui.gui_services import srv_dataframe
 
 # OMGUI
-from omgui import ctx
+from omgui import ctx, config
 from omgui.util.logger import get_logger
 from omgui.util import exceptions as omg_exc
 
@@ -62,6 +63,11 @@ async def exec_command(request: Request):
 # ------------------------------------
 # region - Context
 # ------------------------------------
+
+
+@gui_router.get(f"{api_v1}/get-config")
+async def get_config():
+    return config.__dict__
 
 
 @gui_router.get(f"{api_v1}/get-workspace-name")
@@ -378,7 +384,7 @@ async def update_molset_mws(request: Request):
 async def add_mol_to_mws(request: Request):
     body = await request.json()
     smol = body.get("mol")
-    success = srv_molecules.add_mol_to_mws(smol=smol)
+    success = srv_mws.add_mol(smol=smol)
     if not success:
         raise omg_exc.FailedOperation("Failed to add molecule to your working set.")
     else:
@@ -389,7 +395,7 @@ async def add_mol_to_mws(request: Request):
 async def remove_mol_from_mws(request: Request):
     body = await request.json()
     smol = body.get("mol")
-    success = srv_molecules.remove_mol_from_mws(smol=smol)
+    success = srv_mws.remove_mol(smol=smol)
     if not success:
         raise omg_exc.FailedOperation(
             "Failed to remove molecule from your working set."
@@ -402,7 +408,7 @@ async def remove_mol_from_mws(request: Request):
 async def check_mol_in_mws(request: Request):
     body = await request.json()
     smol = body.get("mol")
-    present = srv_molecules.check_mol_in_mws(smol)
+    present = srv_mws.is_mol_present(smol)
     return {"status": present}
 
 

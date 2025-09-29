@@ -132,7 +132,7 @@ class Context:
 
         # Save the context to file
         self._initialized = True
-        self._save()
+        self.save()
 
     def _load_global_context(self):
         """
@@ -164,7 +164,7 @@ class Context:
     # region - Core
     # ------------------------------------
 
-    def _save(self):
+    def save(self):
         """
         Saves the current context to the context file in the data directory.
         """
@@ -228,7 +228,7 @@ class Context:
         # Create the directory
         self._create_workspace_dir(workspace_name)
 
-        self._save()
+        self.save()
         spf.success(f"Switched to new workspace: <yellow>{workspace_name}</yellow>")
 
     def set_workspace(self, workspace_name, silent: bool = False):
@@ -244,7 +244,7 @@ class Context:
             return
         self.workspace = workspace_name
 
-        self._save()
+        self.save()
         if not silent:
             spf.success(f"Switched to workspace: <yellow>{workspace_name}</yellow>")
 
@@ -318,7 +318,7 @@ class Context:
             self._mws.extend(molset)
         else:
             self._mws = molset
-        self._save()
+        self.save()
         return True
 
     def mws_add(self, smol):
@@ -326,21 +326,21 @@ class Context:
         Adds a molecule to the current molecule working set.
         """
         self._mws.append(smol.copy())
-        self._save()
+        self.save()
 
     def mws_remove(self, i):
         """
         Removes a molecule from the current molecule working set.
         """
         self._mws.pop(i)
-        self._save()
+        self.save()
 
     def mws_clear(self):
         """
         Clears the current molecule working set.
         """
         self._mws = []
-        self._save()
+        self.save()
 
     def _load_mws(self):
         """

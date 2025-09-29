@@ -23,6 +23,9 @@ omgui.launch()
 - [3. Molset Viewer](#3-molset-viewer)
 - [4. Data Viewer](#4-data-viewer)
 - [5. Molecule Working Set](#5-molecule-working-set)
+  - [Adding \& Removing Molecules](#adding--removing-molecules)
+  - [Adding a Property](#adding-a-property)
+    - [Formatting results](#formatting-results)
 - [6. Results](#6-results)
 
 <br>
@@ -117,42 +120,92 @@ The data viewer will let you easily view an edit data from a CSV or YAML file. T
 
 ## 5. Molecule Working Set
 
-Your molecules working set (or "MWS") functions as a basket for storing selected candidate molecules for further processing.
+Your molecules working set (or "MWS") functions as a basket for storing and processing selected candidate molecules.
 
 Each workspace has their own MWS. The MWS lets you easily fetch your molecules as a list of SMILES to be processed by your software, model or function of choice, and then lets you update your molecules with the newly calculated properties.
 
 > [!IMPORTANT]  
 > Partly implemented.
 
+### Adding & Removing Molecules
+
 ```python
 from omgui import mws
 
-# Add some molecules and inspect them in the GUI
 mws.add("C(C(=O)O)N")
 mws.add("C1=CC=CC=C1")
+mws.add("dopamine")
+mws.remove("C1=CC=CC=C1")
+
 mws.open()
 ```
+
+### Adding a Property
+
+Once you've calculated a property for your molecules, you can easily update the MWS with your new data.
 
 ```python
 # Get a list of your molecules as SMILES
 my_candidates = mws.get_smiles()
 
-# Perform any type of property calculation
-my_calculated_prop_result = [
-    { "foo": 0.729 },
-    { "foo": 1.235 }
-]
+# Do your calculations
+results = some_processing_here(my_candidates)
 
 # Update the molecules in your working set
-mws.add_props(my_calculated_prop_result) # To be inmplemented
+mws.add_props(results)
 
 # Export your results as SDF file
-mws.export(format="sdf")
+mws.export(format="sdf") # To be implemented
 ```
 
 ```python
 # Clear your working set to start over
 mws.clear()
+```
+
+#### Formatting results
+
+The `add_props()` function supports result data in various different formats. Which format you use is up to you.
+
+There's two ways:
+
+1. Sequential input: update all molecules at once, where the length of the input should match the length of the MWS
+2. Subject input: update select molecules, which are identified by the 'subject' identifier.
+
+3. ##### Sequential input (all molecules)
+
+```python
+# Option 1.1 - A list of dicts
+results_1 = [
+    { "foo_1": 0.729 },
+    { "foo_1": 1.235 }
+]
+mws.add_prop(results_1)
+
+# Option 1.2 - A list of values and a property name
+results_2 = [0.238, 0.598]
+mws.add_prop(results_2, prop_name="foo_2")
+```
+
+1. ##### Subject input (select molecules)
+
+```python
+# Option 2.1 - A list of dicts
+results_3 = [
+    { "foo_3": 0.729, "subject": "NCC(=O)O" },
+    { "foo_3": 1.235, "subject": "CC(O)CC(=O)O" }
+]
+mws.add_prop(results_3)
+
+# Option 2.2 - A dataframe with subject, prop, val columns
+import pandas as pd
+results_4 = {
+    "subject": ["NCC(=O)O", "CC(O)CC(=O)O"],
+    "prop": ["foo_4"] * len(subjects),
+    "val": [0.526, 0.192],
+}
+df = pd.DataFrame(results_4)
+mws.add_props(df)
 ```
 
 <kbd><img src="assets/gui-mws.png" alt="GUI Molset viewer"></kbd>

@@ -10,6 +10,7 @@ Usage:
 
 import logging
 from omgui.util.jupyter import nb_mode
+from omgui.spf import spf
 
 
 # Define format
@@ -41,6 +42,7 @@ class ColoredFormatter(logging.Formatter):
             record.msg = f"{color_start}{record.msg}{color_end}"
 
         log_message = super().format(record)
+        log_message = spf.produce(log_message)
 
         # Find-and-replace hack to color level name after formatting
         # This is needed to have -8s spacing work correctly with ansi codes

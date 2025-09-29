@@ -37,7 +37,7 @@ def config():
 
 
 def configure(
-    title: str | None = None,
+    app_name: str | None = None,
     host: str | None = None,
     port: int | None = None,
     session: bool | None = None,
@@ -59,8 +59,8 @@ def configure(
     See configuration.py for details.
     """
 
-    if title:
-        config().set("title", title)
+    if app_name:
+        config().set("app_name", app_name)
 
     if host:
         config().set("host", host)
@@ -157,7 +157,7 @@ class Config:
 
     # Default config
     default_config = {
-        "title": "omgui",
+        "app_name": "omgui",
         "host": "localhost",
         "port": 8024,
         "session": False,
@@ -323,6 +323,17 @@ class Config:
             logger.info("Configuration reset to default values")
         else:
             logger.info("Configuration reset")
+
+    def fixed_port(self) -> bool:
+        """
+        Returns True if a custom port is set,
+        in which case we don't want to auto-increment it.
+        """
+        return (
+            "port" in self.config_env()
+            or "port" in self.config_file()
+            or "port" in self.config_runtime
+        )
 
     def report(self):
         """

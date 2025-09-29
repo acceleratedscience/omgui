@@ -5,7 +5,17 @@ import readline
 from omgui.spf import spf
 
 
-def next_avail_port(port=8024, host="127.0.0.1"):
+def is_port_available(host: str, port: int) -> bool:
+    """Check if a port is available on the given host."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind((host, port))
+            return True
+        except OSError:
+            return False
+
+
+def next_avail_port(host: str = "localhost", port: int = 8024) -> int:
     """
     Returns the next available port starting with 8024.
 
@@ -29,7 +39,7 @@ def next_avail_port(port=8024, host="127.0.0.1"):
 
     while not _is_port_open(host, port):
         port += 1
-    return host, port
+    return port
 
 
 def wait_for_port(host, port, timeout=5.0, interval=0.1):
