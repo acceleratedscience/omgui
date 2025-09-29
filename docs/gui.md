@@ -175,44 +175,42 @@ The `add_props()` function supports result data in various different formats. Wh
 
 There's two ways:
 
--   **Sequential input:** update all molecules at once, where the length of the input should match the length of the MWS
--   **Subject input:** update select molecules, which are identified by the 'subject' identifier.
+1. **Sequential input:**
+   Update all molecules at once, where the length of the input should match the length of the MWS.
 
-1. ##### <u>Sequential input</u> (all molecules)
+    ```python
+    # Option 1.1 - A list of dicts
+    results_1 = [
+        { "foo_1": 0.729 },
+        { "foo_1": 1.235 }
+    ]
+    mws.add_prop(results_1)
+    # Option 1.2 - A list of values and a property name
+    results_2 = [0.238, 0.598]
+    mws.add_prop(results_2, prop_name="foo_2")
+    ```
 
-```python
-# Option 1.1 - A list of dicts
-results_1 = [
-    { "foo_1": 0.729 },
-    { "foo_1": 1.235 }
-]
-mws.add_prop(results_1)
+1. **Subject input:**
+   Update select molecules, which are identified by the 'subject' identifier.
 
-# Option 1.2 - A list of values and a property name
-results_2 = [0.238, 0.598]
-mws.add_prop(results_2, prop_name="foo_2")
-```
+    ```python
+    # Option 2.1 - A list of dicts
+    results_3 = [
+        { "foo_3": 0.729, "subject": "NCC(=O)O" },
+        { "foo_3": 1.235, "subject": "CC(O)CC(=O)O" }
+    ]
+    mws.add_prop(results_3)
 
-2. ##### <u>Subject input</u> (select molecules)
-
-```python
-# Option 2.1 - A list of dicts
-results_3 = [
-    { "foo_3": 0.729, "subject": "NCC(=O)O" },
-    { "foo_3": 1.235, "subject": "CC(O)CC(=O)O" }
-]
-mws.add_prop(results_3)
-
-# Option 2.2 - A dataframe with subject, prop, val columns
-import pandas as pd
-results_4 = {
-    "subject": ["NCC(=O)O", "CC(O)CC(=O)O"],
-    "prop": ["foo_4"] * len(subjects),
-    "val": [0.526, 0.192],
-}
-df = pd.DataFrame(results_4)
-mws.add_props(df)
-```
+    # Option 2.2 - A dataframe with subject, prop, val columns
+    import pandas as pd
+    results_4 = {
+        "subject": ["NCC(=O)O", "CC(O)CC(=O)O"],
+        "prop": ["foo_4"] * len(subjects),
+        "val": [0.526, 0.192],
+    }
+    df = pd.DataFrame(results_4)
+    mws.add_props(df)
+    ```
 
 <kbd><img src="assets/gui-mws.png" alt="GUI Molset viewer"></kbd>
 
