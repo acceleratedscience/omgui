@@ -127,6 +127,8 @@ Each workspace has their own MWS. The MWS lets you easily fetch your molecules a
 > [!IMPORTANT]  
 > Partly implemented.
 
+<br>
+
 ### Adding & Removing Molecules
 
 ```python
@@ -139,6 +141,8 @@ mws.remove("C1=CC=CC=C1")
 
 mws.open()
 ```
+
+<br>
 
 ### Adding a Property
 
@@ -163,16 +167,18 @@ mws.export(format="sdf") # To be implemented
 mws.clear()
 ```
 
+<br>
+
 #### Formatting results
 
 The `add_props()` function supports result data in various different formats. Which format you use is up to you.
 
 There's two ways:
 
-1. Sequential input: update all molecules at once, where the length of the input should match the length of the MWS
-2. Subject input: update select molecules, which are identified by the 'subject' identifier.
+-   **Sequential input:** update all molecules at once, where the length of the input should match the length of the MWS
+-   **Subject input:** update select molecules, which are identified by the 'subject' identifier.
 
-3. ##### Sequential input (all molecules)
+1. ##### <u>Sequential input</u> (all molecules)
 
 ```python
 # Option 1.1 - A list of dicts
@@ -187,7 +193,7 @@ results_2 = [0.238, 0.598]
 mws.add_prop(results_2, prop_name="foo_2")
 ```
 
-1. ##### Subject input (select molecules)
+2. ##### <u>Subject input</u> (select molecules)
 
 ```python
 # Option 2.1 - A list of dicts
