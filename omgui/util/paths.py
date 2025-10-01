@@ -20,7 +20,30 @@ NOT_ALLOWED_ERR = [
 ]
 
 
-def prepare_file_path(file_path: Path | str, fallback_ext=None, force_ext=None):
+def path_type(file_path_input: Path | str) -> str:
+    """
+    Return how a path will be parsed by parse_path:
+    - cwd
+    - absolute
+    - workspace
+    """
+    file_path: Path = Path(file_path_input)
+    is_absolute = file_path.resolve().is_absolute()
+    is_cwd = str(file_path_input).startswith(".")
+
+    # if not file_path_input:
+    #     return None
+    if is_cwd:
+        return "cwd"
+    elif is_absolute:
+        return "absolute"
+    else:
+        return "workspace"
+
+
+def prepare_file_path(
+    file_path_input: Path | str, fallback_ext=None, force_ext=None
+) -> Path | None:
     """
     prepare a file path for saving.
 
@@ -35,9 +58,9 @@ def prepare_file_path(file_path: Path | str, fallback_ext=None, force_ext=None):
                 - if yes, return the file path
                 - if no, print error and return None
     """
-    file_path = Path(file_path)
-    file_path = parse_path(file_path, fallback_ext, force_ext)
-    file_path = _ensure_file_path(file_path)
+    file_path: Path = Path(file_path_input)
+    file_path: Path | None = parse_path(file_path, fallback_ext, force_ext)
+    file_path: Path | bool = _ensure_file_path(file_path)
     # if not file_path:
     #     spf.error("Directory does not exist")
     #     return None
@@ -45,10 +68,10 @@ def prepare_file_path(file_path: Path | str, fallback_ext=None, force_ext=None):
 
 
 def parse_path(
-    file_path: Path | str,
+    file_path_input: Path | str,
     fallback_ext: str = None,
     force_ext: str = None,
-) -> str:
+) -> Path | None:
     """
     Parse a path string to a path object.
 
@@ -56,14 +79,14 @@ def parse_path(
     - /foo: absolute path
     """
 
-    if not file_path:
-        return None
+    if not file_path_input:
+        return ctx().workspace_path()
 
-    file_path = Path(file_path)
+    file_path = Path(file_path_input)
 
     # Detect path type
-    is_absolute = file_path.is_absolute()
-    is_cwd = file_path.parts[0] in (".", "..")
+    is_absolute = file_path.resolve().is_absolute()
+    is_cwd = str(file_path_input).startswith(".")
 
     # Expand user path: ~/... --> /Users/my-username/...
     file_path = file_path.expanduser()
@@ -106,10 +129,10 @@ def parse_path(
                 f"--> {path if is_absolute else filename}",
             ]
         )
-    return path
+    return path.resolve()
 
 
-def _ensure_file_path(file_path: Path, force: bool = False) -> bool:
+def _ensure_file_path(file_path: Path, force: bool = False) -> Path | bool:
     """
     Ensure a file_path is valid.
 
@@ -161,9 +184,9 @@ def _next_available_filename(file_path: Path) -> str:
         stem, ext = [file_path.stem, file_path.suffix]
 
     i = 1
-    while Path(f"{file_path.parent}/{stem}-{i}{ext}").exists():
+    while (file_path.parent / f"{stem}-{i}{ext}").exists():
         i += 1
-    return f"{file_path.parent}/{stem}-{i}{ext}"
+    return file_path.parent / f"{stem}-{i}{ext}"
 
 
 def __split_double_suffix_filename(file_path: Path):
@@ -181,18 +204,7 @@ def __split_double_suffix_filename(file_path: Path):
     return stem, "".join(file_path.suffixes[-2:])
 
 
-def block_absolute(file_path) -> bool:
-    """
-    Display error when absolute paths are not allowed.
-
-    Usage:
-    if block_absolute(file_path):
-        return
-    """
-    if is_abs_path(file_path):
-        spf.error(NOT_ALLOWED_ERR)
-        return True
-    return False
+# -- Below not used --
 
 
 def is_abs_path(file_path) -> bool:

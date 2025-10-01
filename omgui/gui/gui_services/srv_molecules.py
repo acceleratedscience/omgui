@@ -35,9 +35,9 @@ from omgui.gui.workers.mmol_transformers import mmol2pdb, mmol2cif, cif2mmol
 
 # OMGUI
 from omgui import ctx
+from omgui.mws.mws_core import mws_core
 from omgui.util.json_decimal_encoder import JSONDecimalEncoder
 from omgui.util.mol_utils import create_molset_response
-from omgui.util.general import confirm_prompt, hash_data
 from omgui.util import exceptions as omg_exc
 from omgui.spf import spf
 
@@ -250,61 +250,6 @@ def get_molset(cache_id, query=None):
     return create_molset_response(molset, query, cache_id)
 
 
-def get_molset_mws(query=None):
-    """
-    Get the list of molecules currently stored in the molecule working set.
-    """
-    if len(ctx().mws()) > 0:
-        # Add index
-        molset = ctx().mws()
-        for i, smol in enumerate(molset):
-            smol["index"] = i + 1
-
-        # Create cache working copy
-        cache_id = create_molset_cache_file(molset)
-
-        # Read molset from cache
-        molset = read_molset_from_cache(cache_id)
-
-        # Formulate response object
-        return create_molset_response(molset, query, cache_id)
-
-    else:
-        return None
-
-
-def get_molset_adhoc_v1(identifiers, query=None):
-    """
-    Get an ad-hoc molset from a list of identifiers provided in the query.
-    """
-    if len(identifiers) == 0:
-        raise ValueError("No identifiers provided")
-
-    molset = []
-    for identifier in identifiers:
-        smol = find_smol(identifier)
-        if smol:
-            molset.append(smol)
-        else:
-            spf.warning(f"No molecule found for identifier: {identifier}")
-
-    if len(molset) == 0:
-        raise omg_exc.NoResult("No molecules found for the provided identifiers")
-
-    # Add index
-    for i, smol in enumerate(molset):
-        smol["index"] = i + 1
-
-    # Create cache working copy
-    cache_id = create_molset_cache_file(molset)
-
-    # Read molset from cache
-    molset = read_molset_from_cache(cache_id)
-
-    # Formulate response object
-    return create_molset_response(molset, query, cache_id)
-
-
 def get_molset_adhoc(inchi_or_smiles, query=None, return_cache_id=False):
     """
     Get an ad-hoc molset from a list of identifiers provided in the query.
@@ -485,7 +430,7 @@ def save_molset(
         for mol in molset:
             molset.append(mol)
 
-        ctx().mws_load(molset)
+        mws_core().add_batch(molset)
 
     return True
 

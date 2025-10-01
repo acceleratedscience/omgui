@@ -32,7 +32,7 @@ from omgui.configuration import config
 from omgui.util.logger import get_logger
 from omgui.spf import spf
 
-
+# Logger
 logger = get_logger()
 
 
@@ -50,7 +50,7 @@ def new_session():
     Context(session=True)
     spf.success(
         [
-            "✅ Session-only context created",
+            "Session-only context created",
             "Your molecule working set will reset when you exit this session.",
         ]
     )
@@ -68,7 +68,6 @@ class Context:
     # Context values
     workspace: str
     session: bool = False  # Session-only context
-    _mws: list
     vars: dict
 
     # Default context values
@@ -76,7 +75,6 @@ class Context:
         "workspace": "DEFAULT",
         "vars": {},
         "session": False,
-        "_mws": [],
     }
 
     # ------------------------------------
@@ -95,11 +93,6 @@ class Context:
     def __init__(self, session: bool = None):
         """
         Initializes the context manager.
-
-        If workspace is provided, a new isolated session context is created
-        for that workspace which stays in memory and won't save to disk.
-        This is useful for when you wish to work separately in parallel contexts
-        (e.g., in Jupyter notebooks).
         """
 
         # Prevent re-initialization of singleton
@@ -110,7 +103,6 @@ class Context:
         if session:
             _context = self.default_context.copy()
             _context["session"] = True  # Mark as session-only
-            _context["_mws"] = []
 
         # B: Load global context from file
         else:
@@ -125,10 +117,6 @@ class Context:
 
         # Make sure workspace exists
         self._create_workspace_dir(self.workspace)
-
-        # Load molecule working set for current workspace into memory
-        if not session:
-            self._mws = self._load_mws()
 
         # Save the context to file
         self._initialized = True
@@ -173,11 +161,6 @@ class Context:
             return
 
         try:
-            # Save molecule working set
-            mws_path = self.mws_path()
-            with open(mws_path, "w", encoding="utf-8") as file:
-                json.dump(self._mws, file, indent=4)
-
             # Save context file, without _private attributes
             ctx_dict = self.__dict__.copy()
             for key in list(ctx_dict.keys()):
@@ -192,21 +175,9 @@ class Context:
 
     def get_dict(self):
         """
-        Displays the current context, mainly for debugging purposes.
+        Returns the current context, mainly for debugging purposes.
         """
-        ctx_dict = self.__dict__.copy()
-
-        # Replace _mws with summary
-        if "_mws" in ctx_dict:
-            count = len(ctx_dict["_mws"])
-            if count == 0:
-                ctx_dict["_mws"] = "<empty>"
-            elif count == 1:
-                ctx_dict["_mws"] = "<1 molecule>"
-            else:
-                ctx_dict["_mws"] = f"<{count} molecules>"
-
-        return ctx_dict
+        return self.__dict__.copy()
 
     # endregion
     # ------------------------------------
@@ -280,13 +251,6 @@ class Context:
 
         return data_dir / "workspaces" / (workspace or self.workspace)
 
-    def mws_path(self, workspace=None):
-        """
-        Returns the current molecule working set path.
-        """
-
-        return self.workspace_path(workspace) / "._system" / "mws.json"
-
     def workspaces(self):
         """
         Returns the list of workspace names.
@@ -295,77 +259,6 @@ class Context:
         if workspaces_path.exists():
             return [p.name for p in workspaces_path.iterdir() if p.is_dir()]
         else:
-            return []
-
-    # endregion
-    # ------------------------------------
-    # region - Molecule Working Set
-    # ------------------------------------
-
-    def mws(self):
-        """
-        Returns the current molecule working set.
-        """
-        if not hasattr(self, "_mws") or self._mws is None:
-            self._mws = self._load_mws()
-        return self._mws
-
-    def mws_load(self, molset: list, append: bool = False):
-        """
-        Load a molset into the molecule working set.
-        """
-        if append:
-            self._mws.extend(molset)
-        else:
-            self._mws = molset
-        self.save()
-        return True
-
-    def mws_add(self, smol):
-        """
-        Adds a molecule to the current molecule working set.
-        """
-        self._mws.append(smol.copy())
-        self.save()
-
-    def mws_remove(self, i):
-        """
-        Removes a molecule from the current molecule working set.
-        """
-        self._mws.pop(i)
-        self.save()
-
-    def mws_clear(self):
-        """
-        Clears the current molecule working set.
-        """
-        self._mws = []
-        self.save()
-
-    def _load_mws(self):
-        """
-        Loads the molecule working set for the current workspace into memory.
-        """
-
-        mws_path = self.mws_path()
-
-        # Read molecules from file
-        if mws_path.exists():
-            try:
-                with open(mws_path, "r", encoding="utf-8") as file:
-                    return json.load(file)
-            except Exception as err:  # pylint: disable=broad-except
-                logger.error(
-                    "An error occurred while loading the molecule working sets: %s",
-                    err,
-                )
-                return []
-
-        # Create file if missing
-        else:
-            mws_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(mws_path, "w", encoding="utf-8") as file:
-                json.dump([], file, indent=4)
             return []
 
     # endregion

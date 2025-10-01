@@ -25,6 +25,7 @@ omgui.launch()
 - [5. Molecule Working Set](#5-molecule-working-set)
   - [Adding a Property](#adding-a-property)
     - [How to Format Property Data](#how-to-format-property-data)
+  - [Exporting Molecules](#exporting-molecules)
 - [6. Results](#6-results)
 
 <br>
@@ -190,7 +191,7 @@ There's two ways:
     mws.add_prop(results_2, prop_name="foo_2")
     ```
 
-2. **Subject input:**  
+2. **Non-sequential input:**  
    Update select molecules, which are identified by the 'subject' identifier containing the canonical SMILES.
 
     ```python
@@ -211,6 +212,22 @@ There's two ways:
     df = pd.DataFrame(results_4)
     mws.add_prop(df)
     ```
+
+<br>
+
+### Exporting Molecules
+
+You can easily fetch your working set molecules in different formats.
+
+```python
+from omgui import mws
+
+mws_dicts = mws.get() # Your molecules as list of dictionaries
+mws_smiles = mws.get_smiles() # Your molecules as list of SMILES
+mws_names = mws.get_names() # Your molecules as list of names
+count = mws.count() # Count your molecules
+is_empty = mws.is_empty() # Check if you have molecules saved
+```
 
 <br>
 

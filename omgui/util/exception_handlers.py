@@ -10,15 +10,7 @@ into user-friendly JSON responses.
 # FastAPI exceptions
 from fastapi import Request
 from fastapi.responses import JSONResponse, PlainTextResponse
-from starlette.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-    HTTP_409_CONFLICT,
-    HTTP_422_UNPROCESSABLE_ENTITY,
-    HTTP_500_INTERNAL_SERVER_ERROR,
-    HTTP_503_SERVICE_UNAVAILABLE,
-)
+from starlette import status
 
 # OMGUI exceptions
 from omgui.util import exceptions as omg_exc
@@ -33,7 +25,7 @@ async def invalid_mol_input_handler(
     request: Request, err: omg_exc.InvalidMoleculeInput
 ):
     return JSONResponse(
-        status_code=HTTP_400_BAD_REQUEST,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={
             "message": "The provided molecule is not in valid format.",
             "error": str(err),
@@ -43,7 +35,7 @@ async def invalid_mol_input_handler(
 
 async def invalid_molset_handler(request: Request, err: omg_exc.InvalidMolset):
     return JSONResponse(
-        status_code=HTTP_400_BAD_REQUEST,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={
             "message": "The provided molset is not valid.",
             "error": str(err),
@@ -53,7 +45,7 @@ async def invalid_molset_handler(request: Request, err: omg_exc.InvalidMolset):
 
 async def no_result_handler(request: Request, err: omg_exc.NoResult):
     return JSONResponse(
-        status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
             "message": "No result was obtained.",
             "error": str(err),
@@ -63,7 +55,7 @@ async def no_result_handler(request: Request, err: omg_exc.NoResult):
 
 async def failed_operation_handler(request: Request, err: omg_exc.FailedOperation):
     return JSONResponse(
-        status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "message": "The operation failed to complete successfully.",
             "error": str(err),
@@ -75,7 +67,7 @@ async def cache_file_not_found_handler(
     request: Request, err: omg_exc.CacheFileNotFound
 ):
     return JSONResponse(
-        status_code=HTTP_400_BAD_REQUEST,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={
             "message": "The cached working copy is not found.",
             "error": str(err),
@@ -87,7 +79,7 @@ async def missing_dependencies_viz(
     request: Request, err: omg_exc.MissingDependenciesViz
 ):
     return PlainTextResponse(
-        status_code=HTTP_503_SERVICE_UNAVAILABLE,
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         content="Optional dependencies for /viz routes are not installed. Install with `pip install omgui[viz]`.",
     )
 
@@ -100,7 +92,7 @@ async def missing_dependencies_viz(
 
 async def value_error_handler(request: Request, err: ValueError):
     return JSONResponse(
-        status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
             "message": "Invalid value provided.",
             "error": str(err),
@@ -110,7 +102,7 @@ async def value_error_handler(request: Request, err: ValueError):
 
 async def save_file_exists_handler(request: Request, err: FileExistsError):
     return JSONResponse(
-        status_code=HTTP_409_CONFLICT,
+        status_code=status.HTTP_409_CONFLICT,
         content={
             "message": "A file with this name already exists.",
             "error": str(err),
@@ -120,7 +112,7 @@ async def save_file_exists_handler(request: Request, err: FileExistsError):
 
 async def save_file_not_found_handler(request: Request, err: FileNotFoundError):
     return JSONResponse(
-        status_code=HTTP_404_NOT_FOUND,
+        status_code=status.HTTP_404_NOT_FOUND,
         content={
             "message": "The file you're trying to save is not found.",
             "error": str(err),
@@ -130,14 +122,14 @@ async def save_file_not_found_handler(request: Request, err: FileNotFoundError):
 
 async def permission_error_handler(request: Request, err: PermissionError):
     return JSONResponse(
-        status_code=HTTP_403_FORBIDDEN,
+        status_code=status.HTTP_403_FORBIDDEN,
         content={"message": "Permission denied.", "error": str(err)},
     )
 
 
 async def catch_all_handler(request: Request, err: Exception):
     return JSONResponse(
-        status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"message": "An internal server error occurred.", "error": str(err)},
     )
 

@@ -335,6 +335,12 @@ class Config:
             or "port" in self.config_runtime
         )
 
+    def get_dict(self):
+        """
+        Returns the current config, mainly for debugging purposes.
+        """
+        return self.__dict__.copy()
+
     def report(self):
         """
         Prints an overview of the current configuration.

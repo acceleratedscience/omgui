@@ -7,11 +7,10 @@ http://0.0.0.0:8024/api/v1/<endpoint>
 # pylint: disable=missing-function-docstring
 
 # Std
-import json
 from urllib.parse import unquote
 
 # FastAPI
-from fastapi import APIRouter, Request, status, Query, Body, Depends
+from fastapi import APIRouter, Request, status
 
 # OMGUI - Service modules
 from omgui.gui.gui_services import srv_general
@@ -23,8 +22,10 @@ from omgui.gui.gui_services import srv_dataframe
 
 # OMGUI
 from omgui import ctx, config
+from omgui.mws.mws_core import mws_core
 from omgui.util.logger import get_logger
 from omgui.util import exceptions as omg_exc
+
 
 logger = get_logger()
 
@@ -47,11 +48,6 @@ async def health():
     return srv_general.health()
 
 
-@gui_router.get(f"{api_v1}/settings")
-async def settings():
-    return ctx().get_dict()
-
-
 @gui_router.post(f"{api_v1}/exec-command")
 async def exec_command(request: Request):
     body = await request.json()
@@ -61,33 +57,38 @@ async def exec_command(request: Request):
 
 # endregion
 # ------------------------------------
-# region - Context
+# region - Context / Config / Workspace
 # ------------------------------------
 
 
-@gui_router.get(f"{api_v1}/get-config")
+@gui_router.get(f"{api_v1}/config")
 async def get_config():
-    return config.__dict__
+    return config.get_dict()
 
 
-@gui_router.get(f"{api_v1}/get-workspace-name")
+@gui_router.get(f"{api_v1}/context")
+async def context():
+    return ctx().get_dict()
+
+
+@gui_router.get(f"{api_v1}/workspace/name")
 async def get_workspace_name():
     return ctx().workspace
 
 
-@gui_router.get(f"{api_v1}/get-workspaces")
+@gui_router.get(f"{api_v1}/workspace/list")
 async def get_workspaces():
     return ctx().workspaces()
 
 
-@gui_router.post(f"{api_v1}/set-workspace")
+@gui_router.post(f"{api_v1}/workspace/set")
 async def set_workspace(request: Request):
     body = await request.json()
     workspace_name = body.get("workspace", "")
     return ctx().set_workspace(workspace_name)
 
 
-@gui_router.post(f"{api_v1}/create-workspace")
+@gui_router.post(f"{api_v1}/workspace/create")
 async def create_workspace(request: Request):
     body = await request.json()
     workspace_name = body.get("workspace", "")
@@ -100,14 +101,14 @@ async def create_workspace(request: Request):
 # ------------------------------------
 
 
-@gui_router.post(f"{api_v1}/get-files")
+@gui_router.post(f"{api_v1}/file/list")
 async def get_files(request: Request):
     body = await request.json()
     path = unquote(body.get("path", ""))
     return srv_file_system.get_files(path)
 
 
-@gui_router.post(f"{api_v1}/get-file")
+@gui_router.post(f"{api_v1}/file/get")
 async def get_file(request: Request):
     body = await request.json()
     print(body.get("path"))
@@ -117,14 +118,14 @@ async def get_file(request: Request):
     return srv_file_system.get_file(path, query)
 
 
-@gui_router.post(f"{api_v1}/open-file-os")
+@gui_router.post(f"{api_v1}/file/open-os")
 async def open_file_os(request: Request):
     body = await request.json()
     path_absolute = unquote(body.get("path_absolute", ""))
     return srv_file_system.open_file_os(path_absolute)
 
 
-@gui_router.post(f"{api_v1}/delete-file")
+@gui_router.post(f"{api_v1}/file/delete")
 async def delete_file(request: Request):
     body = await request.json()
     path_absolute = unquote(body.get("path_absolute", ""))
@@ -137,36 +138,28 @@ async def delete_file(request: Request):
 # ------------------------------------
 
 
-@gui_router.post(f"{api_v1}/get-smol-data")
+@gui_router.post(f"{api_v1}/smol")
 async def get_smol_data(request: Request):
     body = await request.json()
     identifier = body.get("identifier")
     return srv_molecules.get_smol_data(identifier)
 
 
-@gui_router.post(f"{api_v1}/get-smol-viz-data", status_code=status.HTTP_200_OK)
+@gui_router.post(f"{api_v1}/smol/viz", status_code=status.HTTP_200_OK)
 async def get_smol_viz_data(request: Request):
     body = await request.json()
     inchi_or_smiles = body.get("inchi_or_smiles")
     return srv_molecules.get_smol_viz_data(inchi_or_smiles)
 
 
-@gui_router.post(f"{api_v1}/get-mol-data-from-molset")
-async def get_mol_data_from_molset(request: Request):
-    body = await request.json()
-    cache_id = body.get("cacheId")
-    index = body.get("index", 1)
-    return srv_molecules.get_mol_data_from_molset(cache_id, index)
-
-
-@gui_router.post(f"{api_v1}/enrich-smol")
+@gui_router.post(f"{api_v1}/smol/enrich")
 async def enrich_smol(request: Request):
     body = await request.json()
     smol = body.get("smol")
     return srv_molecules.enrich_smol(smol)
 
 
-@gui_router.post(f"{api_v1}/save-smol-as-{{ext}}")
+@gui_router.post(f"{api_v1}/smol/save-as-{{ext}}")
 async def save_smol_as(ext: str, request: Request):
     body = await request.json()
     smol = body.get("smol")
@@ -197,7 +190,7 @@ async def save_smol_as(ext: str, request: Request):
 # ------------------------------------
 
 
-@gui_router.post(f"{api_v1}/get-molset")
+@gui_router.post(f"{api_v1}/molset")
 async def get_molset(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
@@ -205,7 +198,7 @@ async def get_molset(request: Request):
     return srv_molecules.get_molset(cache_id, query)
 
 
-@gui_router.post(f"{api_v1}/get-molset-adhoc")
+@gui_router.post(f"{api_v1}/molset/adhoc")
 async def get_molset_adhoc(request: Request):
     body = await request.json()
     identifiers = body.get("identifiers", [])
@@ -213,8 +206,16 @@ async def get_molset_adhoc(request: Request):
     return srv_molecules.get_molset_adhoc(identifiers, query)
 
 
+@gui_router.post(f"{api_v1}/molset/mol")
+async def get_mol_data_from_molset(request: Request):
+    body = await request.json()
+    cache_id = body.get("cacheId")
+    index = body.get("index", 1)
+    return srv_molecules.get_mol_data_from_molset(cache_id, index)
+
+
 @gui_router.post(
-    f"{api_v1}/post-molset-adhoc",
+    f"{api_v1}/molset/adhoc-post",
     summary="Create an on-the-fly molset and return the Redis/memory ID",
 )
 async def post_molset_adhoc(request: Request):
@@ -224,7 +225,7 @@ async def post_molset_adhoc(request: Request):
     return srv_molecules.post_molset_adhoc(identifiers, query)
 
 
-@gui_router.post(f"{api_v1}/remove-from-molset")
+@gui_router.post(f"{api_v1}/molset/remove-mol")
 async def remove_from_molset(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
@@ -233,14 +234,14 @@ async def remove_from_molset(request: Request):
     return srv_molecules.remove_from_molset(cache_id, indices, query)
 
 
-@gui_router.post(f"{api_v1}/clear-molset-working-copy")
+@gui_router.post(f"{api_v1}/molset/clear-working-copy")
 async def clear_molset_working_copy(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
     return srv_molecules.clear_molset_working_copy(cache_id)
 
 
-@gui_router.post(f"{api_v1}/update-molset")
+@gui_router.post(f"{api_v1}/molset/update")
 async def update_molset(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
@@ -249,7 +250,7 @@ async def update_molset(request: Request):
     return srv_molecules.save_molset(cache_id, path, new_file)
 
 
-@gui_router.post(f"{api_v1}/save-molset-as-json")
+@gui_router.post(f"{api_v1}/molset/save-as-json")
 async def save_molset_as_json(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
@@ -259,7 +260,7 @@ async def save_molset_as_json(request: Request):
     return srv_molecules.save_molset(cache_id, path, new_file, format_as)
 
 
-@gui_router.post(f"{api_v1}/save-molset-as-sdf")
+@gui_router.post(f"{api_v1}/molset/save-as-sdf")
 async def save_molset_as_sdf(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
@@ -272,7 +273,7 @@ async def save_molset_as_sdf(request: Request):
     )
 
 
-@gui_router.post(f"{api_v1}/save-molset-as-csv")
+@gui_router.post(f"{api_v1}/molset/save-as-csv")
 async def save_molset_as_csv(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
@@ -282,7 +283,7 @@ async def save_molset_as_csv(request: Request):
     return srv_molecules.save_molset(cache_id, path, new_file, format_as)
 
 
-@gui_router.post(f"{api_v1}/save-molset-as-smiles")
+@gui_router.post(f"{api_v1}/molset/save-as-smiles")
 async def save_molset_as_smiles(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
@@ -292,7 +293,7 @@ async def save_molset_as_smiles(request: Request):
     return srv_molecules.save_molset(cache_id, path, new_file, format_as)
 
 
-@gui_router.post(f"{api_v1}/replace-mol-in-molset")
+@gui_router.post(f"{api_v1}/molset/replace-mol")
 async def replace_mol_in_molset(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
@@ -309,14 +310,14 @@ async def replace_mol_in_molset(request: Request):
 # ------------------------------------
 
 
-@gui_router.post(f"{api_v1}/get-mmol-data")
+@gui_router.post(f"{api_v1}/mmol")
 async def get_mmol_data(request: Request):
     body = await request.json()
     identifier = body.get("identifier")
     return srv_molecules.get_mmol_data(identifier)
 
 
-@gui_router.post(f"{api_v1}/save-mmol-as-{{ext}}")
+@gui_router.post(f"{api_v1}/mmol/save-as-{{ext}}")
 async def save_mmol_as(ext: str, request: Request):
     body = await request.json()
     mmol = body.get("mmol")
@@ -343,14 +344,14 @@ async def save_mmol_as(ext: str, request: Request):
 # ------------------------------------
 
 
-@gui_router.post(f"{api_v1}/get-result")
+@gui_router.post(f"{api_v1}/result")
 async def get_result(request: Request):
     body = await request.json()
     query = body.get("query", {})
     return srv_result.get_result(query)
 
 
-@gui_router.post(f"{api_v1}/update-result-molset")
+@gui_router.post(f"{api_v1}/result/update")
 async def update_result_molset(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId", "")
@@ -363,35 +364,35 @@ async def update_result_molset(request: Request):
 # ------------------------------------
 
 
-@gui_router.post(f"{api_v1}/get-molset-mws")
-async def get_molset_mws(request: Request):
+@gui_router.post(f"{api_v1}/mws")
+async def get_mws(request: Request):
     body = await request.json()
     query = body.get("query", {})
-    return srv_molecules.get_molset_mws(query)
+    return srv_mws.get_cached_mws(query)
 
 
-@gui_router.post(f"{api_v1}/update-molset-mws")
-async def update_molset_mws(request: Request):
+@gui_router.post(f"{api_v1}/mws/update")
+async def update_mws(request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")
     path = unquote(body.get("path", ""))
     new_file = False
     format_as = "mws"
-    return srv_molecules.save_molset(cache_id, path, new_file, format_as)
+    srv_molecules.save_molset(cache_id, path, new_file, format_as)
+    return {"success": True}
 
 
-@gui_router.post(f"{api_v1}/add-mol-to-mws")
+@gui_router.post(f"{api_v1}/mws/add-mol")
 async def add_mol_to_mws(request: Request):
     body = await request.json()
     smol = body.get("mol")
     success = srv_mws.add_mol(smol=smol)
     if not success:
         raise omg_exc.FailedOperation("Failed to add molecule to your working set.")
-    else:
-        return True
+    return {"success": True}
 
 
-@gui_router.post(f"{api_v1}/remove-mol-from-mws")
+@gui_router.post(f"{api_v1}/mws/remove-mol")
 async def remove_mol_from_mws(request: Request):
     body = await request.json()
     smol = body.get("mol")
@@ -400,16 +401,23 @@ async def remove_mol_from_mws(request: Request):
         raise omg_exc.FailedOperation(
             "Failed to remove molecule from your working set."
         )
-    else:
-        return True
+    return {"success": True}
 
 
-@gui_router.post(f"{api_v1}/check-mol-in-mws")
-async def check_mol_in_mws(request: Request):
+@gui_router.post(f"{api_v1}/mws/mol-present")
+async def check_mol_present_in_mws(request: Request):
     body = await request.json()
     smol = body.get("mol")
-    present = srv_mws.is_mol_present(smol)
-    return {"status": present}
+    present = mws_core().is_mol_present(smol)
+    return {"present": present}
+
+
+@gui_router.post(f"{api_v1}/mws/clear")
+async def clear_mws():
+    if mws_core().is_empty():
+        return {"success": True}, 204
+    mws_core().clear()
+    return {"success": True}
 
 
 # endregion
@@ -418,14 +426,14 @@ async def check_mol_in_mws(request: Request):
 # ------------------------------------
 
 
-@gui_router.post(f"{api_v1}/get-dataframe/{{df_name}}")
+@gui_router.post(f"{api_v1}/dataframe/{{df_name}}")
 async def get_dataframe(df_name: str, request: Request):
     body = await request.json()
     query = body.get("query", {})
     return srv_dataframe.get_dataframe(df_name, query)
 
 
-@gui_router.post(f"{api_v1}/update-dataframe-molset/{{df_name}}")
+@gui_router.post(f"{api_v1}/dataframe/update/{{df_name}}")
 async def update_dataframe_molset(df_name: str, request: Request):
     body = await request.json()
     cache_id = body.get("cacheId")

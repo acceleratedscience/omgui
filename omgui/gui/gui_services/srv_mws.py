@@ -3,14 +3,22 @@ Molecule working set functions for OMGUI API endpoints.
 """
 
 # Std
-import pandas as pd
+import json
+from pathlib import Path
 
 # OMGUI
-from omgui import ctx
+from omgui import mws, ctx
 from omgui.spf import spf
-from omgui.gui.workers import smol_functions
+from omgui.mws.mws_core import mws_core
 from omgui.util import exceptions as omg_exc
-from omgui.util.general import confirm_prompt
+from omgui.util.mol_utils import create_molset_response
+from omgui.util.paths import path_type, parse_path, prepare_file_path
+from omgui.gui.workers import smol_functions, smol_transformers
+
+
+# from omgui.util.logger import get_logger
+# Logger
+# logger = get_logger()
 
 
 def add_mol(
@@ -25,7 +33,7 @@ def add_mol(
     Takes either an identifier or a mol object.
     """
 
-    # Todo: add pydantic type for mol and validate
+    # TODO: add pydantic type for mol and validate
 
     # Invalid input
     if not smol and not identifier:
@@ -65,7 +73,7 @@ def add_mol(
         return True
 
     # Add to working set
-    ctx().mws_add(smol)
+    mws_core().add(smol)
     if not silent:
         spf.success(f"Molecule <yellow>{name}</yellow> was added")
     return True
@@ -94,11 +102,11 @@ def remove_mol(identifier: str = None, smol: dict = None, silent=False):
 
     try:
         # Find matching molecule
-        for i, item in enumerate(ctx().mws()):
+        for i, item in enumerate(mws_core().get()):
             if item.get("identifiers", {}).get("inchikey") == inchikey:
 
                 # Remove from mws
-                ctx().mws_remove(i)
+                mws_core().remove(i)
 
                 # Feedback
                 if not silent:
@@ -116,146 +124,117 @@ def remove_mol(identifier: str = None, smol: dict = None, silent=False):
         return False
 
 
-def is_mol_present(smol):
+def get_cached_mws(query=None):
     """
-    Check if a molecule is stored in your molecule working set.
+    Fetch the current molecule working set for GUI display.
     """
+    if mws_core().count() > 0:
+        # Add index
+        for i, smol in enumerate(mws_core().get()):
+            smol["index"] = i + 1
 
-    # Get best available identifier
-    _, identifier = smol_functions.get_best_available_identifier(smol)
+        # Create cache working copy
+        cache_id = smol_functions.create_molset_cache_file(mws_core().get())
 
-    # Check if it's in the working set
-    present = bool(smol_functions.get_smol_from_mws(identifier))
-    return present
+        # Read molset from cache
+        _mws = smol_functions.read_molset_from_cache(cache_id)
 
+        # Formulate response object
+        return create_molset_response(_mws, query, cache_id)
 
-def add_prop(prop_list_or_df: list[str] | pd.DataFrame, prop_name: str = None) -> None:
-    """
-    Add property to molecules in the current working set.
-
-    You can provide either:
-    1. A list of property values and a property name (the list length must match
-       the number of molecules in the working set)
-    2. A pandas DataFrame with the following columns:
-       - subject or smiles: SMILES molecule identifier
-       - prop or property: property name
-       - val, value or result: property value
-    """
-    from omgui.util.logger import get_logger
-    from omgui.gui.gui_services import srv_mws
-    from omgui.gui.workers.smol_functions import get_best_available_smiles
-
-    logger = get_logger()
-    mws = ctx().mws()
-
-    # List of values + prop name
-    if isinstance(prop_list_or_df, list) and prop_name:
-        prop_list = prop_list_or_df
-        if len(prop_list_or_df) != len(mws):
-            spf.error(
-                f"Length of property list ({len(prop_list)}) does not match number of molecules in working set ({len(mws)})."
-            )
-            return False
-        for mol in mws:
-            val = prop_list.pop(0)
-            mol["properties"][prop_name] = val
-            logger.info(
-                "%s. Adding property <yellow>%s</yellow>: %s to molecule <yellow>%s</yellow>.",
-                len(mws) - len(prop_list),
-                prop_name,
-                val,
-                mol.get("name", get_best_available_smiles(mol)),
-            )
-
-        srv_mws.save()
-        return True
-
-    # DataFrame with subject/smiles + prop/property + val/value/result columns
-    elif isinstance(prop_list_or_df, pd.DataFrame):
-        df = prop_list_or_df
-        df_columns_lower = [col.lower() for col in df.columns]
-        fail = False
-
-        # fmt: off
-        # Validate dataframe structure
-        if not any(val in df_columns_lower for val in ["subject", "smiles"]):
-            fail = True
-            spf.error("DataFrame must contain a <yellow>subject<yellow> column with SMILES values.")
-        if not any(val in df_columns_lower for val in ["prop", "property"]):
-            fail = True
-            spf.error("DataFrame must contain a <yellow>prop<yellow> column with property names.")
-        if not any(val in df_columns_lower for val in ["val", "value", "result"]):
-            fail = True
-            spf.error("DataFrame must contain a <yellow>val<yellow> column with property values.")
-        if fail:
-            return False
-        # fmt: on
-
-        # Define column names
-        subject_col = "subject" if "subject" in df.columns else "smiles"
-        property_col = "prop" if "prop" in df.columns else "property"
-        value_col = (
-            "val"
-            if "val" in df.columns
-            else ("value" if "value" in df.columns else "result")
-        )
-
-        for _, row in df.iterrows():
-            subject = row[subject_col]
-            prop_name = row[property_col]
-            val = row[value_col]
-
-            # Find the molecule in the working set
-            mol_found = False
-            for mol in mws:
-                if (
-                    mol.get("name") == subject
-                    or get_best_available_smiles(mol) == subject
-                ):
-                    mol["properties"][prop_name] = val
-                    logger.info(
-                        "%s. Adding property <yellow>%s</yellow>: %s to molecule <yellow>%s</yellow>.",
-                        len(mws) - len(prop_list),
-                        prop_name,
-                        val,
-                        mol.get("name", get_best_available_smiles(mol)),
-                    )
-                    mol_found = True
-                    break
-            if not mol_found:
-                spf.warning(
-                    f"Skipping molecule with identifier <yellow>{subject}</yellow>, not found in working set."
-                )
-
-        srv_mws.save()
-        return True
     else:
+        return None
+
+
+def export(file_path_str: str = "") -> bool:
+    """
+    Export the current molecule working set to a file.
+
+    Supported formats: json, csv, sdf, smi
+    """
+
+    # print(f"\n\nPath: '{path}'")
+
+    if mws_core().is_empty():
+        spf.warning("No molecules to export")
+        return False
+
+    file_path = parse_path(file_path_str)
+    default_stem = "mws_export"
+    supported_formats = [".csv", ".json", ".sdf", ".smi"]
+
+    # No extension --> default to JSON
+    if not file_path.suffix:
+        spf.warning("No file extension provided, defaulting to JSON format")
+        file_path = (file_path / default_stem).with_suffix(".molset.json")
+
+    # Unsupported format --> abort
+    elif file_path.suffix not in supported_formats:
         spf.error(
             [
-                "Invalid input: provide either:\n1. List of property values with a property name\n2. Pandas DataFrame with required columns.",
-                "Example 1: add_props(['val1', 'val2'], prop_name='MyProp')",
-                "Example 2: add_props(df) where df has the required 'subject', 'prop' and 'val' columns",
+                f"Failed to export molecule working set to <yellow>{file_path_str}</yellow>",
+                f"Unsupported <yellow>{file_path.suffix}</yellow> format - supported extensions are: {' / '.join(supported_formats)}",
+            ]
+        )
+        return False
+
+    # Prepate path
+    file_path = prepare_file_path(file_path)
+    if not file_path:
+        return False
+
+    # Write to disk
+    try:
+        if file_path.suffix == ".json":
+            _export_as_json(file_path)
+        elif file_path.suffix == ".csv":
+            _export_as_csv(file_path)
+        elif file_path.suffix == ".sdf":
+            _export_as_sdf(file_path)
+        elif file_path.suffix == ".smi":
+            _export_as_smi(file_path)
+
+        # Success
+        if path_type(file_path_str) == "workspace":
+            spf.success(
+                f"Molecule working set exported to your <reset>{ctx().workspace}</reset> workspace as <yellow>{file_path.name}</yellow>"
+            )
+        else:
+            spf.success(
+                f"Molecule working set exported to <yellow>{file_path}</yellow>"
+            )
+        return True
+
+    except Exception as err:  # pylint: disable=broad-except
+        spf.error(
+            [
+                f"Failed to export molecule working set to <yellow>{file_path_str}</yellow>",
+                err,
             ]
         )
         return False
 
 
-def save() -> None:
-    """
-    Save changes to the molecule working set.
-    """
-    ctx().save()
+def _export_as_json(file_path: Path):
+    molset = mws.get()
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(molset, f, indent=2, ensure_ascii=False)
 
 
-def clear(force: bool = False):
-    """
-    Clear the molecule working set.
-    """
-    count = len(ctx().mws())
-    if count == 0:
-        spf.warning("No molecules to clear")
-        return True
-    if force or confirm_prompt(f"Are you sure you want to clear {count} molecules?"):
-        ctx().mws_clear()
-        spf.success("✅ Molecule working set cleared")
-        return True
+def _export_as_csv(file_path: Path):
+    molset = mws.get()
+    df = smol_transformers.molset2dataframe(molset)
+    smol_transformers.write_dataframe2csv(df, file_path)
+
+
+def _export_as_sdf(file_path: Path):
+    molset = mws.get()
+    df = smol_transformers.molset2dataframe(molset, include_romol=True)
+    smol_transformers.write_dataframe2sdf(df, file_path)
+
+
+def _export_as_smi(file_path: Path):
+    smiles = mws.get_smiles()
+    with open(file_path, "w", encoding="utf-8") as f:
+        for smi in smiles:
+            f.write(smi + "\n")

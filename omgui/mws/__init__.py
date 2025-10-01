@@ -5,21 +5,18 @@ from typing import Any
 import pandas as pd
 
 # OMGUI
-from omgui.context import ctx
-
+from omgui.mws.mws_core import mws_core
 
 # ------------------------------------
 # region - Core
 # ------------------------------------
 
 
-def open() -> None:
+def open() -> None:  # pylint: disable=redefined-builtin
     """
-    Open the current molecule working set in the GUI.
+    Open your molecule working set in the GUI.
     """
-    from omgui.main import gui_init as _gui_init
-
-    return _gui_init(path="mws")
+    mws_core().open()
 
 
 # endregion
@@ -35,7 +32,7 @@ def add(identifier: str, basic: bool = False) -> None:
     from omgui.gui.gui_services import srv_mws
 
     enrich = not basic
-    srv_mws.add_mol_to_mws(identifier, enrich=enrich)
+    return srv_mws.add_mol(identifier, enrich=enrich)
 
 
 def remove(identifier: str) -> None:
@@ -44,25 +41,31 @@ def remove(identifier: str) -> None:
     """
     from omgui.gui.gui_services import srv_mws
 
-    srv_mws.remove_mol_from_mws(identifier)
+    return srv_mws.remove_mol(identifier)
 
 
-def add_prop(prop_list_or_df: list[str] | pd.DataFrame, prop_name: str = None) -> None:
+def add_prop(prop_data: list | pd.DataFrame, prop_name: str = None) -> None:
     """
     Add properties to molecules in the current working set.
     """
-    from omgui.gui.gui_services import srv_mws
-
-    return srv_mws.add_prop(prop_list_or_df, prop_name)
+    return mws_core().add_prop(prop_data, prop_name)
 
 
 def clear(force: bool = False) -> None:
     """
     Clear the current molecule working set.
     """
-    from omgui.gui.gui_services import srv_molecules
+    from omgui.spf import spf
+    from omgui.util.general import confirm_prompt
 
-    srv_molecules.clear_mws(force)
+    if mws_core().is_empty():
+        spf.warning("No molecules to clear")
+        return
+
+    pr = f"Are you sure you want to clear {mws_core().count()} molecules?"
+    if force or confirm_prompt(pr):
+        mws_core().clear()
+        return spf.result("✅ Molecule working set cleared")
 
 
 # endregion
@@ -75,41 +78,47 @@ def get() -> list[dict[str, Any]]:
     """
     Get the current molecule working set.
     """
-    return ctx().mws()
+    return mws_core().get()
 
 
 def get_names() -> list[str]:
     """
-    Get list of molecule names from your working set.
+    Get your molecule working set as a list of names.
     """
-    from omgui.gui.workers.smol_transformers import molset_to_names_list
-
-    mws = ctx().mws()
-    return molset_to_names_list(mws)
+    return mws_core().get_names()
 
 
 def get_smiles() -> list[str]:
     """
-    Get list of molecule SMILES from your working set.
+    Get your molecule working set as a list of SMILES.
     """
-    from omgui.gui.workers.smol_transformers import molset_to_smiles_list
-
-    mws = ctx().mws()
-    return molset_to_smiles_list(mws)
+    return mws_core().get_smiles()
 
 
 def count() -> int:
     """
-    Get the number of molecules in the current working set.
+    Get the number of molecules in your molecule working set.
     """
-    return len(ctx().mws())
+    return mws_core().count()
 
 
 def is_empty() -> bool:
     """
-    Returns whether the current molecule working set is empty.
+    Whether the your molecule working set is empty.
     """
-    return len(ctx().mws()) == 0
+    return mws_core().is_empty()
+
+
+def export(path: str = "") -> bool:
+    """
+    Export your molecule working set to a file.
+
+    The file extension determines the format.
+    Supported file extensions: csv, json, sdf
+    """
+    from omgui.gui.gui_services import srv_mws
+
+    return srv_mws.export(path)
 
 
 # endregion

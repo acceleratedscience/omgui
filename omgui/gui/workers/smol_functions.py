@@ -25,15 +25,15 @@ from rdkit.Chem.Descriptors import MolWt, ExactMolWt
 
 # OMGUI
 from omgui import ctx
+from omgui.spf import spf
+from omgui.mws.mws_core import mws_core
+from omgui.gui.workers import smol_transformers
+from omgui.gui.workers.data_structures import OPENAD_SMOL_DICT
 from omgui.util.spinner import Spinner
 from omgui.util.paths import parse_path
 from omgui.util.json_decimal_encoder import JSONDecimalEncoder
 from omgui.util.general import pretty_date, is_numeric, merge_dict_lists
 from omgui.util.logger import get_logger
-from omgui.gui.workers import smol_transformers
-from omgui.gui.workers.data_structures import OPENAD_SMOL_DICT
-from omgui.gui.workers import smol_transformers
-from omgui.spf import spf
 
 # Logger
 logger = get_logger()
@@ -257,7 +257,9 @@ def get_smol_from_mws(identifier: str, ignore_synonyms: bool = False) -> dict | 
         The OpenAD smol dictionary if found, otherwise None.
     """
 
-    smol = get_smol_from_list(identifier, ctx().mws(), ignore_synonyms=ignore_synonyms)
+    smol = get_smol_from_list(
+        identifier, mws_core().get(), ignore_synonyms=ignore_synonyms
+    )
     if smol is not None:
         return deepcopy(smol)
     return None
@@ -1731,7 +1733,7 @@ def load_mols_to_mws(inp):
 
     # Clear mws unless append is passed
     if "append" not in inp:
-        ctx().mws_clear()
+        mws_core().clear()
 
     added_count = 0
     failed_count = 0
@@ -1927,7 +1929,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
             # GLOBAL_SETTINGS["grammar_refresh"] = True # TODO: replace with callback
             if update_flag is True:
                 srv_mws.remove_mol(smol=merge_smol, silent=True)
-            ctx().mws_add(smol)
+            mws_core().add(smol)
 
     spf.success("Data merged into your working set")
     # GLOBAL_SETTINGS["grammar_refresh"] = True # TODO: replace with callback

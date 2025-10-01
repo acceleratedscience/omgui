@@ -10,7 +10,7 @@ from pathlib import Path
 import ast
 import pandas as pd
 from rdkit import Chem, RDLogger
-from rdkit.Chem import Draw
+from rdkit.Chem import Draw, PandasTools
 from rdkit.Chem.rdDistGeom import EmbedMolecule
 
 # OMGUI
@@ -273,6 +273,7 @@ def molset2dataframe(molset, remove_invalid_mols=False, include_romol=False):
     # Flatten the molset into a list of dictionaries.
     data = []
     invalid = []
+    mol_rdkit = None
     for i, smol in enumerate(molset):
         # Create RDKit molecule object (ROMol)
         if smol["identifiers"].get("inchi"):
@@ -284,7 +285,7 @@ def molset2dataframe(molset, remove_invalid_mols=False, include_romol=False):
 
         # Store mols that failed to parse.
         if not mol_rdkit:
-            spf.error("Failed to parse:", i, smiles)  # Keep this
+            spf.error(f"Failed to parse #{i} - <yellow>{smiles}</yellow>")  # Keep this
             invalid.append(i)
             continue
 
@@ -341,7 +342,7 @@ def write_dataframe2sdf(df, destination_path):
         raise ValueError("Dataframe does not contain a 'ROMol' column")
 
     try:
-        Chem.PandasTools.WriteSDF(
+        PandasTools.WriteSDF(
             df,
             destination_path,
             molColName="ROMol",
@@ -349,7 +350,7 @@ def write_dataframe2sdf(df, destination_path):
             idName="RowID",
         )
     except Exception as err:
-        raise RuntimeError(f"Failed to write dataframe to SDF: {err}")
+        raise RuntimeError(f"Failed to write dataframe to SDF: {err}") from err
 
 
 def write_dataframe2csv(df, destination_path):

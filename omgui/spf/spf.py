@@ -240,18 +240,30 @@ class SPF:
         """
         Print styled text, preformatted as a success message.
         """
+        if isinstance(msg, list) and len(msg) > 0:
+            msg[0] = f"✅ {msg[0]}"
+        elif isinstance(msg, str):
+            msg = f"✅ {msg}"
         self.print(msg, "success", **kwargs)
 
     def warning(self, msg, **kwargs):
         """
         Print styled text, preformatted as a warning message.
         """
+        if isinstance(msg, list) and len(msg) > 0:
+            msg[0] = f"⚠️  {msg[0]}"
+        elif isinstance(msg, str):
+            msg = f"⚠️  {msg}"
         self.print(msg, "warning", **kwargs)
 
     def error(self, msg, **kwargs):
         """
         Print styled text, preformatted as an error message.
         """
+        if isinstance(msg, list) and len(msg) > 0:
+            msg[0] = f"❌ {msg[0]}"
+        elif isinstance(msg, str):
+            msg = f"❌ {msg}"
         self.print(msg, "error", **kwargs)
 
     # endregion
