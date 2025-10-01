@@ -116,8 +116,8 @@ def render(
 
     # Report
     svg_size = len(svg.to_svg()) / 1000
-    logger.info(f"Runtime: {1000 * (time.time() - t0)} ms")
-    logger.info(f"File size: {svg_size} kb")
+    logger.debug("Runtime: %s ms", 1000 * (time.time() - t0))
+    logger.debug("File size: %s kb", svg_size)
 
     return svg_str
 

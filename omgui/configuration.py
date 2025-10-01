@@ -335,6 +335,13 @@ class Config:
             or "port" in self.config_runtime
         )
 
+    def host_url(self) -> str:
+        """
+        Returns the host URL, e.g. http://localhost:8024
+        """
+        base_path = self.base_path if self.base_path else ""
+        return f"http://{self.host}:{self.port}{base_path}"
+
     def get_dict(self):
         """
         Returns the current config, mainly for debugging purposes.

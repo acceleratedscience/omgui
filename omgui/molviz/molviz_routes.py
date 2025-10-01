@@ -120,15 +120,13 @@ def visualize_molecule(
             detail=f"Invalid SMILES string, unable to generate SVG: {smiles}",
         )
 
-    # Success
-    logger.info("Success generating SVG for SMILES: %s", smiles)
-
     # Return as PNG
     if png:
         png_data = BytesIO()
         svg2png(bytestring=svg_str.encode("utf-8"), write_to=png_data)
         png_data.seek(0)  # Rewind to the beginning of the BytesIO object
 
+        logger.info("Success generating PNG for SMILES: <yellow>%s</yellow>", smiles)
         return Response(
             content=png_data.getvalue(),
             media_type="image/png",
@@ -136,6 +134,7 @@ def visualize_molecule(
         )
 
     # Return as SVG
+    logger.info("Success generating SVG for SMILES: <yellow>%s</yellow>", smiles)
     return Response(
         content=svg_str,
         media_type="image/svg+xml",

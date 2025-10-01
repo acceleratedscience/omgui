@@ -330,9 +330,11 @@ def _launch(path=None, query="", hash=""):
     else:
         port = next_avail_port(config.host, config.port)
 
-    # Remove logging of warning & informational messages
-    log = logging.getLogger("uvicorn")
-    log.setLevel(logging.ERROR)
+    # Lower logging level for certain libraries
+    _log = logging.getLogger("uvicorn")
+    _log.setLevel(logging.ERROR)
+    _log = logging.getLogger("cinemol.model")
+    _log.setLevel(logging.ERROR)
 
     # Spin up the GUI API in a separate thread
     # so it doesn't block your application.

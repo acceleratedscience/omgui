@@ -19,14 +19,16 @@ The `molviz` sub-module lets you visualize molecules on the fly, in 2D and 3D, e
 
 ## Instructions
 
-In order to use the molecule visualization, simply start the server in the background, then compose your url:
-
-`/viz/mol/<SMILES>&output=<svg/png>`
+In order to use the molecule visualization, simply start the server in the background, then compose your url: `/viz/mol/<SMILES>`
 
 ```python
 import omgui
 
 omgui.launch()
+```
+
+```text
+http://localhost:8024/viz/mol/CCO
 ```
 
 ```text
