@@ -6,11 +6,12 @@
 
 The `molviz` sub-module lets you visualize molecules on the fly, in 2D and 3D, either as SVG or PNG.
 
-Note that the [chart](chartviz) & molecule visualization requires additional dependencies:
-
-```shell
-pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
-```
+> [!IMPORTANT]
+> The [chart](chartviz) & molecule visualization requires additional dependencies:
+>
+> ```shell
+> pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
+> ```
 
 ![Molecule visualization with omgui.molviz](assets/mol-example-quercetin--2d.svg)
 
