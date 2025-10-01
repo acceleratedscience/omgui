@@ -17,16 +17,16 @@ omgui.launch()
 
 ### Components<!-- omit in toc -->
 
-- [1. File Browser](#1-file-browser)
-  - [Supported File Formats](#supported-file-formats)
-- [2. Molecule Viewer](#2-molecule-viewer)
-- [3. Molset Viewer](#3-molset-viewer)
-- [4. Data Viewer](#4-data-viewer)
-- [5. Molecule Working Set](#5-molecule-working-set)
-  - [Adding a Property](#adding-a-property)
-    - [How to Format Property Data](#how-to-format-property-data)
-  - [Exporting Molecules](#exporting-molecules)
-- [6. Results](#6-results)
+-   [1. File Browser](#1-file-browser)
+    -   [Supported File Formats](#supported-file-formats)
+-   [2. Molecule Viewer](#2-molecule-viewer)
+-   [3. Molset Viewer](#3-molset-viewer)
+-   [4. Data Viewer](#4-data-viewer)
+-   [5. Molecule Working Set](#5-molecule-working-set)
+    -   [Adding a Property](#adding-a-property)
+        -   [How to Format Property Data](#how-to-format-property-data)
+    -   [Exporting Molecules](#exporting-molecules)
+-   [6. Results](#6-results)
 
 <br>
 
@@ -39,8 +39,14 @@ Files can easily be opened in their default system app, which is also the defaul
 ```python
 import omgui
 
+# Show your workspace files in the GUI
 omgui.show_files()
+
+# Open a file in the GUI
 omgui.open_file('my_candidates/batch_1.sdf')
+
+# Open a file in its default OS application
+omgui.open_file_os('my_candidates/batch_1.sdf')
 ```
 
 <kbd><img src="assets/gui-file-browser.png" alt="GUI File browser"></kbd>
@@ -99,10 +105,10 @@ In the future you can expect more advanced functionality like filtering, subsett
 import omgui
 
 omgui.show_mols(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
-omgui.show_file("neurotransmitters.molset.json")
-omgui.show_file("neurotransmitters.sdf")
-omgui.show_file("neurotransmitters.smi")
-omgui.show_file("neurotransmitters.csv") # Support coming soon
+omgui.open_file("neurotransmitters.molset.json")
+omgui.open_file("neurotransmitters.sdf")
+omgui.open_file("neurotransmitters.smi")
+omgui.open_file("neurotransmitters.csv") # Support coming soon
 ```
 
 <kbd><img src="assets/gui-molset-viewer.png" alt="GUI Molset viewer"></kbd>
@@ -114,7 +120,8 @@ omgui.show_file("neurotransmitters.csv") # Support coming soon
 > [!IMPORTANT]  
 > Not yet implemented, coming soon.
 
-The data viewer will let you easily view an edit data from a CSV or YAML file. This includes editing values as well as adding, removing and renaming rows or columns.
+The data viewer will let you easily view an edit data from a CSV or YAML file.  
+This includes editing values as well as adding, removing and renaming rows or columns.
 
 <br>
 
@@ -159,7 +166,8 @@ results = some_processing_here(my_candidates)
 mws.add_prop(results)
 
 # Export your results as SDF file
-mws.export(format="sdf") # To be implemented
+# Supported file extensions: json, csv, sdf, smi
+mws.export("my_candidated.sdf")
 ```
 
 ```python

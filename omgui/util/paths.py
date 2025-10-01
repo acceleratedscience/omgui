@@ -59,7 +59,7 @@ def prepare_file_path(
                 - if no, print error and return None
     """
     file_path: Path = Path(file_path_input)
-    file_path: Path | None = parse_path(file_path, fallback_ext, force_ext)
+    file_path: Path | None = resolve_path(file_path, fallback_ext, force_ext)
     file_path: Path | bool = _ensure_file_path(file_path)
     # if not file_path:
     #     spf.error("Directory does not exist")
@@ -67,16 +67,19 @@ def prepare_file_path(
     return file_path
 
 
-def parse_path(
+def resolve_path(
     file_path_input: Path | str,
     fallback_ext: str = None,
     force_ext: str = None,
 ) -> Path | None:
     """
-    Parse a path string to a path object.
+    Custom path resolver that points to the workspace by default.
 
     - foo:  workspace path
     - /foo: absolute path
+    - ~/foo: absolute path
+    - ./foo: current working directory path
+    - ../foo: current working directory path
     """
 
     if not file_path_input:

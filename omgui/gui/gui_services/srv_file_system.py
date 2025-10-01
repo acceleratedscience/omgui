@@ -9,28 +9,31 @@ from pathlib import Path
 
 # OMGUI
 from omgui import ctx
-from omgui.gui.workers.smol_functions import create_molset_cache_file, get_molset_mols
-from omgui.gui.workers.smol_transformers import (
-    smiles_path2molset,
-    sdf_path2molset,
-    mdl_path2smol,
-)
-from omgui.gui.workers.mmol_transformers import cif2mmol, pdb2mmol
+from omgui.util.logger import get_logger
+from omgui.util.paths import resolve_path
 from omgui.util.mol_utils import create_molset_response
+from omgui.gui.workers import smol_transformers, smol_functions
+from omgui.gui.workers.mmol_transformers import cif2mmol, pdb2mmol
+
+# Logger
+logger = get_logger()
 
 # File and directory names to hide in the file browser.
 IGNORE_FILES = [".DS_Store", "._system"]
 
 
-def open_file_os(path_absolute=""):
+def open_file_os(path: Path | str):
     """
     Open a file in its designated OS application.
     """
     try:
-        os.system(f"open '{path_absolute}'")
-        return "ok", 200
+        path = resolve_path(path)
+        os.system(f"open '{path}'")
+        logger.info("Opening file: %s", path)
+        return True
     except OSError as err:
-        return err, 500
+        logger.error("Failed to open file in OS: %s - %s", path, err)
+        return False
 
 
 def delete_file(path_absolute=""):
@@ -243,15 +246,15 @@ def _attach_file_data(file_obj, query=None):
 
         # From molset JSON file, no formatting required.
         if ext == "json":
-            molset = get_molset_mols(path_absolute)
+            molset = smol_functions.get_molset_mols(path_absolute)
 
         # From SMILES file
         elif ext == "smi":
-            molset = smiles_path2molset(path_absolute)
+            molset = smol_transformers.smiles_path2molset(path_absolute)
 
         # From SDF file
         elif ext == "sdf":
-            molset = sdf_path2molset(path_absolute)
+            molset = smol_transformers.sdf_path2molset(path_absolute)
 
         if molset:
             # Step 2: Store a working copy of the molset in the cache.
@@ -259,11 +262,13 @@ def _attach_file_data(file_obj, query=None):
 
             # For JSON files, we can simply copy the original file (fast).
             if ext == "json":
-                cache_id = create_molset_cache_file(ctx(), path_absolute=path_absolute)
+                cache_id = smol_functions.create_molset_cache_file(
+                    ctx(), path_absolute=path_absolute
+                )
 
             # All other cases, write file from memory.
             else:
-                cache_id = create_molset_cache_file(molset=molset)
+                cache_id = smol_functions.create_molset_cache_file(molset=molset)
 
             # Step 3: Create the response object.
             # - - -
@@ -280,7 +285,7 @@ def _attach_file_data(file_obj, query=None):
     elif file_type in ["mdl", "pdb", "cif"]:
         # From MOL file
         if ext == "mol":
-            data = mdl_path2smol(path_absolute)
+            data = smol_transformers.mdl_path2smol(path_absolute)
 
         # From PDB file
         if ext == "pdb":

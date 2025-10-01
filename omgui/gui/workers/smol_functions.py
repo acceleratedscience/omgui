@@ -30,7 +30,7 @@ from omgui.mws.mws_core import mws_core
 from omgui.gui.workers import smol_transformers
 from omgui.gui.workers.data_structures import OPENAD_SMOL_DICT
 from omgui.util.spinner import Spinner
-from omgui.util.paths import parse_path
+from omgui.util.paths import resolve_path
 from omgui.util.json_decimal_encoder import JSONDecimalEncoder
 from omgui.util.general import pretty_date, is_numeric, merge_dict_lists
 from omgui.util.logger import get_logger
@@ -836,7 +836,7 @@ def load_mols_from_file(file_path):
     - SMILES (.smi)
     """
 
-    file_path = parse_path(file_path)
+    file_path = resolve_path(file_path)
     molset = None
 
     try:
@@ -1939,7 +1939,7 @@ def merge_molecule_property_data(inp=None, dataframe=None):
 def _load_mol_data(file_path):
     """loads molecule data from a file where Smiles, property and values are supplied in row format"""
 
-    file_path = parse_path(file_path)
+    file_path = resolve_path(file_path)
 
     # SDF
     if file_path.split(".")[-1].lower() == "sdf":

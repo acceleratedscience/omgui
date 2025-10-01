@@ -133,7 +133,7 @@ def show_files(*args, **kwargs) -> None:
     return _gui_init(*args, **kwargs)
 
 
-def show_file(path: str = "") -> None:
+def open_file(path: str = "") -> None:
     """
     Open the appropriate viewer for a given file path.
     """
@@ -142,6 +142,15 @@ def show_file(path: str = "") -> None:
 
     path = "~/" + urllib.parse.quote(path, safe="/")
     _gui_init(path)
+
+
+def open_file_os(path: str = "") -> None:
+    """
+    Open the appropriate viewer for a given file path.
+    """
+    from omgui.gui.gui_services import srv_file_system
+
+    srv_file_system.open_file_os(path)
 
 
 # endregion

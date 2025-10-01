@@ -122,7 +122,10 @@ async def get_file(request: Request):
 async def open_file_os(request: Request):
     body = await request.json()
     path_absolute = unquote(body.get("path_absolute", ""))
-    return srv_file_system.open_file_os(path_absolute)
+    success = srv_file_system.open_file_os(path_absolute)
+    if not success:
+        return {"success": False}, 400
+    return {"success": True}
 
 
 @gui_router.post(f"{api_v1}/file/delete")

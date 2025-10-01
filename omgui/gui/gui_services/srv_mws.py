@@ -12,7 +12,7 @@ from omgui.spf import spf
 from omgui.mws.mws_core import mws_core
 from omgui.util import exceptions as omg_exc
 from omgui.util.mol_utils import create_molset_response
-from omgui.util.paths import path_type, parse_path, prepare_file_path
+from omgui.util.paths import path_type, resolve_path, prepare_file_path
 from omgui.gui.workers import smol_functions, smol_transformers
 
 
@@ -159,7 +159,7 @@ def export(file_path_str: str = "") -> bool:
         spf.warning("No molecules to export")
         return False
 
-    file_path = parse_path(file_path_str)
+    file_path = resolve_path(file_path_str)
     default_stem = "mws_export"
     supported_formats = [".csv", ".json", ".sdf", ".smi"]
 
