@@ -10,6 +10,7 @@ def _process(
     height: int | None = None,
     png: bool | None = None,
     url: bool = False,
+    data: bool = False,
     # 3D parameters
     _d3: bool | None = None,
     d3_style: Literal["BALL_AND_STICK", "SPACEFILLING", "TUBE", "WIREFRAME"] | None = None,
@@ -75,7 +76,7 @@ def _process(
         r.raise_for_status()
 
         # Jupyter notebook display
-        if nb_mode():
+        if not data and nb_mode():
             from IPython.display import Image, SVG, display
 
             if png:
@@ -95,6 +96,7 @@ def d2(
     height: int | None = None,
     png: bool | None = None,
     url: bool = False,
+    data: bool = False,
 ):
     """
     Generate a 2D molecule visualization.
@@ -107,7 +109,7 @@ def d2(
         png: Whether to return a PNG (True) or SVG (False).
         url: Whether to return the URL (True) or the raw content (False).
     """
-    return _process(smiles, highlight, width, height, png, url)
+    return _process(smiles, highlight, width, height, png, url, data)
 
 
 def d3(
@@ -119,6 +121,7 @@ def d3(
     height: int | None = None,
     png: bool | None = None,
     url: bool = False,
+    data: bool = False,
     # 3D parameters
     d3_style: Literal["BALL_AND_STICK", "SPACEFILLING", "TUBE", "WIREFRAME"] | None = None,
     d3_look: Literal["CARTOON", "GLOSSY"] | None = None,
@@ -152,6 +155,7 @@ def d3(
         height,
         png,
         url,
+        data,
         True,  # 3D toggle _d3
         d3_style,
         d3_look,

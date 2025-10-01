@@ -41,21 +41,18 @@ http://localhost:8024/viz/mol/C1=CC(=C(C=C1C2=C(C(=O)C3=C(C=C(C=C3O2)O)O)O)O)O?h
 
 If you want to understand how to manually compose a molviz url, jump to [Demo Interface](#demo-interface) below.
 
-Otherwise, you will want to use the library's API.
-
 ### Tl;dr
 
 ```python
 from omgui import molviz
 
-url = molviz.d2("CCO", highlight="CO", url=True)
+url_2d = molviz.d2("CCO", highlight="CO", url=True)
+url_3d = molviz.d3("CCO", highlight="CO", url=True)
 
 svg_2d = molviz.d2("CCO", highlight="CO")
-
 png_2d = molviz.d2("CCO", highlight="CO", png=True)
 
 svg_3d = molviz.d3("CCO", width=300, height=200)
-
 svg_3d_fixed = molviz.d3("CCO", width=300, height=200, d3_rot_random=False, d3_rot_x=1, d3_rot_y=1.5, d3_rot_z=2)
 
 ```
@@ -68,21 +65,43 @@ svg_3d_fixed = molviz.d3("CCO", width=300, height=200, d3_rot_random=False, d3_r
 molviz.d2("<SMILES>", <param>=<val>, <param>=<val>)
 ```
 
-| Parameter     | Type | Default        | Description                                                            |
-| :------------ | ---- | :------------- | :--------------------------------------------------------------------- |
-| smiles        | str  | (REQUIRED)     | Molcule identifier                                                     |
-| highlight     | str  | None           | SMARTS substructure                                                    |
-| width         | int  | 600            | Width in pixels                                                        |
-| height        | int  | 450            | Height in pixels                                                       |
-| png           | bool | False          | Returns a PNG image instead of an SVG, when `url` is False             |
-| url           | bool | False          | Return a URL string instead of the image                               |
-|               |      |                |                                                                        |
-| d3_style      | enum | BALL_AND_STICK | Choose from `BALL_AND_STICK`, `SPACEFILLING`, `TUBE` or `WIREFRAME`    |
-| d3_look       | enum | CARTOON        | Choose from `CARTOON` or `GLOSSY`                                      |
-| d3_rot_random | bool | True           | Whether the 3D molecule should be randomly rotated.                    |
-| d3_rot_x      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation. |
-| d3_rot_y      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation. |
-| d3_rot_z      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation. |
+| Parameter     | Type | Default        | Description                                                                                                                        |
+| :------------ | ---- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| highlight     | str  | None           | A SMARTS substructure.                                                                                                             |
+| width         | int  | 600            | Image width in pixels.                                                                                                             |
+| height        | int  | 450            | Image height in pixels.                                                                                                            |
+| png           | bool | False          | Returns a PNG image instead of an SVG, when `url` is False.                                                                        |
+| url           | bool | False          | Return a URL string instead of the image.                                                                                          |
+| data          | bool | False          | Jupyter Notebook only: return image data instead of displaying it. See [Jupyter Notebook](#jupyter-notebook) below for an example. |
+|               |      |                |                                                                                                                                    |
+| d3_style      | enum | BALL_AND_STICK | Choose from `BALL_AND_STICK`, `SPACEFILLING`, `TUBE` or `WIREFRAME`                                                                |
+| d3_look       | enum | CARTOON        | Choose from `CARTOON` or `GLOSSY`                                                                                                  |
+| d3_rot_random | bool | True           | Whether the 3D molecule should be randomly rotated.                                                                                |
+| d3_rot_x      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                             |
+| d3_rot_y      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                             |
+| d3_rot_z      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                             |
+
+<br>
+
+### Jupyter Notebook
+
+When used in a Jupyter Notebook, molecules will be visualized inline.
+
+<kbd><img src="assets/molviz-notebook.png"></kbd>
+
+If you want to capture the image data instead, you can set the `data` parameter to True.  
+This way you can store the image data for later display.
+
+```python
+from omgui import molviz
+from IPython.display import Image, SVG, display
+
+svg_data = molviz.d2("CCO", data=True)
+png_data = molviz.d2("CCO", data=True, png=True)
+
+display(SVG(svg_data))
+display(Image(png_data))
+```
 
 <br>
 
