@@ -28,12 +28,15 @@ def _process(
         d3: Whether to generate a 3D visualization (True) or 2D (False).
     """
     import requests
+    import omgui
     from omgui import config
     from urllib.parse import urlencode
     from omgui.util.jupyter import nb_mode
     from omgui.util.logger import get_logger
 
     logger = get_logger()
+
+    omgui.launch(block_thread=False)
 
     # Compile URL
     host_url = config.host_url()

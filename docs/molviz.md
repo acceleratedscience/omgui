@@ -17,26 +17,6 @@ The `molviz` sub-module lets you visualize molecules on the fly, in 2D and 3D, e
 
 <br>
 
-## The Basics
-
-In order to use the molecule visualization, simply start the server in the background, then compose your url: `/viz/mol/<SMILES>`
-
-```python
-import omgui
-
-omgui.launch()
-```
-
-```text
-http://localhost:8024/viz/mol/CCO
-```
-
-<!-- ```text
-http://localhost:8024/viz/mol/C1=CC(=C(C=C1C2=C(C(=O)C3=C(C=C(C=C3O2)O)O)O)O)O?highlight=c1ccccc1&width=800&height=400
-``` -->
-
-<br>
-
 ## Visualizing Molecules
 
 If you want to understand how to manually compose a molviz url, jump to [Demo Interface](#demo-interface) below.
@@ -80,6 +60,23 @@ molviz.d2("<SMILES>", <param>=<val>, <param>=<val>)
 | d3_rot_x      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                                                   |
 | d3_rot_y      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                                                   |
 | d3_rot_z      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                                                   |
+
+<br>
+
+### Direct rendering
+
+You don't need to use the `molviz` library to generate a visualization URL.  
+You can simply launch the server and compose your own URLs: `/viz/mol/<SMILES>?option=value`
+
+```python
+import omgui
+
+omgui.launch() # Launch the server in the background
+```
+
+```text
+http://localhost:8024/viz/mol/CCO
+```
 
 <br>
 

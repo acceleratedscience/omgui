@@ -92,7 +92,7 @@ class GUIThread(Thread):
         _print_shutdown_msg(self.host, self.port)
 
 
-def gui_init(path=None, data=None):
+def gui_init(path: str = None, data: dict = None, block_thread: bool = True):
     """
     Check if the GUI is installed and start the server.
 
@@ -116,11 +116,11 @@ def gui_init(path=None, data=None):
     """
 
     # Jupyter: wrap up immediately
-    if NOTEBOOK_MODE:
+    if NOTEBOOK_MODE or block_thread is False:
         _gui_init(path, data)
         return
 
-    # Terminal: keep alive main thread
+    # Terminal: block main thread
     # --> allow Ctrl+C to stop it elegantly
     try:
         _gui_init(path, data)
