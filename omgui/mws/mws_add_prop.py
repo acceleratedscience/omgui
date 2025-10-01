@@ -122,7 +122,7 @@ def _is_format_a(prop_data: any, prop_name: str) -> bool:
     """
     Validates format A
     ------------------
-    [ <val_1>, <val_2>, <val_3> ]
+    [ <val_1>, <val_2>, <val_3> ], prop_name
     """
     if isinstance(prop_data, list) and prop_name:
         return True

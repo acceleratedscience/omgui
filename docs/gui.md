@@ -182,34 +182,43 @@ The `add_prop()` function supports result data in various formats. Which format 
    Update all molecules at once, where the length of the input should match the length of the MWS.
 
     ```python
-    # Option 1.1 - A list of dicts
-    results_1 = [
-       { "foo_1": 0.729 },
-       { "foo_1": 1.235 }
-    ]
-    mws.add_prop(results_1)
+    # Format A: List of values + property name
+    # --> Sequential
+    # --> Single property
+    results_2 = [0.238, 0.598]
+    mws.add_prop(results_2, prop_name="foo_2")
     ```
 
     ```python
-     # Option 1.2 - A list of values and a property name
-     results_2 = [0.238, 0.598]
-     mws.add_prop(results_2, prop_name="foo_2")
+    # Format B: List of dicts
+    # --> Sequential
+    # --> Multiple properties supported
+    results_1 = [
+       { "foo_1": 0.729 },
+       { "foo_1": 1.235, "foo_2": 0.927 }
+    ]
+    mws.add_prop(results_1)
     ```
 
 2. **Non-sequential input:**  
    Update select molecules, which are identified by the 'subject' identifier containing the canonical SMILES.
 
     ```python
-    # Option 2.1 - A list of dicts
+    # Format C: List of dicts with subject
+    # --> Non-sequential
+    # --> Multiple properties supported
     results_3 = [
        { "foo_3": 0.729, "subject": "NCC(=O)O" },
-       { "foo_3": 1.235, "subject": "CC(O)CC(=O)O" }
+       { "foo_3": 1.235, "foo_2": 0.927, "subject": "CC(O)CC(=O)O" }
     ]
     mws.add_prop(results_3)
     ```
 
     ```python
-    # Option 2.2 - A dataframe with subject, prop, val columns
+    # Format D: Dataframe with subject, prop, val columns
+    # --> Non-sequential
+    # --> Single property
+    # --> Useful when adding property data from CSV
     import pandas as pd
     results_4 = {
        "subject": ["NCC(=O)O", "CC(O)CC(=O)O"],

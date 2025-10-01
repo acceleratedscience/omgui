@@ -6,6 +6,7 @@ import pandas as pd
 
 # OMGUI
 from omgui.mws.mws_core import mws_core
+from omgui.mws.mws_add_prop import PropDataType
 
 # ------------------------------------
 # region - Core
@@ -44,7 +45,7 @@ def remove(identifier: str) -> None:
     return srv_mws.remove_mol(identifier)
 
 
-def add_prop(prop_data: list | pd.DataFrame, prop_name: str = None) -> None:
+def add_prop(prop_data: PropDataType, prop_name: str = None) -> None:
     """
     Add properties to molecules in the current working set.
     """
