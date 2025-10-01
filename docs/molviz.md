@@ -65,21 +65,21 @@ svg_3d_fixed = molviz.d3("CCO", width=300, height=200, d3_rot_random=False, d3_r
 molviz.d2("<SMILES>", <param>=<val>, <param>=<val>)
 ```
 
-| Parameter     | Type | Default        | Description                                                                                                                                                |
-| :------------ | ---- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| highlight     | str  | None           | A SMARTS substructure.                                                                                                                                     |
-| width         | int  | 600            | Image width in pixels.                                                                                                                                     |
-| height        | int  | 450            | Image height in pixels.                                                                                                                                    |
-| png           | bool | False          | Returns a PNG image instead of an SVG, when `url` is False.                                                                                                |
-| url           | bool | False          | Return a URL string instead of the image.                                                                                                                  |
-| data          | bool | False          | Jupyter Notebook only: return image data instead of displaying it, when `url` is False.<br>See [Jupyter Notebook](#jupyter-notebook) below for an example. |
-|               |      |                |                                                                                                                                                            |
-| d3_style      | enum | BALL_AND_STICK | Choose from `BALL_AND_STICK`, `SPACEFILLING`, `TUBE` or `WIREFRAME`                                                                                        |
-| d3_look       | enum | CARTOON        | Choose from `CARTOON` or `GLOSSY`                                                                                                                          |
-| d3_rot_random | bool | True           | Whether the 3D molecule should be randomly rotated.                                                                                                        |
-| d3_rot_x      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                                                     |
-| d3_rot_y      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                                                     |
-| d3_rot_z      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                                                     |
+| Parameter     | Type | Default        | Description                                                                                                                                            |
+| :------------ | ---- | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| highlight     | str  | None           | A SMARTS substructure.                                                                                                                                 |
+| width         | int  | 600            | Image width in pixels.                                                                                                                                 |
+| height        | int  | 450            | Image height in pixels.                                                                                                                                |
+| png           | bool | False          | Returns a PNG image instead of an SVG, when `url` is False.                                                                                            |
+| url           | bool | False          | Return a URL string instead of the image.                                                                                                              |
+| data          | bool | False          | [ Notebooks only ] Return image data instead of displaying it, when `url` is False.<br>See [Jupyter Notebook](#jupyter-notebook) below for an example. |
+|               |      |                |                                                                                                                                                        |
+| d3_style      | enum | BALL_AND_STICK | Choose from `BALL_AND_STICK`, `SPACEFILLING`, `TUBE` or `WIREFRAME`                                                                                    |
+| d3_look       | enum | CARTOON        | Choose from `CARTOON` or `GLOSSY`                                                                                                                      |
+| d3_rot_random | bool | True           | Whether the 3D molecule should be randomly rotated.                                                                                                    |
+| d3_rot_x      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                                                 |
+| d3_rot_y      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                                                 |
+| d3_rot_z      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation.                                                                                 |
 
 <br>
 
