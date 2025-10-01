@@ -185,6 +185,7 @@ The `add_prop()` function supports result data in various formats. Which format 
     # Format A: List of values + property name
     # --> Sequential
     # --> Single property
+
     results_2 = [0.238, 0.598]
     mws.add_prop(results_2, prop_name="foo_2")
     ```
@@ -193,6 +194,7 @@ The `add_prop()` function supports result data in various formats. Which format 
     # Format B: List of dicts
     # --> Sequential
     # --> Multiple properties supported
+
     results_1 = [
        { "foo_1": 0.729 },
        { "foo_1": 1.235, "foo_2": 0.927 }
@@ -207,6 +209,7 @@ The `add_prop()` function supports result data in various formats. Which format 
     # Format C: List of dicts with subject
     # --> Non-sequential
     # --> Multiple properties supported
+
     results_3 = [
        { "foo_3": 0.729, "subject": "NCC(=O)O" },
        { "foo_3": 1.235, "foo_2": 0.927, "subject": "CC(O)CC(=O)O" }
@@ -219,6 +222,7 @@ The `add_prop()` function supports result data in various formats. Which format 
     # --> Non-sequential
     # --> Single property
     # --> Useful when adding property data from CSV
+
     import pandas as pd
     results_4 = {
        "subject": ["NCC(=O)O", "CC(O)CC(=O)O"],
