@@ -17,7 +17,7 @@ The `molviz` sub-module lets you visualize molecules on the fly, in 2D and 3D, e
 
 <br>
 
-## Basics
+## The Basics
 
 In order to use the molecule visualization, simply start the server in the background, then compose your url: `/viz/mol/<SMILES>`
 
@@ -35,7 +35,9 @@ http://localhost:8024/viz/mol/CCO
 http://localhost:8024/viz/mol/C1=CC(=C(C=C1C2=C(C(=O)C3=C(C=C(C=C3O2)O)O)O)O)O?highlight=c1ccccc1&width=800&height=400
 ``` -->
 
-## Visualize Molecules
+<br>
+
+## Visualizing Molecules
 
 If you want to understand how to manually compose a molviz url, jump to [Demo Interface](#demo-interface) below.
 
@@ -58,7 +60,13 @@ svg_3d_fixed = molviz.d3("CCO", width=300, height=200, d3_rot_random=False, d3_r
 
 ```
 
+<br>
+
 ### Available Parameters
+
+```python
+molviz.d2("<SMILES>", <param>=<val>, <param>=<val>)
+```
 
 | Parameter     | Type | Default        | Description                                                            |
 | :------------ | ---- | :------------- | :--------------------------------------------------------------------- |
@@ -76,7 +84,9 @@ svg_3d_fixed = molviz.d3("CCO", width=300, height=200, d3_rot_random=False, d3_r
 | d3_rot_y      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation. |
 | d3_rot_z      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation. |
 
-### Demo Interface
+<br>
+
+## Demo Interface
 
 Use the demo interface to see what options are available and how to compose your URL.
 
