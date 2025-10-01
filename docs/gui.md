@@ -131,9 +131,6 @@ Your molecules working set (or "MWS") functions as a basket for storing and proc
 
 Each workspace has their own MWS. The MWS lets you easily fetch your molecules as a list of SMILES to be processed by your software, model or function of choice, and then lets you update your molecules with the newly calculated properties.
 
-> [!IMPORTANT]  
-> Partly implemented.
-
 ```python
 from omgui import mws
 
@@ -180,8 +177,6 @@ mws.clear()
 #### How to Format Property Data
 
 The `add_prop()` function supports result data in various formats. Which format you use is up to you.
-
-There's two ways:
 
 1. **Sequential input:**  
    Update all molecules at once, where the length of the input should match the length of the MWS.
