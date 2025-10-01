@@ -12,6 +12,8 @@ Any function that requires the GUI will start the server, which will then keep o
 If you wish to start the server in the background, you can run:
 
 ```
+import omgui
+
 omgui.launch()
 ```
 
