@@ -87,7 +87,7 @@ molviz.d2("<SMILES>", <param>=<val>, <param>=<val>)
 
 When used in a Jupyter Notebook, molecules will be visualized inline.
 
-<kbd><img src="assets/molviz-notebook.png"></kbd>
+<kbd><img src="assets/molviz-notebook.png" width="411"></kbd>
 
 If you want to capture the image data instead, you can set the `data` parameter to True.  
 This way you can store the image data for later display.
