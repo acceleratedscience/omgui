@@ -188,10 +188,12 @@ The `add_prop()` function supports result data in various formats. Which format 
        { "foo_1": 1.235 }
     ]
     mws.add_prop(results_1)
+    ```
 
-    # Option 1.2 - A list of values and a property name
-    results_2 = [0.238, 0.598]
-    mws.add_prop(results_2, prop_name="foo_2")
+    ```python
+     # Option 1.2 - A list of values and a property name
+     results_2 = [0.238, 0.598]
+     mws.add_prop(results_2, prop_name="foo_2")
     ```
 
 2. **Non-sequential input:**  
@@ -204,7 +206,9 @@ The `add_prop()` function supports result data in various formats. Which format 
        { "foo_3": 1.235, "subject": "CC(O)CC(=O)O" }
     ]
     mws.add_prop(results_3)
+    ```
 
+    ```python
     # Option 2.2 - A dataframe with subject, prop, val columns
     import pandas as pd
     results_4 = {
