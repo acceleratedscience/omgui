@@ -42,12 +42,11 @@ from typing import Literal
 
 # OMGUI
 from omgui.spf import spf
+from omgui.types import PropDataType
 from omgui.mws.mws_core import mws_core
 from omgui.util.logger import get_logger
-from omgui.gui.workers.smol_functions import get_best_available_smiles
+from omgui.gui.workers import smol_functions
 
-# Typing
-PropDataType = list[any] | list[dict[str, any]] | pd.DataFrame
 
 # Logger
 logger = get_logger()
@@ -241,7 +240,7 @@ def _add_from_format_a(mws, prop_data: list, prop_name: str) -> None:
             None,
             prop_name,
             val,
-            mol.get("name", get_best_available_smiles(mol)),
+            mol.get("name", smol_functions.get_best_available_smiles(mol)),
         )
 
     return True
@@ -266,7 +265,7 @@ def _add_from_format_b(mws, prop_data: list) -> None:
                 i,
                 key,
                 value,
-                mol.get("name", get_best_available_smiles(mol)),
+                mol.get("name", smol_functions.get_best_available_smiles(mol)),
             )
 
     return True
@@ -292,7 +291,8 @@ def _add_from_format_c(mws, prop_data: list) -> None:
         mol_found = False
         for mol in mws:
             if (
-                mol.get("name") == subject or get_best_available_smiles(mol) == subject
+                mol.get("name") == subject
+                or smol_functions.get_best_available_smiles(mol) == subject
             ):  # TODO: revisit unique id
                 for j, (key, val) in enumerate(item.items()):
                     if key == "subject":
@@ -338,7 +338,8 @@ def _add_from_format_d(mws, prop_data: pd.DataFrame):
         mol_found = False
         for mol in mws:
             if (
-                mol.get("name") == subject or get_best_available_smiles(mol) == subject
+                mol.get("name") == subject
+                or smol_functions.get_best_available_smiles(mol) == subject
             ):  # TODO: revisit unique id
                 mol["properties"][prop_name] = val
                 _log_prop(i, None, prop_name, val, subject)

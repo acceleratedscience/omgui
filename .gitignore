@@ -17,6 +17,9 @@ venv/
 # Secret files
 .env
 
+# Library files
+dump.rdb
+
 # Custom ignores
 _*
 !__init__.py

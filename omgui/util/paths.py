@@ -28,8 +28,10 @@ def path_type(file_path_input: Path | str) -> str:
     - workspace
     """
     file_path: Path = Path(file_path_input)
-    is_absolute = file_path.resolve().is_absolute()
-    is_cwd = str(file_path_input).startswith(".")
+    is_absolute = file_path.expanduser().is_absolute()
+    is_cwd = str(file_path_input).startswith("./") or str(file_path_input).startswith(
+        "../"
+    )
 
     # if not file_path_input:
     #     return None
@@ -58,8 +60,7 @@ def prepare_file_path(
                 - if yes, return the file path
                 - if no, print error and return None
     """
-    file_path: Path = Path(file_path_input)
-    file_path: Path | None = resolve_path(file_path, fallback_ext, force_ext)
+    file_path: Path | None = resolve_path(file_path_input, fallback_ext, force_ext)
     file_path: Path | bool = _ensure_file_path(file_path)
     # if not file_path:
     #     spf.error("Directory does not exist")
@@ -88,8 +89,10 @@ def resolve_path(
     file_path = Path(file_path_input)
 
     # Detect path type
-    is_absolute = file_path.resolve().is_absolute()
-    is_cwd = str(file_path_input).startswith(".")
+    is_absolute = file_path.expanduser().is_absolute()
+    is_cwd = str(file_path_input).startswith("./") or str(file_path_input).startswith(
+        "../"
+    )
 
     # Expand user path: ~/... --> /Users/my-username/...
     file_path = file_path.expanduser()
@@ -112,13 +115,15 @@ def resolve_path(
         ext = file_path.suffix
         filename = filename if ext else filename + "." + fallback_ext
 
-    # Absolute path
-    if is_absolute:
-        path = path / filename
-
     # Current working directory path
-    elif is_cwd:
+    if is_cwd:
         path = Path.cwd() / path / filename
+
+    # -- Resolve path --
+
+    # Absolute path
+    elif is_absolute:
+        path = path / filename
 
     # Default: workspace path
     else:

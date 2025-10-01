@@ -1,12 +1,9 @@
 # Std
 from typing import Any
 
-# 3rd party
-import pandas as pd
-
 # OMGUI
 from omgui.mws.mws_core import mws_core
-from omgui.mws.mws_add_prop import PropDataType
+from omgui.types import PropDataType
 
 # ------------------------------------
 # region - Core

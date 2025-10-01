@@ -164,7 +164,7 @@ mws.add_prop(results)
 
 # Export your results as SDF file
 # Supported file extensions: json, csv, sdf, smi
-mws.export("my_candidated.sdf")
+mws.export("my_candidates.sdf")
 ```
 
 ```python
@@ -246,7 +246,40 @@ mws_dicts = mws.get()         # Your molecules as list of dictionaries
 mws_smiles = mws.get_smiles() # Your molecules as list of SMILES
 mws_names = mws.get_names()   # Your molecules as list of names
 count = mws.count()           # Count your molecules
-is_empty = mws.is_empty()     # Check if you have molecules saved
+is_empty = mws.is_empty()     # Check if you have any molecules saved
+```
+
+And you can just as easily save your working set molecules to disk.
+
+The provided file extension will define the format used to export.
+Supported formats are JSON, CSV, SDF and SMI
+
+```python
+from omgui import mws
+
+# Different formats
+mws.export("my_candidates.json") # JSON file
+mws.export("my_candidates.csv")  # CSV file
+mws.export("my_candidates.sdf")  # SDF file
+mws.export("my_candidates.smi")  # Text file with one SMILES per line
+```
+
+Provided paths that start with with `./`, `../`, `~/` or `/` are treated as regular system paths.  
+Any other paths are considered workspace paths.
+
+```python
+from omgui import mws
+
+# Workspace paths
+mws.export("my_candidates.csv")                          # Workspace path
+mws.export(".my_candidates.csv")                         # Workspace path
+mws.export("foo/my_candidates.csv")                      # Workspace path
+
+# System paths
+mws.export("./my_candidates.csv")                        # Your current working directory
+mws.export("../my_candidates.csv")                       # Your current working directory's parent
+mws.export("~/my_candidates.csv")                        # Your user directory
+mws.export("/Users/johndoe/Downloads/my_candidates.csv") # Absolute path
 ```
 
 <br>
