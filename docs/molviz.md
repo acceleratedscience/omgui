@@ -104,7 +104,7 @@ display(Image(png_data))
 
 ## Demo Interface
 
-Use the demo interface to see what options are available and how to compose your URL.
+Use the demo interface to experiment and learn how to manually compose your URL.
 
 http://localhost:8024/viz/mol
 
