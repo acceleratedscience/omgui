@@ -17,7 +17,7 @@ The `molviz` sub-module lets you visualize molecules on the fly, in 2D and 3D, e
 
 <br>
 
-## Instructions
+## Basics
 
 In order to use the molecule visualization, simply start the server in the background, then compose your url: `/viz/mol/<SMILES>`
 
@@ -31,9 +31,50 @@ omgui.launch()
 http://localhost:8024/viz/mol/CCO
 ```
 
-```text
+<!-- ```text
 http://localhost:8024/viz/mol/C1=CC(=C(C=C1C2=C(C(=O)C3=C(C=C(C=C3O2)O)O)O)O)O?highlight=c1ccccc1&width=800&height=400
+``` -->
+
+## Visualize Molecules
+
+If you want to understand how to manually compose a molviz url, jump to [Demo Interface](#demo-interface) below.
+
+Otherwise, you will want to use the library's API.
+
+### Tl;dr
+
+```python
+from omgui import molviz
+
+url = molviz.d2("CCO", highlight="CO", url=True)
+
+svg_2d = molviz.d2("CCO", highlight="CO")
+
+png_2d = molviz.d2("CCO", highlight="CO", png=True)
+
+svg_3d = molviz.d3("CCO", width=300, height=200)
+
+svg_3d_fixed = molviz.d3("CCO", width=300, height=200, d3_rot_random=False, d3_rot_x=1, d3_rot_y=1.5, d3_rot_z=2)
+
 ```
+
+### Available Parameters
+
+| Parameter     | Type | Default        | Description                                                            |
+| :------------ | ---- | :------------- | :--------------------------------------------------------------------- |
+| smiles        | str  | (REQUIRED)     | Molcule identifier                                                     |
+| highlight     | str  | None           | SMARTS substructure                                                    |
+| width         | int  | 600            | Width in pixels                                                        |
+| height        | int  | 450            | Height in pixels                                                       |
+| png           | bool | False          | Returns a PNG image instead of an SVG, when `url` is False             |
+| url           | bool | False          | Return a URL string instead of the image                               |
+|               |      |                |                                                                        |
+| d3_style      | enum | BALL_AND_STICK | Choose from `BALL_AND_STICK`, `SPACEFILLING`, `TUBE` or `WIREFRAME`    |
+| d3_look       | enum | CARTOON        | Choose from `CARTOON` or `GLOSSY`                                      |
+| d3_rot_random | bool | True           | Whether the 3D molecule should be randomly rotated.                    |
+| d3_rot_x      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation. |
+| d3_rot_y      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation. |
+| d3_rot_z      | int  | None           | Custom rotation where `1` equals 60°, so 6 would mean a 360° rotation. |
 
 ### Demo Interface
 
