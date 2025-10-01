@@ -187,7 +187,7 @@ The `add_prop()` function supports result data in various formats. Which format 
     # --> Single property
 
     results_2 = [0.238, 0.598]
-    mws.add_prop(results_2, prop_name="foo_2")
+    mws.add_prop(results_2, prop_name="foo_A")
     ```
 
     ```python
@@ -196,8 +196,8 @@ The `add_prop()` function supports result data in various formats. Which format 
     # --> Multiple properties supported
 
     results_1 = [
-       { "foo_1": 0.729 },
-       { "foo_1": 1.235, "foo_2": 0.927 }
+       { "foo_B": 0.729 },
+       { "foo_B": 1.235, "bar_B": 0.927 }
     ]
     mws.add_prop(results_1)
     ```
@@ -211,8 +211,8 @@ The `add_prop()` function supports result data in various formats. Which format 
     # --> Multiple properties supported
 
     results_3 = [
-       { "foo_3": 0.729, "subject": "NCC(=O)O" },
-       { "foo_3": 1.235, "foo_2": 0.927, "subject": "CC(O)CC(=O)O" }
+       { "foo_C": 0.729, "subject": "NCC(=O)O" },
+       { "foo_C": 1.235, "bar_C": 0.927, "subject": "CC(O)CC(=O)O" }
     ]
     mws.add_prop(results_3)
     ```
@@ -226,7 +226,7 @@ The `add_prop()` function supports result data in various formats. Which format 
     import pandas as pd
     results_4 = {
        "subject": ["NCC(=O)O", "CC(O)CC(=O)O"],
-       "prop": ["foo_4"] * len(subjects),
+       "prop": ["foo_D", "foo_D"],
        "val": [0.526, 0.192],
     }
     df = pd.DataFrame(results_4)
@@ -242,11 +242,11 @@ You can easily fetch your working set molecules in different formats.
 ```python
 from omgui import mws
 
-mws_dicts = mws.get() # Your molecules as list of dictionaries
+mws_dicts = mws.get()         # Your molecules as list of dictionaries
 mws_smiles = mws.get_smiles() # Your molecules as list of SMILES
-mws_names = mws.get_names() # Your molecules as list of names
-count = mws.count() # Count your molecules
-is_empty = mws.is_empty() # Check if you have molecules saved
+mws_names = mws.get_names()   # Your molecules as list of names
+count = mws.count()           # Count your molecules
+is_empty = mws.is_empty()     # Check if you have molecules saved
 ```
 
 <br>
