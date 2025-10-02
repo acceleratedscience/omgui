@@ -114,11 +114,3 @@ omgui.show_mol('dopamine')
 <br><br>
 
 To discover what else **omgui** can do, [continue here](docs/readme.md).
-
-<table style="border: 0; background-color: #ff0; width: 200px; height: 800px; border-radius: 10px; margin: 0 auto; text-align: center;">
-  <tr>
-    <td style="vertical-align: middle;">
-      <img src="docs/assets/atest.webp" alt="Description of Image" style="max-width: 100%; height: auto; display: block; margin: 50px auto;">
-    </td>
-  </tr>
-</table>
