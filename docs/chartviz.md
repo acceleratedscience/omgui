@@ -30,15 +30,15 @@ from omgui import chartviz
 
 bar_chart_data = [
   {
+    "name": "Lion",
     "keys": [ "A", "B", "C" ],
-    "values": [ 73, 93, 21 ],
-    "name": "Lion"
+    "values": [ 173, 493, 421 ]
   },
   {
+    "name": "Tiger",
     "keys": [ "A", "B", "C" ],
-    "values": [ 24, 20, 88 ],
-    "name": "Tiger"
-  },
+    "values": [ 424, 320, 188 ]
+  }
 ]
 
 bar_chart_svg = chartviz.bar(bar_chart_data)
@@ -50,7 +50,7 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 
 <br>
 
-### Charts Types
+### Data Structures
 
 <!-- Bar chart -->
 <details>
@@ -63,13 +63,13 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
   {
     "name": "Lion",
     "keys": [ "A", "B", "C" ],
-    "values": [ 73, 93, 21 ]
+    "values": [ 173, 493, 421 ]
   },
   {
     "name": "Tiger",
     "keys": [ "A", "B", "C" ],
-    "values": [ 24, 20, 88 ]
-  },
+    "values": [ 424, 320, 188 ]
+  }
 ]
 ```
 
