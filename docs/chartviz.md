@@ -86,12 +86,12 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
   {
     "name": "Lion",
     "x": [ "2025-10-02", "2025-10-03", "2025-10-04" ],
-    "y": [ -1004, -1628, -2179 ]
+    "y": [ 104, 168, 219 ]
   },
   {
     "name": "Tiger",
     "x": [ "2025-10-02", "2025-10-03", "2025-10-04" ],
-    "y": [ 135, -1065, -369 ]
+    "y": [ 135, 165, 369 ]
   }
 ]
 ```
@@ -108,13 +108,13 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 [
   {
     "name": "Monkey",
-    "x": [ 186276, 6424, 480 ],
-    "y": [ 18, 38, 100 ]
+    "x": [ 186, 642, 480 ],
+    "y": [ 185, 383, 100 ]
   },
   {
     "name": "Wolf",
-    "x": [ 192280, 194700, 9450 ],
-    "y": [ 11, 52, 23 ]
+    "x": [ 280, 194, 450 ],
+    "y": [ 117, 522, 233 ]
   }
 ]
 ```
@@ -131,15 +131,15 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 [
   {
     "name": "Elephant",
-    "x": [ -4, -24, -5 ],
-    "y": [ -9, -38, -25 ],
-    "size": [ 63, 0, 21.6 ]
+    "x": [ 250, 714, 896 ],
+    "y": [ 989, 338, 251 ],
+    "size": [ 63, 10, 26 ]
   },
   {
     "name": "Zebra",
-    "x": [ 17, -34, 26 ],
-    "y": [ 38, -24, 24 ],
-    "size": [ 36, 56.7, 0 ]
+    "x": [ 175, 541, 864 ],
+    "y": [ 103, 734, 247 ],
+    "size": [ 36, 56, 14 ]
   }
 ]
 ```
@@ -155,8 +155,8 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 
 [
   {
-    "values": [ 80, 1, 14 ],
     "labels": [ "Lion", "Tiger", "Elephant" ]
+    "values": [ 800, 200, 300 ],
   }
 ]
 ```
