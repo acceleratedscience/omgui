@@ -46,7 +46,7 @@ bar_chart_png = chartviz.bar(bar_chart_data, png=True)
 bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 ```
 
-<kbd><img src="assets/chartviz-tldr.svg"/><kbd>
+![bar chart](assets/chartviz-tldr.svg)
 
 <br>
 
