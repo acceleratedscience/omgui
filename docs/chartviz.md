@@ -42,6 +42,7 @@ bar_chart_data = [
 ]
 
 bar_chart_svg = chartviz.bar(bar_chart_data)
+bar_chart_png = chartviz.bar(bar_chart_data, png=True)
 ```
 
 ### Direct Rendering
