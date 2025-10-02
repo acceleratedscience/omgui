@@ -99,7 +99,7 @@ def d2(
     height: int | None = None,
     png: bool | None = None,
     url: bool = False,
-    data: bool = False,
+    return_data: bool = False,
 ):
     """
     Generate a 2D molecule visualization.
@@ -111,8 +111,9 @@ def d2(
         height: The height of the image in pixels.
         png: Whether to return a PNG (True) or SVG (False).
         url: Whether to return the URL (True) or the raw content (False).
+        return_data: Whether to return raw data (True) or display svg/png (False) in Jupyter Notebook.
     """
-    return _process(smiles, highlight, width, height, png, url, data)
+    return _process(smiles, highlight, width, height, png, url, return_data)
 
 
 def d3(

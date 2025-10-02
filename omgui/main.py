@@ -92,7 +92,12 @@ class GUIThread(Thread):
         _print_shutdown_msg(self.host, self.port)
 
 
-def gui_init(path: str = None, data: dict = None, block_thread: bool = True):
+def gui_init(
+    path: str = None,
+    data: dict = None,
+    block_thread: bool = True,
+    ignore_headless: bool = False,
+):
     """
     Check if the GUI is installed and start the server.
 
@@ -110,20 +115,25 @@ def gui_init(path: str = None, data: dict = None, block_thread: bool = True):
         A data dictionary that will be stringified, encoded and passed
         to the GUI via the ?data= query parameter.
         This is no longer used, but may be useful in the future.
-    silent : bool, optional
-        If True, we'll start the server without opening the browser.
-        This is used when restarting the server.
+    block_thread : bool, optional
+        If True (default), block the main thread until Ctrl+C is pressed.
+        Without it, ctrl+C crashes application, but sometimes we need to
+        be able to execute code after the gui_init() call.
+    ignore_headless : bool, optional
+        If True, do not switch to headless mode in Jupyter notebooks.
+        This is used by chartviz and molviz sub-modules, which don't
+        have headless mode.
     """
 
     # Jupyter: wrap up immediately
     if NOTEBOOK_MODE or block_thread is False:
-        _gui_init(path, data)
+        _gui_init(path, data, ignore_headless)
         return
 
     # Terminal: block main thread
     # --> allow Ctrl+C to stop it elegantly
     try:
-        _gui_init(path, data)
+        _gui_init(path, data, ignore_headless)
         while not ABORT_LAUNCH:
             time.sleep(1)
     except KeyboardInterrupt:
@@ -134,7 +144,7 @@ def gui_init(path: str = None, data: dict = None, block_thread: bool = True):
         cleanup()
 
 
-def _gui_init(path=None, data=None):
+def _gui_init(path: str = None, data: dict = None, ignore_headless: bool = False):
     # Install the GUI if needed
     gui_install.ensure()
 
@@ -143,10 +153,10 @@ def _gui_init(path=None, data=None):
     hash = ""
 
     # Launch the GUI
-    _launch(path, query, hash)
+    _launch(path, query, hash, ignore_headless)
 
 
-def _launch(path=None, query="", hash=""):
+def _launch(path: str, query: str, hash: str, ignore_headless: bool = False):
     """
     Launch the GUI web server in a separate thread.
     """
@@ -154,7 +164,9 @@ def _launch(path=None, query="", hash=""):
 
     # If the server is already running, don't launch it again
     if path and GUI_SERVER and GUI_SERVER.is_running():
-        _open_browser(GUI_SERVER.host, GUI_SERVER.port, path, query, hash)
+        _open_browser(
+            GUI_SERVER.host, GUI_SERVER.port, path, query, hash, ignore_headless
+        )
         return
 
     # Lifespan Event Handler
@@ -352,17 +364,19 @@ def _launch(path=None, query="", hash=""):
     url = f"http://{host}:{port}/{BASE_PATH}"
     if path:
         background = False
-        url = _open_browser(host, port, path, query, hash)
+        url = _open_browser(host, port, path, query, hash, ignore_headless)
 
     if not NOTEBOOK_MODE:
         _print_launch_msg(url, background)
 
 
-def _open_browser(host, port, path, query, hash):
+def _open_browser(host, port, path, query, hash, ignore_headless: bool = False):
     # Compile the URL to be opened in the browser
-    headless = "headless/" if NOTEBOOK_MODE else ""
+    headless = "headless/" if NOTEBOOK_MODE and not ignore_headless else ""
     module_path = f"{headless}{path}" if path else headless
     url = f"http://{host}:{port}/{BASE_PATH}{module_path}{query}{hash}"
+
+    logger.info("Opening GUI in browser: %s", url)
 
     # print("URL:", url)
     # print("BASE_PATH:", BASE_PATH)

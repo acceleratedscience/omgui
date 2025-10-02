@@ -194,3 +194,10 @@ def hash_data(data: dict) -> str:
     # a 50% chance of collision, which is acceptable considering
     # this is not a multi-user high volume application.
     return full_hash[:8]
+
+
+def prune_dict(options: dict):
+    """
+    Remove None values from options dict.
+    """
+    return {k: v for k, v in options.items() if v is not None}

@@ -52,7 +52,7 @@ molviz.d2("<SMILES>", <param>=<val>, <param>=<val>)
 | height        | int  | 450            | Image height in pixels.                                                                                                                                  |
 | png           | bool | False          | Returns a PNG image instead of an SVG, when `url` is False.                                                                                              |
 | url           | bool | False          | Return a URL string instead of the image.                                                                                                                |
-| data          | bool | False          | _[ NOTEBOOKS ONLY ]_ Return image data instead of displaying it, when `url` is False.<br>See [Jupyter Notebook](#jupyter-notebook) below for an example. |
+| return_data   | bool | False          | _[ NOTEBOOKS ONLY ]_ Return image data instead of displaying it, when `url` is False.<br>See [Jupyter Notebook](#jupyter-notebook) below for an example. |
 |               |      |                |                                                                                                                                                          |
 | d3_style      | enum | BALL_AND_STICK | Choose from `BALL_AND_STICK`, `SPACEFILLING`, `TUBE` or `WIREFRAME`                                                                                      |
 | d3_look       | enum | CARTOON        | Choose from `CARTOON` or `GLOSSY`                                                                                                                        |
