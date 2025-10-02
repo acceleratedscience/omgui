@@ -52,21 +52,23 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 
 ### Charts Types
 
-| Chart Type | Data Structure |
-| ---------- | -------------- |
-| bar        | ```[           |
-
-{
-"keys": [ "A", "B", "C" ],
-"values": [ 73, 93, 21 ],
-"name": "Lion"
-},
-{
-"keys": [ "A", "B", "C" ],
-"values": [ 24, 20, 88 ],
-"name": "Tiger"
-},
-]``` |
+<details>
+<summary>Bar chart</summary>
+```
+[
+  {
+    "keys": [ "A", "B", "C" ],
+    "values": [ 73, 93, 21 ],
+    "name": "Lion"
+  },
+  {
+    "keys": [ "A", "B", "C" ],
+    "values": [ 24, 20, 88 ],
+    "name": "Tiger"
+  },
+]
+```
+</details>
 
 <br>
 
