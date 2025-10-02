@@ -54,7 +54,7 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 
 <details markup>
 <summary>Bar chart</summary>
-<div markup>
+
 ```
 [
   {
@@ -69,7 +69,7 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
   },
 ]
 ```
-</div>
+
 </details>
 
 <br>
