@@ -1,4 +1,4 @@
-![omgui](docs/assets/omgui-banner.webp)
+![omgui](docs/assets/omgui-header.webp)
 
 # 😱 OMGUI
 
