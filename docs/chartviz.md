@@ -26,7 +26,8 @@ If you want to understand how to manually compose a chartviz url, jump to [Demo 
 ### Tl;dr
 
 ```python
-# All chart types
+from omgui import chartviz
+
 chartviz.bar(data)
 chartviz.line(data)
 chartviz.scatterplot(data)
