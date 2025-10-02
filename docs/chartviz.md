@@ -50,6 +50,26 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 
 <br>
 
+### Charts Types
+
+| Chart Type | Data Structure |
+| ---------- | -------------- |
+| bar        | [              |
+
+{
+"keys": [ "A", "B", "C" ],
+"values": [ 73, 93, 21 ],
+"name": "Lion"
+},
+{
+"keys": [ "A", "B", "C" ],
+"values": [ 24, 20, 88 ],
+"name": "Tiger"
+},
+] |
+
+<br>
+
 ### Available Parameters
 
 ```python
@@ -87,10 +107,12 @@ omgui.launch()
 ```
 
 ```text
-http://localhost:8024/viz/chart/bar?data=%5B%7B%22keys%22%3A%5B%22A%22%2C%22B%22%2C%22C%22%5D%2C%22values%22%3A%5B73%2C93%2C21%5D%2C%22name%22%3A%22Lion%22%7D%2C%7B%22keys%22%3A%5B%22A%22%2C%22B%22%2C%22C%22%5D%2C%22values%22%3A%5B24%2C20%2C88%5D%2C%22name%22%3A%22Tiger%22%7D%5D&body=Hello+world&width=400&height=300&output=svg
+http://localhost:8024/viz/chart/bar?data=%5B%7B%22keys%22%3A%5B%22A%22%2C%22B%22%2C%22C%22%5D%2C%22values%22%3A%5B73%2C93%2C21%5D%2C%22name%22%3A%22Lion%22%7D%2C%7B%22keys%22%3A%5B%22A%22%2C%22B%22%2C%22C%22%5D%2C%22values%22%3A%5B24%2C20%2C88%5D%2C%22name%22%3A%22Tiger%22%7D%5D&width=400&height=300&output=svg
 ```
 
-### Demo Interface
+<br>
+
+## Demo Interface
 
 Use the demo interface to see what options are available, how to compose your URL and how to structure your data for each type of chart.
 
