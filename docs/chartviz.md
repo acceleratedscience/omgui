@@ -53,9 +53,9 @@ bar_chart_data = [
   }
 ]
 
-bar_chart_svg = chartviz.bar(bar_chart_data, output='svg')                        # HTML
-bar_chart_png = chartviz.bar(bar_chart_data, output='png')                        # PNG
-bar_chart_ops = chartviz.bar(bar_chart_data, output='svg', width=400, height=300) # With options
+bar_chart_svg = chartviz.bar(bar_chart_data, output='svg')
+bar_chart_png = chartviz.bar(bar_chart_data, output='png')
+bar_chart_ops = chartviz.bar(bar_chart_data, output='svg', width=400, height=300)
 ```
 
 ![bar chart](assets/chartviz-tldr.svg)
