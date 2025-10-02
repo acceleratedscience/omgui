@@ -1,3 +1,5 @@
+![omgui](docs/assets/omgui-banner.webp)
+
 # 😱 OMGUI
 
 ### _Open-source Molecular Graphical User Interface_
