@@ -4,7 +4,8 @@
 
 ![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.chartviz-yellow)
 
-The `chartviz` sub-module lets you visualize various types of data charts on the fly, either as HTML page, SVG or PNG.
+The `chartviz` sub-module lets you visualize various types of data charts on the fly, either as HTML page, SVG or PNG.  
+Supported chart types: bar charts, line charts, pie charts, bubble charts, scatter plots, box plots and histograms.
 
 > [!IMPORTANT]
 > The chartviz & [molviz](molviz.md) sub-modules require additional dependencies:
@@ -14,18 +15,6 @@ The `chartviz` sub-module lets you visualize various types of data charts on the
 > ```
 
 ![Chart visualization with omgui.chartviz](assets/chart-preview.svg)
-
-### Supported Chart Types
-
-See [examples](#examples) below.
-
--   bar charts
--   line charts
--   pie charts
--   scatter plots
--   bubble charts
--   box plots
--   histograms
 
 <br>
 
