@@ -56,6 +56,9 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 <summary>Bar chart</summary>
 
 ```
+# Data structure for bar charts
+# - - - - - - - - - - - - - - -
+
 [
   {
     "keys": [ "A", "B", "C" ],
