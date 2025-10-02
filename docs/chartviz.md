@@ -26,6 +26,17 @@ If you want to understand how to manually compose a chartviz url, jump to [Demo 
 ### Tl;dr
 
 ```python
+# All chart types
+chartviz.bar(data)
+chartviz.line(data)
+chartviz.scatterplot(data)
+chartviz.bubble(data)
+chartviz.pie(data)
+chartviz.boxplot(data)
+chartviz.histogram(data)
+```
+
+```python
 from omgui import chartviz
 
 bar_chart_data = [
@@ -41,18 +52,9 @@ bar_chart_data = [
   }
 ]
 
-bar_chart_svg = chartviz.bar(bar_chart_data)                                    # HTML
-bar_chart_png = chartviz.bar(bar_chart_data, svg=True)                          # PNG
-bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300) # With options
-
-# All chart types
-bar_chart = chartviz.bar(data)
-line_chart = chartviz.line(data)
-scatter_plot = chartviz.scatterplot(data)
-bubble_chart = chartviz.bubble(data)
-pie_chart = chartviz.pie(data)
-box_plot = chartviz.boxplot(data)
-histogram = chartviz.histogram(data)
+bar_chart_svg = chartviz.bar(bar_chart_data, output='svg')                        # HTML
+bar_chart_png = chartviz.bar(bar_chart_data, output='png')                        # PNG
+bar_chart_ops = chartviz.bar(bar_chart_data, output='svg', width=400, height=300) # With options
 ```
 
 ![bar chart](assets/chartviz-tldr.svg)
