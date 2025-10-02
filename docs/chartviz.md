@@ -43,7 +43,48 @@ bar_chart_data = [
 
 bar_chart_svg = chartviz.bar(bar_chart_data)
 bar_chart_png = chartviz.bar(bar_chart_data, png=True)
+bar_chart_with_ = chartviz.bar(bar_chart_data, png=True)
 ```
+
+<br>
+
+### Available Parameters
+
+```python
+molviz.d2("<SMILES>", <param>=<val>, <param>=<val>)
+```
+
+title
+subtitle
+body
+x_title
+y_title
+x_prefix
+y_prefix
+x_suffix
+y_suffix
+width
+height
+output
+scale
+omit_legend
+
+| Parameter   | Type  | Default | Description                                                                                                                                                 |
+| :---------- | :---- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| title       | str   | None    | Title of the chart.                                                                                                                                         |
+| subtitle    | str   | None    | Sub-title of the chart.                                                                                                                                     |
+| body        | str   | None    | [ HTML ONLY ] Text paragraph to be displayed above the chart.                                                                                               |
+| x_title     | str   | None    | Label for the X axis, eg. 'Date'                                                                                                                            |
+| y_title     | str   | None    | Label for the Y axis, eg. 'Spending'                                                                                                                        |
+| x_prefix    | str   | None    | Prefix to be added to the values on the X axis, eg. '€'                                                                                                     |
+| y_prefix    | str   | None    | Prefix to be added to the values on the Y axis, eg. '€'                                                                                                     |
+| x_suffix    | str   | None    | Suffix to be added to the values on the X axis, eg. 'kg'                                                                                                    |
+| y_suffix    | str   | None    | Suffix to be added to the values on the Y axis, eg. 'kg'                                                                                                    |
+| width       | int   | 1200    | Width of the chart in pixels.                                                                                                                               |
+| height      | int   | 900     | Height of the chart in pixels.                                                                                                                              |
+| output      | enum  | html    | Choose from `html`, `svg` or `png` to render an HTML page, a vector image or a bitmap image respectively. For image output, 'svg' is generally recommended. |
+| scale       | float | None    | [ PNG ONLY ] Scaling factor for the png pixel output. Set to 2 for high-resolution displays.                                                                |
+| omit_legend | bool  | None    | Renders the chart without the legend when True.                                                                                                             |
 
 ### Direct Rendering
 

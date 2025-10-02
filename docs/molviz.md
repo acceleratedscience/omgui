@@ -46,7 +46,7 @@ molviz.d2("<SMILES>", <param>=<val>, <param>=<val>)
 ```
 
 | Parameter     | Type | Default        | Description                                                                                                                                              |
-| :------------ | ---- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| :------------ | :--- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | highlight     | str  | None           | A SMARTS substructure.                                                                                                                                   |
 | width         | int  | 600            | Image width in pixels.                                                                                                                                   |
 | height        | int  | 450            | Image height in pixels.                                                                                                                                  |
@@ -63,7 +63,7 @@ molviz.d2("<SMILES>", <param>=<val>, <param>=<val>)
 
 <br>
 
-### Direct rendering
+### Direct Rendering
 
 You don't need to use the `molviz` library to generate a visualization URL.  
 You can simply launch the server and compose your own URLs: `/viz/mol/<SMILES>?option=value`
