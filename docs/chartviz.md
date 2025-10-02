@@ -57,7 +57,7 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 
 ```
 # Data structure for bar charts
-# - - - - - - - - - - - - - - -
+# ---
 
 [
   {
