@@ -205,13 +205,24 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 
 </details>
 
-<!-- Histogram chart -->
+<!-- Histograms -->
 <details>
 <summary>Histogram</summary>
 
-| Test                                               | Bar                                                |
-| -------------------------------------------------- | -------------------------------------------------- |
-| <pre># Data structure for histograms:<br>...</pre> | <code># Data structure for histograms:\n...</code> |
+```
+# Data structure for histograms:
+
+[
+  {
+    "name": "Lion",
+    "values": [ 730, 679, 996 ]
+  },
+  {
+    "name": "Tiger",
+    "values": [ 162, 281, 771 ]
+  }
+]
+```
 
 </details>
 
