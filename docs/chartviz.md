@@ -1,16 +1,17 @@
 <sub>[&larr; BACK](readme.md)</sub>
 
-# OMGUI - `chartviz` - Chart Visualization
+# OMGUI - `chartviz` - Data Visualization
 
 ![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.chartviz-yellow)
 
 The `chartviz` sub-module lets you visualize various types of data charts on the fly, either as HTML page, SVG or PNG.
 
-Note that the chart & [molecule](molviz.md) visualization requires additional dependencies:
-
-```shell
-pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
-```
+> [!IMPORTANT]
+> The chartviz & [molviz](molviz.md) sub-modules require additional dependencies:
+>
+> ```shell
+> pip install git+https://github.com/themoenen/omgui.git@v0.1[viz]
+> ```
 
 ![Chart visualization with omgui.chartviz](assets/chart-preview.svg)
 
@@ -28,11 +29,35 @@ See [examples](#examples) below.
 
 <br>
 
-## Instructions
+## Visualizing Data
 
-In order to use the chart visualization, simply start the server in the background, then compose your url:
+If you want to understand how to manually compose a chartviz url, jump to [Demo Interface](#demo-interface) below.
 
-`/viz/chart/<chart_type>?data=<your_data>&output=<svg/png>`
+### Tl;dr
+
+```python
+from omgui import chartviz
+
+bar_chart_data = [
+  {
+    "keys": [ "A", "B", "C" ],
+    "values": [ 73, 93, 21 ],
+    "name": "Lion"
+  },
+  {
+    "keys": [ "A", "B", "C" ],
+    "values": [ 24, 20, 88 ],
+    "name": "Tiger"
+  },
+]
+
+bar_chart_svg = chartviz.bar(bar_chart_data)
+```
+
+### Direct Rendering
+
+You don't need to use the `chartviz` library to generate a visualization URL.  
+You can simply launch the server and compose your own URLs: `/viz/chart/<chart_type>?data=<your_data>`
 
 ```python
 import omgui
