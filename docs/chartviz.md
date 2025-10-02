@@ -43,8 +43,10 @@ bar_chart_data = [
 
 bar_chart_svg = chartviz.bar(bar_chart_data)
 bar_chart_png = chartviz.bar(bar_chart_data, png=True)
-bar_chart_with_ = chartviz.bar(bar_chart_data, png=True)
+bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 ```
+
+<kbd><img src="chart-tldr.svg"/><kbd>
 
 <br>
 

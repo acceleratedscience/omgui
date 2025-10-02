@@ -84,7 +84,7 @@ http://localhost:8024/viz/mol/CCO
 
 When used in a Jupyter Notebook, molecules will be visualized inline.
 
-<kbd><img src="assets/molviz-notebook.png" width="411"></kbd>
+<kbd><img src="assets/molviz-notebook.png" width="411" height="259"/></kbd>
 
 If you want to capture the image data instead, you can set the `data` parameter to True.  
 This way you can store the image data for later display.
