@@ -114,3 +114,7 @@ omgui.show_mol('dopamine')
 <br><br>
 
 To discover what else **omgui** can do, [continue here](docs/readme.md).
+
+![gif](docs/assets/animtest.gif)  
+![gif](docs/assets/animtest.mov)  
+![gif](docs/assets/animtest.webp)

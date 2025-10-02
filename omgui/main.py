@@ -233,8 +233,10 @@ def _launch(path=None, query="", hash=""):
         # because this API call needs to finish before
         # the shutdown will execute.
         def delayed_shutdown():
+            logger.info("Shutdown requested via /shutdown endpoint")
             time.sleep(1)
             GUI_SERVER.shutdown()
+            logger.info("Shutdown complete")
 
         Thread(target=delayed_shutdown).start()
         return Response(content="OMGUI shutdown complete", status_code=200)

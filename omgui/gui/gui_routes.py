@@ -78,7 +78,9 @@ async def get_workspace_name():
 
 @gui_router.get(f"{api_v1}/workspace/list")
 async def get_workspaces():
-    return ctx().workspaces()
+    current_workspace = ctx().workspace
+    workspaces = ctx().workspaces()
+    return {"current_workspace": current_workspace, "workspaces": workspaces}
 
 
 @gui_router.post(f"{api_v1}/workspace/set")
