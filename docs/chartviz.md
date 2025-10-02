@@ -6,8 +6,7 @@
 
 The `chartviz` sub-module lets you visualize various types of data charts on the fly, either as HTML page, SVG or PNG.
 
-Supported chart types: **bar** charts, **line** charts, **pie** charts, **bubble** charts, **scatter plots**, **box plots** and **histograms**.  
-See [examples](#examples) below.
+Supported chart types: **bar**, **line**, **pie** and **bubble** charts, **scatter plots**, **box plots** and **histograms**. See [examples](#examples) below.
 
 > [!IMPORTANT]
 > The chartviz & [molviz](molviz.md) sub-modules require additional dependencies:
