@@ -209,9 +209,9 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 <details>
 <summary>Histogram</summary>
 
-| Test                                                 | Bar                                                |
-| ---------------------------------------------------- | -------------------------------------------------- |
-| <code># Data structure for histograms:<br>...</code> | <code># Data structure for histograms:\n...</code> |
+| Test                                               | Bar                                                |
+| -------------------------------------------------- | -------------------------------------------------- |
+| <pre># Data structure for histograms:<br>...</pre> | <code># Data structure for histograms:\n...</code> |
 
 </details>
 
