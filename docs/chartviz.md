@@ -52,11 +52,12 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
 
 ### Charts Types
 
+<!-- Bar chart -->
 <details>
 <summary>Bar chart</summary>
 
 ```
-# Data structure for bar charts
+# Data structure for bar charts:
 
 [
   {
@@ -70,6 +71,89 @@ bar_chart_small = chartviz.bar(bar_chart_data, png=True, width=400, height=300)
     "name": "Tiger"
   },
 ]
+```
+
+</details>
+
+<!-- Line chart -->
+<details>
+<summary>Line chart</summary>
+
+```
+# Data structure for line charts:
+
+[
+  {
+    "name": "Lion",
+    "x": [ "2025-10-02", "2025-10-03", "2025-10-04", "2025-10-05", "2025-10-06" ],
+    "y": [ -1004, -1628, -2179, -2049, -1653 ]
+  },
+  {
+    "name": "Tiger",
+    "x": [ "2025-10-02", "2025-10-03", "2025-10-04", "2025-10-05", "2025-10-06" ],
+    "y": [ 135, -1065, -369, 82, -168 ]
+  }
+]
+```
+
+</details>
+
+<!-- Scatter plot -->
+<details>
+<summary>Scatter plot</summary>
+
+```
+# Data structure for scatter plots:
+
+...
+```
+
+</details>
+
+<!-- Bubble chart -->
+<details>
+<summary>Bubble chart</summary>
+
+```
+# Data structure for bubble charts:
+
+...
+```
+
+</details>
+
+<!-- Pie chart -->
+<details>
+<summary>Pie chart</summary>
+
+```
+# Data structure for pie charts:
+
+...
+```
+
+</details>
+
+<!-- Boxplot -->
+<details>
+<summary>Boxplot</summary>
+
+```
+# Data structure for boxplots:
+
+...
+```
+
+</details>
+
+<!-- Histogram chart -->
+<details>
+<summary>Histogram</summary>
+
+```
+# Data structure for histograms:
+
+...
 ```
 
 </details>
