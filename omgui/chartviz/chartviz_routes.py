@@ -11,10 +11,10 @@ from urllib.parse import unquote
 
 
 # FastAPI
-from fastapi import APIRouter
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import Response, HTMLResponse
-from fastapi import Request, HTTPException, status, Query, Body, Depends
+from fastapi import APIRouter, Request, HTTPException
+from fastapi import status, Path, Query, Body, Depends
 
 # 3rd party
 try:
@@ -564,8 +564,8 @@ async def random_data(
 async def chart_bar(
     # fmt: off
     request: Request,
+    data_id: str | None = None, # Redis or in-memory ID for the input data
     input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
-    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
     options: dict = Depends(query_params),
     # Bar chart specific options
     horizontal: bool = Query(False, alias="h", description="Render bar chart horizontally"),
@@ -599,8 +599,8 @@ async def chart_bar(
 async def chart_line(
     # fmt: off
     request: Request,
+    data_id: str | None = None, # Redis or in-memory ID for the input data
     input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
-    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
     options: dict = Depends(query_params),
     # Line chart specific options
     horizontal: bool = Query(False, alias="h", description="Render line chart horizontally"),
@@ -636,8 +636,8 @@ async def chart_line(
 async def chart_scatter(
     # fmt: off
     request: Request,
+    data_id: str | None = None, # Redis or in-memory ID for the input data
     input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
-    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
     options: dict = Depends(query_params),
     # fmt: on
 ):
@@ -671,8 +671,8 @@ async def chart_scatter(
 async def chart_bubble(
     # fmt: off
     request: Request,
+    data_id: str | None = None, # Redis or in-memory ID for the input data
     input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
-    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
     options: dict = Depends(query_params),
     # fmt: on
 ):
@@ -698,14 +698,14 @@ async def chart_bubble(
 
 # Pie chart
 # - - -
-# fmt: off
 # https://plotly.com/javascript/pie-charts/
 @chartviz_router.get("/pie", summary="Render a pie chart from URL data")
 @chartviz_router.get("/pie/{data_id}", summary="Render a pie chart from Redis data")
 async def chart_pie(
+    # fmt: off
     request: Request,
+    data_id: str | None = None, # Redis or in-memory ID for the input data
     input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
-    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
     options: dict = Depends(query_params),
     # fmt: on
 ):
@@ -731,14 +731,16 @@ async def chart_pie(
 
 # Box plot chart
 # - - -
-# fmt: off
 # https://plotly.com/javascript/box-plots/
 @chartviz_router.get("/boxplot", summary="Render a box plot chart from URL data")
-@chartviz_router.get("/boxplot/{data_id}", summary="Render a box plot chart from Redis data")
+@chartviz_router.get(
+    "/boxplot/{data_id}", summary="Render a box plot chart from Redis data"
+)
 async def chart_boxplot(
+    # fmt: off
     request: Request,
+    data_id: str | None = None, # Redis or in-memory ID for the input data
     input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
-    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
     options: dict = Depends(query_params),
     # Boxplot specific options
     horizontal: bool = Query(False, alias="h", description="Render box plot horizontally"),
@@ -755,7 +757,9 @@ async def chart_boxplot(
 
     # Render chart
     output = options.get("output")
-    result = render.boxplot(input_data, output, options, horizontal, show_points, boxmean)
+    result = render.boxplot(
+        input_data, output, options, horizontal, show_points, boxmean
+    )
 
     # Response
     return compile_response(
@@ -771,12 +775,14 @@ async def chart_boxplot(
 # - - -
 # https://plotly.com/javascript/histograms/
 @chartviz_router.get("/histogram", summary="Render a histogram chart from URL data")
-@chartviz_router.get("/histogram/{data_id}", summary="Render a histogram chart from Redis data")
+@chartviz_router.get(
+    "/histogram/{data_id}", summary="Render a histogram chart from Redis data"
+)
 async def chart_histogram(
     # fmt: off
     request: Request,
+    data_id: str | None = None, # Redis or in-memory ID for the input data
     input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
-    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
     options: dict = Depends(query_params),
     # Histogram specific options
     horizontal: bool = Query(False, alias="h", description="Render histogram chart horizontally"),
@@ -801,6 +807,7 @@ async def chart_histogram(
         input_data,
         options,
     )
+
 
 # Redis POST
 @chartviz_router.post(
