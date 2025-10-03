@@ -2,14 +2,17 @@
 
 # OMGUI - About
 
-This project was developed by [@themoenen](https://github.com/themoenen) for [IBM Research](https://research.ibm.com) as part of the [OpenAD Toolkit](https://openad.accelerate.science/) under the [Accelerated Discovery](https://accelerate.science) project.
+This project was developed by [@themoenen](https://github.com/themoenen) for [IBM Research](https://research.ibm.com) as part  
+of the [OpenAD Toolkit](https://openad.accelerate.science/) under the [Accelerated Discovery](https://accelerate.science) project.
 
 ### Contributions
 
 OMGUI is fully open-source and [pull requests](../../../pulls) are welcome.  
 For suggestions & bug reports you can always create an [issues](../../../issues).
 
-### The Stack
+<br>
+
+## Technology Stack
 
 -   **OMGUI Server**  
     Lives in this repository and is written in Python.
@@ -22,12 +25,12 @@ For suggestions & bug reports you can always create an [issues](../../../issues)
     Uses [RDKit] for 2D rendering and [CineMol] for static 3D molecules.  
     Relies on [Jinja] for basic template rendering.
 
--   **chartviz**
+-   **chartviz**  
     Uses [Plotly] as charting engine, which itself relies on [D3].  
     Relies on [Jinja] for basic template rendering.
 
--   **OMGUI Banner**  
-    In case you wondered, the [rotating Icosahedron banner](assets/omgui-header.webp) was created with [Three.js] and then exported to an animated webp image with [FFmpeg]. You can find the repo for that at [omgui-gh-banner]
+-   **OMGUI header**  
+    Lives in the [omgui-gh-banner] repo. The [rotating icosahedron header](assets/omgui-header.webp) was created with [Three.js] and then exported to an animated webp image with [FFmpeg].
 
 [chartviz]: chartviz.md
 [molviz]: molviz.md
