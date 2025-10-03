@@ -68,12 +68,12 @@ omgui.show_mol('dopamine')
 
 ## Documentation
 
-1.  [Installation](installation.md)
-1.  [Configuration](config.md)
-1.  [GUI](gui.md) - Graphical user interface for molecules and data
-1.  [molviz](molviz.md) - Sub-module for molecule visualization
-1.  [chartviz](chartviz.md) - Sub-module for chart visualisation
-1.  [about](about.md)
+1.  [Installation](docs/installation.md)
+1.  [Configuration](docs/config.md)
+1.  [GUI](docs/gui.md) - Graphical user interface for molecules and data
+1.  [molviz](docs/molviz.md) - Sub-module for molecule visualization
+1.  [chartviz](docs/chartviz.md) - Sub-module for chart visualisation
+1.  [about](docs/about.md)
 
 <br><br><br><br><br><br><br>
 
