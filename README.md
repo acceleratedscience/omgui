@@ -22,8 +22,10 @@ omgui.show_mol('dopamine')
 
 Included are also the [chartviz](docs/chartviz.md) and [molviz](docs/molviz.md) sub-libraries for generating charts an molecular images in 2D & 3D.
 
-[![Documentation](docs/assets/btn-docs.svg)](docs/readme.md#omgui---documentation)
+[![Documentation](docs/assets/btn-docs.svg)](#documentation)
 [![Quick start](docs/assets/btn-quick-start.svg)](#quick-start)
+
+<sub>_Developed at IBM Research_</sub>
 
 <br>
 
@@ -111,6 +113,13 @@ omgui.show_mol('dopamine')
 
 </details>
 
-<br><br>
+<br>
 
-To discover what else **omgui** can do, [continue here](docs/readme.md).
+## Documentation
+
+1.  [Installation](installation.md)
+1.  [Configuration](config.md)
+1.  [GUI](gui.md) - Graphical user interface for molecules and data
+1.  [molviz](molviz.md) - Sub-module for molecule visualization
+1.  [chartviz](chartviz.md) - Sub-module for chart visualisation
+1.  [about](about.md)
