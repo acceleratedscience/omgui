@@ -2,8 +2,8 @@
 
 # OMGUI - About
 
-This project was developed by [@themoenen](https://github.com/themoenen) for [IBM Research](https://research.ibm.com) as part  
-of the [OpenAD Toolkit](https://openad.accelerate.science/) under the [Accelerated Discovery](https://accelerate.science) project.
+This project was developed by [@themoenen](https://github.com/themoenen) for [IBM Research](https://research.ibm.com).  
+It's a spin-off from the [OpenAD Toolkit](https://openad.accelerate.science/) part of [Accelerated Discovery](https://accelerate.science).
 
 ### Contributions
 
