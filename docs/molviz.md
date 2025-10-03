@@ -1,4 +1,4 @@
-<sub>[&larr; BACK](readme.md)</sub>
+<sub>[home](../#readme) / [docs](readme.md) / chartviz</sub>
 
 # OMGUI - `molviz` - Molecule Visualization
 

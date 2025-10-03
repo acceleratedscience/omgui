@@ -1,4 +1,4 @@
-<sub>[&larr; BACK](../#readme)</sub>
+<sub>[home](../#readme) / docs</sub>
 
 # OMGUI - Documentation
 
@@ -7,3 +7,4 @@
 1.  [GUI](gui.md) - Graphical user interface for molecules and data
 1.  [molviz](molviz.md) - Sub-module for molecule visualization
 1.  [chartviz](chartviz.md) - Sub-module for chart visualisation
+1.  [about](about.md) - About this project
