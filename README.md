@@ -12,9 +12,10 @@
 <!-- [![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/) -->
 
 OMGUI is a web interface that makes it dead-simple to visualize and triage your molecule results in Python.  
-It supports small molecules as well as macromolecules like proteins. Run it from a **Jupyter Notebook** or any **Python** script.
+It supports small molecules as well as macromolecules like proteins.  
+Run it from a **Jupyter Notebook** or any **Python** script.
 
-This project also includes the [chartviz](docs/chartviz.md) and [molviz](docs/molviz.md) sub-libraries for generating data data charts an molecular images in 2D and 3D.
+Included are also the [chartviz](docs/chartviz.md) and [molviz](docs/molviz.md) sub-libraries for generating data charts an molecular images in 2D and 3D.
 
 [![Documentation](docs/assets/btn-docs.svg)](docs/readme.md#omgui---documentation)
 [![Quick start](docs/assets/btn-quick-start.svg)](#quick-start)
