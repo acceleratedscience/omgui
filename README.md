@@ -6,7 +6,6 @@
 
 <!-- [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/omgui)](https://pypi.org/project/omgui/) -->
 <!-- [![PyPI version](https://img.shields.io/pypi/v/omgui)](https://pypi.org/project/omgui/) -->
-
 <!-- ![Static Badge](https://img.shields.io/badge/IBM-Research-0F62FE?style=for-the-badge) -->
 
 [![License MIT](https://img.shields.io/github/license/acceleratedscience/openad-toolkit?style=flat-square)](https://opensource.org/licenses/MIT)
