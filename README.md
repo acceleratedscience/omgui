@@ -15,14 +15,15 @@ OMGUI is a web interface that makes it dead-simple to visualize and triage your 
 It supports small molecules as well as macromolecules like proteins.  
 Run it from a **Jupyter Notebook** or any **Python** script.
 
+```python
+import omgui
+omgui.show_mol('dopamine')
+```
+
 Included are also the [chartviz](docs/chartviz.md) and [molviz](docs/molviz.md) sub-libraries for generating charts an molecular images in 2D & 3D.
 
 [![Documentation](docs/assets/btn-docs.svg)](docs/readme.md#omgui---documentation)
 [![Quick start](docs/assets/btn-quick-start.svg)](#quick-start)
-
-> [!IMPORTANT]
-> OMGUI is in active development. Not all described functionality is implemented yet.  
-> A stable version will be released on PyPI in due time.
 
 <br>
 
@@ -32,12 +33,6 @@ More details under [Installation](docs/installation.md).
 
 ```shell
 pip install git+https://github.com/themoenen/omgui.git@v0.1
-```
-
-```python
-import omgui
-
-omgui.show_mol('dopamine')
 ```
 
 <br>
