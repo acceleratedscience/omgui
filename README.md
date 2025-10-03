@@ -51,7 +51,7 @@ import omgui
 omgui.show_mols(["C(C(=O)O)N", "C1=CC=CC=C1", "CC(CC(=O)O)O"])
 ```
 
-<kbd><img src="docs/assets/gui-molset.png" /></kbd>
+<kbd><img src="docs/assets/gui-molset.png" height="521" /></kbd>
 
 <br>
 
@@ -63,7 +63,7 @@ import omgui
 omgui.show_mol('dopamine')
 ```
 
-<kbd><img src="docs/assets/gui-molecule.png" /></kbd>
+<kbd><img src="docs/assets/gui-molecule.png" height="948" /></kbd>
 
 <br>
 
