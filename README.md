@@ -27,7 +27,7 @@ Included are also the [chartviz](docs/chartviz.md) and [molviz](docs/molviz.md) 
 
 <sub>_Developed at IBM Research_</sub>
 
-![IBM Research](docs/assets/icn-bee.svg)
+![IBM Research](docs/assets/dev-at-ibm-research.svg)
 
 <br><br>
 
