@@ -1,4 +1,4 @@
-<sub>[home](../#readme) / [docs](../#documentation)<sub>[home](../#readme)/ gui</sub>
+<sub>[home](../#readme) / [docs](../#documentation) / gui</sub>
 
 # OMGUI - GUI<!-- omit in toc -->
 
