@@ -7,7 +7,7 @@ This project was developed by [@themoenen](https://github.com/themoenen) for [IB
 ### Contributions
 
 OMGUI is fully open-source and [pull requests](../pulls) are welcome.  
-For suggestions & bug reports you can always create an [issues](../../../../issues).
+For suggestions & bug reports you can always create an [issues](../../../issues).
 
 ### The Stack
 
