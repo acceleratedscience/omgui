@@ -63,6 +63,8 @@ log_level: ERROR
 sample_files: false
 ```
 
+<br>
+
 ## Debugging
 
 ### Config Report
@@ -126,6 +128,8 @@ Configuration Sources:
 ```
 
 </details>
+
+<br>
 
 ### Reset Config
 
