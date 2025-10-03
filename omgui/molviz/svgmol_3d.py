@@ -50,8 +50,6 @@ def render(
     """
     # Create RDKit molecule
     mol = Chem.MolFromSmiles(smiles)
-    # Add hydrogen atoms
-    # mol = Chem.AddHs(mol)
 
     # Get coordinates for 3D rendering
     conformer = _get_conformer(mol)
@@ -69,21 +67,13 @@ def render(
             atom_colors[atom_index] = (230, 25, 75)
 
     base_color = _random_pastel_color()
-    print(atom_colors)
     for atom in mol.GetAtoms():
-        # if atom.GetSymbol() == "H":
-        #     continue
         color = atom_colors.get(atom.GetIdx(), base_color)
         atoms.append(
             Atom(atom.GetIdx(), atom.GetSymbol(), pos[atom.GetIdx()], color=color)
         )
 
     for bond in mol.GetBonds():
-        # if (
-        #     bond.GetBeginAtom().GetSymbol() == "H"
-        #     or bond.GetEndAtom().GetSymbol() == "H"
-        # ):
-        #     continue
         start_index, end_index = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
         bonds.append(Bond(start_index, end_index, int(bond.GetBondTypeAsDouble())))
 
@@ -129,13 +119,8 @@ def _get_conformer(mol: Chem.Mol) -> Chem.Conformer:
     """
     Generate the molecule's conformer.
     """
-    # AllChem.EmbedMolecule(mol)  # pylint: disable=E1101
-    AllChem.EmbedMolecule(
-        mol, useRandomCoords=True, randomSeed=0xF00D
-    )  # pylint: disable=E1101
-    AllChem.MMFFOptimizeMolecule(mol)  # pylint: disable=E1101
-
-    # Generate conformer
+    AllChem.EmbedMolecule(mol, useRandomCoords=True, randomSeed=0xF00D)
+    AllChem.MMFFOptimizeMolecule(mol)
     return mol.GetConformer()
 
 
@@ -182,6 +167,4 @@ def find_substructure(mol: Chem.Mol, smarts: str) -> list[int]:
     """
     substructure = Chem.MolFromSmarts(smarts)
     matches = mol.GetSubstructMatches(substructure)
-    print(matches)
-    print([atom_index for match in matches for atom_index in match])
     return [atom_index for match in matches for atom_index in match]
