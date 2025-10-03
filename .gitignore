@@ -24,4 +24,5 @@ dump.rdb
 _*
 !__init__.py
 test*
+!tests/
 todo.txt
