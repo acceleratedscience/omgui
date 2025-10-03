@@ -25,8 +25,6 @@ Included are also the [chartviz](docs/chartviz.md) and [molviz](docs/molviz.md) 
 [![Documentation](docs/assets/btn-docs.svg)](#documentation)
 [![Quick start](docs/assets/btn-quick-start.svg)](#quick-start)
 
-<sub>_Developed at IBM Research_</sub>
-
 ![IBM Research](docs/assets/dev-at-ibm-research.svg)
 
 <br><br>
