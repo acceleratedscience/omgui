@@ -1,6 +1,6 @@
 ![omgui](docs/assets/omgui-header.webp)
 
-# 😱 OMGUI
+# OMGUI
 
 ### _Open-source Molecular Graphical User Interface_
 
@@ -11,10 +11,10 @@
 
 <!-- [![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/) -->
 
-OMGUI makes it dead-simple to visualize and triage your molecule results in Python.  
-It supports small molecules as well as macromolecules like proteins, plus it does a [whole lot more](docs/readme.md).
+OMGUI is a web interface that makes it dead-simple to visualize and triage your molecule results in Python.  
+It supports small molecules as well as macromolecules like proteins. Run it from a **Jupyter Notebook** or any **Python** script.
 
-Run it from a **Jupyter Notebook** or any **Python** script.
+This project also includes the [chartviz](docs/chartviz.md) and [molviz](docs/molviz.md) sub-libraries for generating data data charts an molecular images in 2D and 3D.
 
 [![Documentation](docs/assets/btn-docs.svg)](docs/readme.md#omgui---documentation)
 [![Quick start](docs/assets/btn-quick-start.svg)](#quick-start)
