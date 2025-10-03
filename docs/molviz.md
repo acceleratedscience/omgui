@@ -1,4 +1,4 @@
-<sub>[home](../#readme) / chartviz</sub>
+<sub>[home](../#readme) / [docs](../#documentation) / chartviz</sub>
 
 # OMGUI - `molviz` - Molecule Visualization
 

@@ -1,4 +1,4 @@
-<sub>[home](../#readme) / config</sub>
+<sub>[home](../#readme) / [docs](../#documentation) / config</sub>
 
 # OMGUI - Configuration
 
