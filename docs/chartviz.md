@@ -1,4 +1,6 @@
-<sub>[home](../README.md) / [docs](readme.md) / chartviz.md</sub>
+<sub>[home](../README.md) / [docs](readme.md) / chartviz</sub>
+
+---
 
 <!-- <sub>[&larr; BACK](readme.md)</sub> -->
 
