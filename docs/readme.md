@@ -7,4 +7,4 @@
 1.  [GUI](gui.md) - Graphical user interface for molecules and data
 1.  [molviz](molviz.md) - Sub-module for molecule visualization
 1.  [chartviz](chartviz.md) - Sub-module for chart visualisation
-1.  [about](about.md) - About this project
+1.  [about](about.md)
