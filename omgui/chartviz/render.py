@@ -39,12 +39,19 @@ def _generate_chart_image(
     """
     fig = go.Figure(data=chart_data)
 
+    default_width = 1200 if output == "interactive" else d.WIDTH
+    default_height = 900 if output == "interactive" else d.HEIGHT
+
     # Set width and height to defaults
     layout["width"] = (
-        options.get("width", 1200) if options.get("width") != "auto" else 1200
+        options.get("width", default_width)
+        if options.get("width") != "auto"
+        else default_width
     )
     layout["height"] = (
-        options.get("height", 900) if options.get("height") != "auto" else 900
+        options.get("height", default_height)
+        if options.get("height") != "auto"
+        else default_height
     )
 
     # Apply layout

@@ -211,7 +211,7 @@ button.copy-btn:hover {
 	background: #e9e9e3;
 	padding: 10px;
 	border-radius: 3px;
-	margin-bottom: 20px;
+	margin-top: 20px;
 }
 .example-section > .example-buttons {
 	display: flex;

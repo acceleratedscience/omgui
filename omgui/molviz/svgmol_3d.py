@@ -66,7 +66,7 @@ def render(
         for atom_index in find_substructure(mol, highlight):
             atom_colors[atom_index] = (230, 25, 75)
 
-    base_color = _random_pastel_color()
+    base_color = (220, 220, 220)  # _random_pastel_color()
     for atom in mol.GetAtoms():
         color = atom_colors.get(atom.GetIdx(), base_color)
         atoms.append(
