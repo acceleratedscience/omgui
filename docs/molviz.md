@@ -2,7 +2,7 @@
 
 # OMGUI - `molviz` - Molecule Visualization
 
-![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.molviz-yellow)
+![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.molviz-yellow?style=flat-square)
 
 The `molviz` sub-module lets you visualize molecules on the fly, in 2D and 3D, either as SVG or PNG.
 

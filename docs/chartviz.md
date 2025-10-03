@@ -2,7 +2,7 @@
 
 # OMGUI - `chartviz` - Data Visualization
 
-![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.chartviz-yellow)
+![chartviz sub-module](https://img.shields.io/badge/sub--module-omgui.chartviz-yellow?style=flat-square)
 
 The `chartviz` sub-module lets you visualize various types of data charts on the fly, either as HTML page, SVG or PNG.
 
