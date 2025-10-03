@@ -6,13 +6,14 @@ Core chart rendering functions.
 import json
 from typing import Literal
 
-
 # 3rd party
 from urllib.parse import urlencode
 
 # OMGUI
+from omgui.chartviz import prep
+from omgui.chartviz import types as t
+from omgui.chartviz import defaults as d
 from omgui.util.logger import get_logger
-from omgui.chartviz import prep, types as t
 from omgui.util.general import deep_merge, is_dates, prune_dict
 
 # Check for [viz] optional dependencies
@@ -28,10 +29,10 @@ logger = get_logger()
 
 
 def _generate_chart_image(
-    chart_data: list[dict],
+    chart_data: t.ChartDataType,
     layout: dict,
     options: dict,
-    output: Literal["png", "svg"],
+    output: t.OutputType,
 ):
     """
     Generate SVG or PNG from Plotly chart data.

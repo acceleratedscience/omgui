@@ -4,14 +4,27 @@ SVG rendering function for 2D molecular structures.
 
 # 3rd party
 from rdkit import Chem
+from rdkit import RDLogger
 from rdkit.Chem.Draw import rdMolDraw2D
+
+
+# OMGUI
+from omgui.molviz import defaults as d
+from omgui.util.logger import get_logger
+
+# Suppress RDKit errors
+RDLogger.DisableLog("rdApp.error")
+RDLogger.DisableLog("rdApp.warning")
+
+# Logger
+logger = get_logger()
 
 
 def render(
     smiles: str,
-    width: int = 600,
-    height: int = 450,
-    highlight: str = None,
+    width: int = d.WIDTH,
+    height: int = d.HEIGHT,
+    highlight: str | None = None,
 ) -> str:
     """
     Render a 2D molecule from SMILES string to SVG format.
@@ -29,8 +42,9 @@ def render(
 
         # Generate RDKit molecule object.
         mol_rdkit = Chem.MolFromInchi(smiles)
+        mol_rdkit = Chem.MolFromSmiles(smiles)  # pylint: disable=no-member
         if not mol_rdkit:
-            mol_rdkit = Chem.MolFromSmiles(smiles)  # pylint: disable=no-member
+            mol_rdkit = Chem.MolFromInchi(smiles)
 
         if highlight:
             substructure = Chem.MolFromSmarts(highlight)  # pylint: disable=no-member
@@ -46,6 +60,6 @@ def render(
         mol_drawer.FinishDrawing()
         return mol_drawer.GetDrawingText()
 
-    except Exception as e:
-        print(f"Error generating SVG: {e}")
+    except Exception as err:
+        logger.error("Error generating SVG for %s: %s", smiles, err)
         return None

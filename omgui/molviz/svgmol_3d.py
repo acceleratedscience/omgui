@@ -6,7 +6,6 @@ SVG rendering function for 3D molecular structures.
 import re
 import time
 from random import randint
-from typing import Optional, Literal, List
 
 # 3rd party
 from rdkit import Chem
@@ -14,6 +13,8 @@ from rdkit.Chem import AllChem
 from cinemol.api import Atom, Bond, Look, Style, draw_molecule
 
 # OMGUI
+from omgui.molviz import types as t
+from omgui.molviz import defaults as d
 from omgui.util.logger import get_logger
 
 # Logger
@@ -23,16 +24,16 @@ logger = get_logger()
 def render(
     # fmt: off
     smiles: str,
-    width: Optional[int] = 600,
-    height: Optional[int] = 450,
-    highlight: Optional[str] = None,
+    width: int = d.WIDTH,
+    height: int = d.HEIGHT,
+    highlight: str | None = None,
     # 3D specific options
-    style: Literal['SPACEFILLING', 'BALL_AND_STICK', 'TUBE', 'WIREFRAME'] = 'BALL_AND_STICK',
-    look: Literal['CARTOON', 'GLOSSY'] = 'CARTOON',
-    rot_random: bool = True,
-    rot_x: Optional[float] = None,
-    rot_y: Optional[float] = None,
-    rot_z: Optional[float] = None,
+    style: t.D3StyleType = d.D3_STYLE,
+    look: t.D3LookType = d.D3_LOOK,
+    rot_random: bool = d.D3_ROT_RANDOM,
+    rot_x: float | None = None,
+    rot_y: float | None = None,
+    rot_z: float | None = None,
     # fmt: on
 ) -> str:
     """
@@ -47,9 +48,10 @@ def render(
     Returns:
         str: 3D SVG representation of the molecule
     """
-
     # Create RDKit molecule
-    mol = Chem.MolFromSmiles(smiles)  # pylint: disable=E1101
+    mol = Chem.MolFromSmiles(smiles)
+    # Add hydrogen atoms
+    # mol = Chem.AddHs(mol)
 
     # Get coordinates for 3D rendering
     conformer = _get_conformer(mol)
@@ -66,30 +68,31 @@ def render(
         for atom_index in find_substructure(mol, highlight):
             atom_colors[atom_index] = (230, 25, 75)
 
-    color = _random_pastel_color()
+    base_color = _random_pastel_color()
+    print(atom_colors)
     for atom in mol.GetAtoms():
         # if atom.GetSymbol() == "H":
         #     continue
-        color = atom_colors.get(atom.GetIdx(), color)
+        color = atom_colors.get(atom.GetIdx(), base_color)
         atoms.append(
             Atom(atom.GetIdx(), atom.GetSymbol(), pos[atom.GetIdx()], color=color)
         )
 
     for bond in mol.GetBonds():
-        if (
-            bond.GetBeginAtom().GetSymbol() == "H"
-            or bond.GetEndAtom().GetSymbol() == "H"
-        ):
-            continue
+        # if (
+        #     bond.GetBeginAtom().GetSymbol() == "H"
+        #     or bond.GetEndAtom().GetSymbol() == "H"
+        # ):
+        #     continue
         start_index, end_index = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
         bonds.append(Bond(start_index, end_index, int(bond.GetBondTypeAsDouble())))
 
     t0 = time.time()
 
     # Set rotation angles
-    rot_x = rot_x if rot_x != None else randint(0, 600) / 100 if rot_random else 0
-    rot_y = rot_y if rot_y != None else randint(0, 600) / 100 if rot_random else 0
-    rot_z = rot_z if rot_z != None else randint(0, 600) / 100 if rot_random else 0
+    rot_x = rot_x if rot_x is not None else randint(0, 360) if rot_random else 0
+    rot_y = rot_y if rot_y is not None else randint(0, 360) if rot_random else 0
+    rot_z = rot_z if rot_z is not None else randint(0, 360) if rot_random else 0
 
     # Draw molecule.
     svg = draw_molecule(
@@ -99,9 +102,9 @@ def render(
         look=_parse_look(look),
         resolution=50,
         # Not obvious: rotation is in increments of 60°, so 6 = 360°
-        rotation_over_y_axis=rot_x,
-        rotation_over_x_axis=rot_y,
-        rotation_over_z_axis=rot_z,
+        rotation_over_y_axis=rot_x / 60,
+        rotation_over_x_axis=rot_y / 60,
+        rotation_over_z_axis=rot_z / 60,
         # view_box=(0, -0, 2000, 2000),  # (x, y, width, height)
         scale=50,
     )
@@ -126,9 +129,6 @@ def _get_conformer(mol: Chem.Mol) -> Chem.Conformer:
     """
     Generate the molecule's conformer.
     """
-
-    # Prepare the molecule for 3D rendering
-    mol = Chem.AddHs(mol)  # pylint: disable=E1101
     # AllChem.EmbedMolecule(mol)  # pylint: disable=E1101
     AllChem.EmbedMolecule(
         mol, useRandomCoords=True, randomSeed=0xF00D
@@ -169,15 +169,19 @@ def _parse_look(look_string: str) -> Look:
         return Look.CARTOON
 
 
-def find_substructure(mol: Chem.Mol, smarts: str) -> List[int]:
+def find_substructure(mol: Chem.Mol, smarts: str) -> list[int]:
     """
     Find a substructure in a molecule.
 
-    :param Chem.Mol mol: Molecule to find a substructure in.
-    :param str smarts: SMARTS string to use for substructure search.
-    :return: List of atom indices that match the substructure.
-    :rtype: ty.List[int]
+    Args:
+        mol (Chem.Mol): Molecule to find a substructure in.
+        smarts (str): SMARTS string to use for substructure search.
+
+    Returns:
+        List of atom indices that match the substructure.
     """
     substructure = Chem.MolFromSmarts(smarts)
     matches = mol.GetSubstructMatches(substructure)
+    print(matches)
+    print([atom_index for match in matches for atom_index in match])
     return [atom_index for match in matches for atom_index in match]

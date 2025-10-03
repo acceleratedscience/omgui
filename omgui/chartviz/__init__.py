@@ -1,6 +1,6 @@
 from typing import Callable
 from omgui.chartviz import types as t
-from omgui.chartviz import defaults
+from omgui.chartviz import defaults as d
 
 
 # ------------------------------------
@@ -13,20 +13,20 @@ from omgui.chartviz import defaults
 # ⚠️ Keep in sync with query_params() in chartviz_routes.py
 def _common_params(
     *,  # Force keyword-only arguments
-    title: str | None = defaults.TITLE,
-    subtitle: str | None = defaults.SUBTITLE,
-    body: str | None = defaults.BODY,
-    x_title: str | None = defaults.X_TITLE,
-    y_title: str | None = defaults.Y_TITLE,
-    x_prefix: str | None = defaults.X_PREFIX,
-    y_prefix: str | None = defaults.Y_PREFIX,
-    x_suffix: str | None = defaults.X_SUFFIX,
-    y_suffix: str | None = defaults.Y_SUFFIX,
-    width: int = defaults.WIDTH,
-    height: int = defaults.HEIGHT,
-    scale: float = defaults.SCALE,
-    omit_legend: bool = defaults.OMIT_LEGEND,
-    return_data: bool = defaults.RETURN_DATA,
+    title: str | None = d.TITLE,
+    subtitle: str | None = d.SUBTITLE,
+    body: str | None = d.BODY,
+    x_title: str | None = d.X_TITLE,
+    y_title: str | None = d.Y_TITLE,
+    x_prefix: str | None = d.X_PREFIX,
+    y_prefix: str | None = d.Y_PREFIX,
+    x_suffix: str | None = d.X_SUFFIX,
+    y_suffix: str | None = d.Y_SUFFIX,
+    width: int = d.WIDTH,
+    height: int = d.HEIGHT,
+    scale: float = d.SCALE,
+    omit_legend: bool = d.OMIT_LEGEND,
+    return_data: bool = d.RETURN_DATA,
 ):
     """
     Common parameters for chart rendering functions.
@@ -155,7 +155,7 @@ def _validate_output(output: str):
     logger = get_logger()
     if output not in ["png", "svg", "url", "interactive"]:
         logger.error(
-            "Invalid output type '%s', using 'interactive' instead. Other options are: 'svg', 'png' or 'url'.",
+            "Invalid output type '%s', using 'interactive' instead. Other options are 'svg', 'png' or 'url'",
             output,
         )
         return "interactive"
@@ -171,10 +171,10 @@ def _validate_output(output: str):
 @with_common_params
 def bar(  # pylint: disable=disallowed-name
     input_data: t.ChartDataType,
-    output: t.OutputType = defaults.OUTPUT,
-    options: dict | None = defaults.OPTIONS,
+    output: t.OutputType = d.OUTPUT,
+    options: dict | None = d.OPTIONS,
     ##
-    horizontal: bool = defaults.HORIZONTAL,
+    horizontal: bool = d.HORIZONTAL,
 ):
     """
     Render a bar chart from input data.
@@ -190,10 +190,10 @@ def bar(  # pylint: disable=disallowed-name
 @with_common_params
 def line(
     input_data: t.ChartDataType,
-    output: t.OutputType = defaults.OUTPUT,
-    options: dict | None = defaults.OPTIONS,
+    output: t.OutputType = d.OUTPUT,
+    options: dict | None = d.OPTIONS,
     ##
-    horizontal: bool = defaults.HORIZONTAL,
+    horizontal: bool = d.HORIZONTAL,
 ):
     """
     Render a line chart from input data.
@@ -209,8 +209,8 @@ def line(
 @with_common_params
 def scatter(
     input_data: t.ChartDataType,
-    output: t.OutputType = defaults.OUTPUT,
-    options: dict | None = defaults.OPTIONS,
+    output: t.OutputType = d.OUTPUT,
+    options: dict | None = d.OPTIONS,
 ):
     """
     Render a scatter plot from input data.
@@ -226,8 +226,8 @@ def scatter(
 @with_common_params
 def bubble(
     input_data: t.ChartDataType,
-    output: t.OutputType = defaults.OUTPUT,
-    options: dict | None = defaults.OPTIONS,
+    output: t.OutputType = d.OUTPUT,
+    options: dict | None = d.OPTIONS,
 ):
     """
     Render a bubble chart from input data.
@@ -243,8 +243,8 @@ def bubble(
 @with_common_params
 def pie(
     input_data: t.ChartDataType,
-    output: t.OutputType = defaults.OUTPUT,
-    options: dict | None = defaults.OPTIONS,
+    output: t.OutputType = d.OUTPUT,
+    options: dict | None = d.OPTIONS,
 ):
     """
     Render a pie chart from input data.
@@ -260,8 +260,8 @@ def pie(
 @with_common_params
 def boxplot(
     input_data: t.ChartDataType,
-    output: t.OutputType = defaults.OUTPUT,
-    options: dict | None = defaults.OPTIONS,
+    output: t.OutputType = d.OUTPUT,
+    options: dict | None = d.OPTIONS,
     ##
     horizontal: bool = False,
     show_points: bool = False,
@@ -283,11 +283,11 @@ def boxplot(
 @with_common_params
 def histogram(
     input_data: t.ChartDataType,
-    output: t.OutputType = defaults.OUTPUT,
-    options: dict | None = defaults.OPTIONS,
+    output: t.OutputType = d.OUTPUT,
+    options: dict | None = d.OPTIONS,
     ##
-    horizontal: bool = defaults.HORIZONTAL,
-    barmode: t.BarModeType = defaults.BARMODE,
+    horizontal: bool = d.HORIZONTAL,
+    barmode: t.BarModeType = d.BARMODE,
 ):
     """
     Render a histogram chart from input data.
