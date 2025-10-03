@@ -27,8 +27,7 @@ For suggestions & bug reports you can always create an [issues](../../../issues)
     Relies on [Jinja] for basic template rendering.
 
 -   **OMGUI Banner**  
-    In case you wondered, the [rotating Icosahedron banner](assets/omgui-header.webp) was created with [Three.js] and then exported to an animated webp image with [FFmpeg].  
-     You can find the repo for that at [omgui-gh-banner]
+    In case you wondered, the [rotating Icosahedron banner](assets/omgui-header.webp) was created with [Three.js] and then exported to an animated webp image with [FFmpeg]. You can find the repo for that at [omgui-gh-banner]
 
 [chartviz]: chartviz.md
 [molviz]: molviz.md
