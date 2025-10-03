@@ -1,8 +1,6 @@
-<sub>[home](../#readme) / [docs](readme.md) / chartviz</sub>
+<sub>[home](../#readme) › [docs](readme.md) › chartviz</sub>
 
----
-
-<!-- <sub>[&larr; BACK](readme.md)</sub> -->
+<!-- --- -->
 
 # OMGUI - `chartviz` - Data Visualization
 
