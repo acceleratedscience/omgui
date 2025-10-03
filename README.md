@@ -7,7 +7,8 @@
 <!-- [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/omgui)](https://pypi.org/project/omgui/) -->
 <!-- [![PyPI version](https://img.shields.io/pypi/v/omgui)](https://pypi.org/project/omgui/) -->
 
-[![License MIT](https://img.shields.io/github/license/acceleratedscience/openad-toolkit)](https://opensource.org/licenses/MIT)
+![Static Badge](https://img.shields.io/badge/IBM-Research-0F62FE?style=for-the-badge)
+[![License MIT](https://img.shields.io/github/license/acceleratedscience/openad-toolkit)](https://opensource.org/licenses/MIT?style=for-the-badge)
 
 <!-- [![License MIT](https://img.shields.io/pypi/frameworkversions/jupyterlab/omgui)](https://jupyter.org/) -->
 
