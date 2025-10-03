@@ -1,4 +1,4 @@
-<sub>[home](../#readme) / [docs](readme.md) / gui</sub>
+<sub>[home](../#readme) / gui</sub>
 
 # OMGUI - GUI<!-- omit in toc -->
 
@@ -19,16 +19,16 @@ omgui.launch()
 
 ### Components<!-- omit in toc -->
 
-- [1. File Browser](#1-file-browser)
-  - [Supported File Formats](#supported-file-formats)
-- [2. Molecule Viewer](#2-molecule-viewer)
-- [3. Molset Viewer](#3-molset-viewer)
-- [4. Data Viewer (coming soon)](#4-data-viewer-coming-soon)
-- [5. Molecule Working Set](#5-molecule-working-set)
-  - [Adding a Property](#adding-a-property)
-    - [How to Format Property Data](#how-to-format-property-data)
-  - [Exporting Your Molecules](#exporting-your-molecules)
-- [6. Results (coming soon)](#6-results-coming-soon)
+-   [1. File Browser](#1-file-browser)
+    -   [Supported File Formats](#supported-file-formats)
+-   [2. Molecule Viewer](#2-molecule-viewer)
+-   [3. Molset Viewer](#3-molset-viewer)
+-   [4. Data Viewer (coming soon)](#4-data-viewer-coming-soon)
+-   [5. Molecule Working Set](#5-molecule-working-set)
+    -   [Adding a Property](#adding-a-property)
+        -   [How to Format Property Data](#how-to-format-property-data)
+    -   [Exporting Your Molecules](#exporting-your-molecules)
+-   [6. Results (coming soon)](#6-results-coming-soon)
 
 <br>
 

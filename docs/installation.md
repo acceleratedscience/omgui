@@ -1,4 +1,4 @@
-<sub>[home](../#readme) / [docs](readme.md) / installation</sub>
+<sub>[home](../#readme) / installation</sub>
 
 # OMGUI - Installation
 

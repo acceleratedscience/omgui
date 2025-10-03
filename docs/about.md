@@ -1,4 +1,4 @@
-<sub>[home](../#readme) / [docs](readme.md) / about</sub>
+<sub>[home](../#readme) / about</sub>
 
 # OMGUI - About
 
