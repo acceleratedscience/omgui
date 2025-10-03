@@ -1,5 +1,5 @@
 """
-Chart rendering functions.
+Core chart rendering functions.
 """
 
 # Std
@@ -11,7 +11,6 @@ from typing import Literal
 from urllib.parse import urlencode
 
 # OMGUI
-from omgui.main import gui_init
 from omgui.util.logger import get_logger
 from omgui.chartviz import prep, types as t
 from omgui.util.general import deep_merge, is_dates, prune_dict
@@ -81,21 +80,26 @@ def _chart_output(
     options: t.OptionsType,
 ):
     """
-    Shared output rendering for all charts.
+    Shared output handling for all charts.
     """
-    # Return image
-    if output in ["png", "svg", None]:
-        # Compile Plotly layout dict
-        layout = __compile_layout(chart_type, chart_data, options)
-        return _generate_chart_image(chart_data, layout, options, output)
-
     # Return URL
-    url = __generate_url(chart_type, input_data, **options)
-    if output == "url":
+    if output in ["url", "interactive"]:
+        url = __generate_url(chart_type, input_data, **options)
         return url
 
-    # Open URL in browser
-    gui_init(url, ignore_headless=True)
+    # Compile Plotly layout dict
+    layout = __compile_layout(chart_type, chart_data, options)
+
+    # Return image
+    if output in ["png", "svg"]:
+        return _generate_chart_image(chart_data, layout, options, output)
+
+    # Return data for HTML template
+    elif output == "html":
+        return {
+            "chart_data": chart_data,
+            "layout": layout,
+        }
 
 
 def __compile_layout(

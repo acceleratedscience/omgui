@@ -246,23 +246,23 @@ bar_chart_ops = chartviz.bar(bar_chart_data, output='svg', width=400, height=300
 chartviz.bar(bar_chart_data, <param>=<val>, <param>=<val>)
 ```
 
-| Parameter   | Type  | Default | Description                                                                                                                                              |
-| :---------- | :---- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| output      | enum  | html    | Choose from `html`, `svg` or `png` to render an HTML page, a vector image or a bitmap image.<br>For image output, 'svg' is generally recommended.        |
-| title       | str   | None    | Title of the chart.                                                                                                                                      |
-| subtitle    | str   | None    | Subtitle of the chart.                                                                                                                                   |
-| body        | str   | None    | _[ HTML ONLY ]_ Text paragraph to be displayed above the chart.                                                                                          |
-| x_title     | str   | None    | Title for the x-axis, eg. 'Date'                                                                                                                         |
-| y_title     | str   | None    | Title for the y-axis, eg. 'Spending'                                                                                                                     |
-| x_prefix    | str   | None    | Prefix for x-axis tick labels, eg. "€".                                                                                                                  |
-| y_prefix    | str   | None    | Prefix for y-axis tick labels, eg. "€".                                                                                                                  |
-| x_suffix    | str   | None    | Suffix for x-axis tick labels, eg. "%".                                                                                                                  |
-| y_suffix    | str   | None    | Suffix for y-axis tick labels, eg. "%".                                                                                                                  |
-| width       | int   | 1200    | Width of the chart in pixels.                                                                                                                            |
-| height      | int   | 900     | Height of the chart in pixels.                                                                                                                           |
-| scale       | float | 1       | _[ PNG ONLY ]_ Scaling factor for the png pixel output. Set to 2 for high-resolution displays.                                                           |
-| omit_legend | bool  | False   | If True, do not display the legend.                                                                                                                      |
-| return_data | bool  | False   | _[ NOTEBOOKS ONLY ]_ Return image data instead of displaying it, when `url` is False.<br>See [Jupyter Notebook](#jupyter-notebook) below for an example. |
+| Parameter   | Type  | Default | Description                                                                                                                                                                                                    |
+| :---------- | :---- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| output      | enum  | html    | Choose from `html`, `svg` or `png` to render an HTML page, a vector image or a bitmap image.<br>For image output, 'svg' is generally recommended.                                                              |
+| title       | str   | None    | Title of the chart.                                                                                                                                                                                            |
+| subtitle    | str   | None    | Subtitle of the chart.                                                                                                                                                                                         |
+| body        | str   | None    | _[ HTML ONLY ]_ Paragraph displayed below the chart. Only used with output='html'.                                                                                                                             |
+| x_title     | str   | None    | Title for the x-axis, eg. 'Date'                                                                                                                                                                               |
+| y_title     | str   | None    | Title for the y-axis, eg. 'Spending'                                                                                                                                                                           |
+| x_prefix    | str   | None    | Prefix for x-axis tick labels, eg. "€".                                                                                                                                                                        |
+| y_prefix    | str   | None    | Prefix for y-axis tick labels, eg. "€".                                                                                                                                                                        |
+| x_suffix    | str   | None    | Suffix for x-axis tick labels, eg. "%".                                                                                                                                                                        |
+| y_suffix    | str   | None    | Suffix for y-axis tick labels, eg. "%".                                                                                                                                                                        |
+| width       | int   | 1200    | Width of the chart in pixels.                                                                                                                                                                                  |
+| height      | int   | 900     | Height of the chart in pixels.                                                                                                                                                                                 |
+| scale       | float | 1       | _[ PNG ONLY ]_ Scaling factor for the png pixel output. Set to 2 for high-resolution displays. Only used when output='png'                                                                                     |
+| omit_legend | bool  | False   | If True, do not display the legend.                                                                                                                                                                            |
+| return_data | bool  | False   | _[ NOTEBOOKS ONLY ]_ Whether to return raw data (True) or display the svg/png (False) in Jupyter Notebook. Only used when output='svg/png'.<br>See [Jupyter Notebook](#jupyter-notebook) below for an example. |
 
 <br>
 

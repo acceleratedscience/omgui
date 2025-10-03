@@ -1,15 +1,5 @@
-# Std
-import inspect
 from typing import Callable
-from functools import wraps
-
-# 3rd party
-from IPython.display import Image, SVG, display
-
-# OMGUI
-from omgui.chartviz import render
-from omgui.util.jupyter import nb_mode
-from omgui.chartviz.types import ChartDataType, OutputType, BarModeType, BoxMeanType
+from omgui.chartviz import types as t
 from omgui.chartviz import defaults
 
 
@@ -19,6 +9,8 @@ from omgui.chartviz import defaults
 
 
 # pylint: disable=unused-argument
+# ---
+# ⚠️ Keep in sync with query_params() in chartviz_routes.py
 def _common_params(
     *,  # Force keyword-only arguments
     title: str | None = defaults.TITLE,
@@ -42,18 +34,18 @@ def _common_params(
     Args:
         title        (str, optional):    Title of the chart.
         subtitle     (str, optional):    Subtitle of the chart.
-        body         (str, optional):    Additional descriptive text below the chart. Only used with output='html'.
+        body         (str, optional):    Paragraph displayed below the chart. Only used with output='html'.
         x_title      (str, optional):    Title for the x-axis.
         y_title      (str, optional):    Title for the y-axis.
-        x_prefix     (str, optional):    Prefix for x-axis tick labels, eg. "€".
-        y_prefix     (str, optional):    Prefix for y-axis tick labels, eg. "€".
-        x_suffix     (str, optional):    Suffix for x-axis tick labels, eg. "%".
-        y_suffix     (str, optional):    Suffix for y-axis tick labels, eg. "%".
+        x_prefix     (str, optional):    Prefix for x-axis tick labels, eg. '€'.
+        y_prefix     (str, optional):    Prefix for y-axis tick labels, eg. '€'.
+        x_suffix     (str, optional):    Suffix for x-axis tick labels, eg. '%'.
+        y_suffix     (str, optional):    Suffix for y-axis tick labels, eg. '%'.
         width        (int, optional):    Width of the chart in pixels.
         height       (int, optional):    Height of the chart in pixels.
         scale        (float, optional):  Scaling factor for the png pixel output. Set to 2 for high-resolution displays. Only used when output='png'.
         omit_legend  (bool, optional):   If True, do not display the legend.
-        return_data  (bool, optional):   Whether to return raw data (True) or display svg/png (False) in Jupyter Notebook.
+        return_data  (bool, optional):   Whether to return raw data (True) or display the svg/png (False) in Jupyter Notebook. Only used when output='svg/png'.
     """
     # This function is never called, it only provides the shared options
     # signature and documentation. See @with_common_options decorator below.
@@ -67,6 +59,8 @@ def with_common_params(func: Callable) -> Callable:
 
     This applies the common parameters to every chart function.
     """
+    import inspect
+    from functools import wraps
 
     # Get signatures
     common_sig = inspect.signature(_common_params)
@@ -105,7 +99,7 @@ def with_common_params(func: Callable) -> Callable:
 
         # Ensure 'data' and 'output' are always first,
         # remove 'options' to avoid doubling in func_args
-        data = func_args.pop("data")
+        data = func_args.pop("input_data")
         output = func_args.pop("output", None)
         func_args.pop("options", None)
 
@@ -119,18 +113,26 @@ def with_common_params(func: Callable) -> Callable:
 
 # endregion
 # ------------------------------------
-# region - Chart Functions
+# region - Auxiliary Functions
 # ------------------------------------
 
 
-def _handle_result(result: any, output: OutputType, return_data: bool = False):
+def _handle_result(result: any, output: t.OutputType, return_data: bool = False):
     """
-    Handles the result based on the output type and environment.
+    Shared result handling based on the output type and environment.
 
     In Jupyter Notebook, SVGs or PNGs are displayed directly,
     unless return_data is True. URL is always returned as is.
     """
-    # Jupyter notebook display
+    from omgui.main import gui_init
+    from omgui.util.jupyter import nb_mode
+    from IPython.display import Image, SVG, display
+
+    # HTML page -> launch browser or iframe
+    if output == "interactive":
+        gui_init(result, ignore_headless=True)
+
+    # Jupyter notebook -> display images
     if nb_mode() and not return_data:
         if output == "png":
             display(Image(result))
@@ -144,10 +146,32 @@ def _handle_result(result: any, output: OutputType, return_data: bool = False):
         return result
 
 
+def _validate_output(output: str):
+    """
+    Ensure the output type is valid.
+    """
+    from omgui.util.logger import get_logger
+
+    logger = get_logger()
+    if output not in ["png", "svg", "url", "interactive"]:
+        logger.error(
+            "Invalid output type '%s', using 'interactive' instead. Other options are: 'svg', 'png' or 'url'.",
+            output,
+        )
+        return "interactive"
+    return output
+
+
+# endregion
+# ------------------------------------
+# region - Chart Functions
+# ------------------------------------
+
+
 @with_common_params
 def bar(  # pylint: disable=disallowed-name
-    data: ChartDataType,
-    output: OutputType = defaults.OUTPUT,
+    input_data: t.ChartDataType,
+    output: t.OutputType = defaults.OUTPUT,
     options: dict | None = defaults.OPTIONS,
     ##
     horizontal: bool = defaults.HORIZONTAL,
@@ -155,15 +179,18 @@ def bar(  # pylint: disable=disallowed-name
     """
     Render a bar chart from input data.
     """
-    result = render.bar(data, output, options, horizontal)
+    from omgui.chartviz import render
+
+    output = _validate_output(output)
+    result = render.bar(input_data, output, options, horizontal)
     return_data = options.get("return_data") if options else False
     return _handle_result(result, output, return_data)
 
 
 @with_common_params
 def line(
-    data: ChartDataType,
-    output: OutputType = defaults.OUTPUT,
+    input_data: t.ChartDataType,
+    output: t.OutputType = defaults.OUTPUT,
     options: dict | None = defaults.OPTIONS,
     ##
     horizontal: bool = defaults.HORIZONTAL,
@@ -171,84 +198,104 @@ def line(
     """
     Render a line chart from input data.
     """
-    result = render.line(data, output, options, horizontal)
+    from omgui.chartviz import render
+
+    output = _validate_output(output)
+    result = render.line(input_data, output, options, horizontal)
     return_data = options.get("return_data") if options else False
     return _handle_result(result, output, return_data)
 
 
 @with_common_params
 def scatter(
-    data: ChartDataType,
-    output: OutputType = defaults.OUTPUT,
+    input_data: t.ChartDataType,
+    output: t.OutputType = defaults.OUTPUT,
     options: dict | None = defaults.OPTIONS,
 ):
     """
     Render a scatter plot from input data.
     """
-    result = render.scatter(data, output, options)
+    from omgui.chartviz import render
+
+    output = _validate_output(output)
+    result = render.scatter(input_data, output, options)
     return_data = options.get("return_data") if options else False
     return _handle_result(result, output, return_data)
 
 
 @with_common_params
 def bubble(
-    data: ChartDataType,
-    output: OutputType = defaults.OUTPUT,
+    input_data: t.ChartDataType,
+    output: t.OutputType = defaults.OUTPUT,
     options: dict | None = defaults.OPTIONS,
 ):
     """
     Render a bubble chart from input data.
     """
-    result = render.bubble(data, output, options)
+    from omgui.chartviz import render
+
+    output = _validate_output(output)
+    result = render.bubble(input_data, output, options)
     return_data = options.get("return_data") if options else False
     return _handle_result(result, output, return_data)
 
 
 @with_common_params
 def pie(
-    data: ChartDataType,
-    output: OutputType = defaults.OUTPUT,
+    input_data: t.ChartDataType,
+    output: t.OutputType = defaults.OUTPUT,
     options: dict | None = defaults.OPTIONS,
 ):
     """
     Render a pie chart from input data.
     """
-    result = render.pie(data, output, options)
+    from omgui.chartviz import render
+
+    output = _validate_output(output)
+    result = render.pie(input_data, output, options)
     return_data = options.get("return_data") if options else False
     return _handle_result(result, output, return_data)
 
 
 @with_common_params
 def boxplot(
-    data: ChartDataType,
-    output: OutputType = defaults.OUTPUT,
+    input_data: t.ChartDataType,
+    output: t.OutputType = defaults.OUTPUT,
     options: dict | None = defaults.OPTIONS,
     ##
     horizontal: bool = False,
     show_points: bool = False,
-    boxmean: BoxMeanType = False,
+    boxmean: t.BoxMeanType = False,
 ):
     """
     Render a boxplot from input data.
     """
-    result = render.boxplot(data, output, options, horizontal, show_points, boxmean)
+    from omgui.chartviz import render
+
+    output = _validate_output(output)
+    result = render.boxplot(
+        input_data, output, options, horizontal, show_points, boxmean
+    )
     return_data = options.get("return_data") if options else False
     return _handle_result(result, output, return_data)
 
 
 @with_common_params
 def histogram(
-    data: ChartDataType,
-    output: OutputType = defaults.OUTPUT,
+    input_data: t.ChartDataType,
+    output: t.OutputType = defaults.OUTPUT,
     options: dict | None = defaults.OPTIONS,
     ##
     horizontal: bool = defaults.HORIZONTAL,
-    barmode: BarModeType = defaults.BARMODE,
+    barmode: t.BarModeType = defaults.BARMODE,
 ):
     """
     Render a histogram chart from input data.
     """
-    result = render.histogram(data, output, options, horizontal, barmode)
+    from omgui.chartviz import render
+
+    output = _validate_output(output)
+    result = render.histogram(input_data, output, options, horizontal, barmode)
     return_data = options.get("return_data") if options else False
     return _handle_result(result, output, return_data)
 

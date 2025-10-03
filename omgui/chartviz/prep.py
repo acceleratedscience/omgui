@@ -1,5 +1,5 @@
 """
-Prepare input data for Plotly consumption.
+Massage the input data for Plotly consumption.
 """
 
 from typing import Literal

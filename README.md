@@ -18,7 +18,6 @@ Run it from a **Jupyter Notebook** or any **Python** script.
 ```python
 import omgui
 omgui.show_mol('dopamine')
-omgui.show_mols(['CCO', 'C=C'])
 ```
 
 Included are also the [chartviz](docs/chartviz.md) and [molviz](docs/molviz.md) sub-libraries for generating charts an molecular images in 2D & 3D.
@@ -76,6 +75,8 @@ omgui.show_mol('dopamine')
 > ```
 > http://localhost:8024/shutdown
 > ```
+>
+> If this didn't work, you can always run: `kill -9 $(lsof -ti:8024)`
 
 </details>
 
@@ -100,7 +101,7 @@ omgui.show_mol('dopamine')
 <summary>Inspecting context</summary>
 <br>
 
-> To see your current context (which sets your workspace and holds your molecule working set), you can run:
+> To debug your current context (which sets your workspace), you can run:
 >
 > ```
 > import omgui

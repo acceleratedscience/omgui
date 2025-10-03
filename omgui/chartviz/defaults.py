@@ -9,21 +9,21 @@ OUTPUT: OutputType = "svg"
 OPTIONS: dict = None
 
 # Shared options
-TITLE = None
-SUBTITLE = None
-BODY = None
-X_TITLE = None
-Y_TITLE = None
-X_PREFIX = None
-Y_PREFIX = None
-X_SUFFIX = None
-Y_SUFFIX = None
-WIDTH = 600
-HEIGHT = 400
-SCALE = 1.0
-OMIT_LEGEND = True
-RETURN_DATA = False
+TITLE: str = None
+SUBTITLE: str = None
+BODY: str = None
+X_TITLE: str = None
+Y_TITLE: str = None
+X_PREFIX: str = None
+Y_PREFIX: str = None
+X_SUFFIX: str = None
+Y_SUFFIX: str = None
+WIDTH: int = 600
+HEIGHT: int = 400
+SCALE: float = 1.0
+OMIT_LEGEND: bool = True
+RETURN_DATA: bool = False
 
 # Function-specific options
-HORIZONTAL = False
+HORIZONTAL: bool = False
 BARMODE: BarModeType = "overlay"

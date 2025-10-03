@@ -1,10 +1,11 @@
 """
-Chart visualization API routes.
+Chart visualization web API routes.
+
+/viz/chart/<chart_type>?data=<data>
 """
 
 # Std
 import json
-from enum import Enum
 from typing import Literal
 from urllib.parse import unquote
 
@@ -24,6 +25,8 @@ except ImportError:
 
 # OMGUI
 from omgui import config
+from omgui.chartviz.types import ChartType, OutputType
+from omgui.chartviz import render
 from omgui.util.logger import get_logger
 from omgui.chartviz import chart_sampler
 from omgui.util import exceptions as omg_exc
@@ -43,49 +46,32 @@ templates = Jinja2Templates(directory="omgui/chartviz/templates")
 logger = get_logger()
 
 
-# Types
-# ------------------------------------
-
-
-class ChartType(Enum):
-    """
-    Supported chart types
-    More available: https://plotly.com/javascript/#basic-charts
-    """
-
-    BAR = "bar"
-    LINE = "line"
-    SCATTER = "scatter"
-    BUBBLE = "bubble"
-    PIE = "pie"
-    BOXPLOT = "boxplot"
-    HISTOGRAM = "histogram"
-
-
 # ------------------------------------
 # region - Auxiliary functions
 # ------------------------------------
 
 
+# ⚠️ Keep in sync with _common_params() in chartviz_routes.py
 def query_params(
     # fmt: off
-    width: int | Literal['auto'] | None = Query(None, description="Width of the chart"),
-    height: int | Literal['auto'] | None = Query(None, description="Height of the chart"),
-    scale: int | None = Query(None, description="PNG scale factor"),
-    omit_legend: bool | None = Query(False, description="Omit the legend from the chart"),
+    output: OutputType = Query("html", description="Output format: html, png or svg"),
     title: str | None = Query(None, description="Chart title"),
     subtitle: str | None = Query(None, description="Chart subtitle"),
-    body: str | None = Query(None, description="Paragraph displayed in the HTML page only"),
-    x_title: str | None = Query(None, description="Title for the x axis"),
-    y_title: str | None = Query(None, description="Title for the y axis"),
-    x_prefix: str | None = Query(None, description="Prefix for the x axis labels"),
-    y_prefix: str | None = Query(None, description="Prefix for the y axis labels"),
-    x_suffix: str | None = Query(None, description="Suffix for the x axis labels"),
-    y_suffix: str | None = Query(None, description="Suffix for the y axis labels"),
-    
+    body: str | None = Query(None, description="Paragraph displayed below the chart. Only used with output='html'."),
+    x_title: str | None = Query(None, description="Title for the x-axis."),
+    y_title: str | None = Query(None, description="Title for the y-axis."),
+    x_prefix: str | None = Query(None, description="Prefix for x-axis tick labels, eg. '€'."),
+    y_prefix: str | None = Query(None, description="Prefix for y-axis tick labels, eg. '€'."),
+    x_suffix: str | None = Query(None, description="Suffix for x-axis tick labels, eg. '%'."),
+    y_suffix: str | None = Query(None, description="Suffix for y-axis tick labels, eg. '%'."),
+    width: int | Literal['auto'] | None = Query(None, description="Width of the chart in pixels."),
+    height: int | Literal['auto'] | None = Query(None, description="Height of the chart in pixels."),
+    scale: int | None = Query(None, description="Scaling factor for the png pixel output. Set to 2 for high-resolution displays. Only used when output='png'."),
+    omit_legend: bool | None = Query(False, description="If True, do not display the legend."),
+    return_data: bool | None = Query(False, description="Whether to return raw data (True) or display the svg/png (False) in Jupyter Notebook. Only used when output='svg/png'."),
     # Chart-specific options
-    barmode: Literal["stack", "group", "overlay", "relative"] | None = Query(None, description="Bar mode for bar/histogram charts"),
-    boxmode: Literal["group", "overlay"] | None = Query(None, description="Box mode for box plot chart"),
+    # barmode: Literal["stack", "group", "overlay", "relative"] | None = Query(None, description="Bar mode for bar/histogram charts."),
+    # boxmode: Literal["group", "overlay"] | None = Query(None, description="Box mode for box plot chart."),
     # fmt: on
 ):
     """
@@ -95,9 +81,7 @@ def query_params(
         options: dict = Depends(query_params),
     """
     return {
-        "width": None if width == "auto" else width,
-        "height": None if height == "auto" else height,
-        "scale": scale,
+        "output": output if output in ["html", "png", "svg"] else "html",
         "title": title,
         "subtitle": subtitle,
         "body": body,
@@ -107,9 +91,14 @@ def query_params(
         "y_prefix": y_prefix,
         "x_suffix": x_suffix,
         "y_suffix": y_suffix,
+        "width": None if width == "auto" else width,
+        "height": None if height == "auto" else height,
+        "scale": scale,
         "omit_legend": omit_legend,
-        "barmode": barmode,
-        "boxmode": boxmode,
+        "return_data": return_data,
+        ##
+        # "barmode": barmode,
+        # "boxmode": boxmode,
     }
 
 
@@ -442,9 +431,8 @@ def compile_layout(
 
 def _compile_template_response(
     request: Request,
-    chart_data: list[dict],
+    result: dict,
     input_data: list[dict] = None,
-    layout: dict = None,
     options: dict = None,
     additional_options: dict = None,
 ):
@@ -452,6 +440,8 @@ def _compile_template_response(
     Shared template response for all charts.
     """
 
+    chart_data = result.get("chart_data", [])
+    layout = result.get("layout", {})
     options = options or {}
 
     return templates.TemplateResponse(
@@ -473,79 +463,37 @@ def _compile_template_response(
     )
 
 
-def _compile_image_response(
-    chart_data: list[dict],
-    layout: dict,
+def compile_response(
+    request: Request,
+    output: OutputType,
+    result: any,
+    input_data: list[dict],
     options: dict,
-    output: Literal["png", "svg"],
 ):
-    """
-    Compile the image response for charts.
-    """
 
-    fig = go.Figure(data=chart_data)
-
-    # Set width and height to defaults
-    layout["width"] = (
-        options.get("width", 1200) if options.get("width") != "auto" else 1200
-    )
-    layout["height"] = (
-        options.get("height", 900) if options.get("height") != "auto" else 900
-    )
-
-    # Apply layout
-    fig.update_layout(layout)
-
-    # Generate image
-    if output == "png":
-        img_bytes = fig.to_image(
-            format="png",
-            width=layout["width"],
-            height=layout["height"],
-            scale=options.get("scale", 1),
+    # Return HTML template
+    if output == "html":
+        return _compile_template_response(
+            request,
+            result,
+            input_data,
+            options,
         )
+
+    # PNG
+    if output == "png":
         return Response(
-            content=img_bytes,
+            content=result,
             media_type="image/png",
             headers={"Content-Disposition": "inline; filename='pie_chart.png'"},
         )
+
+    # SVG
     elif output == "svg":
-        svg_str = fig.to_image(
-            format="svg", width=layout["width"], height=layout["height"]
-        ).decode("utf-8")
         return Response(
-            content=svg_str,
+            content=result,
             media_type="image/svg+xml",
             headers={"Content-Disposition": "inline; filename='pie_chart.svg'"},
-        )
-
-
-def compile_response(
-    request: Request,
-    output: Literal["png", "svg"] | None,
-    chart_data: list[dict],
-    input_data: list[dict],
-    layout: dict,
-    options: dict,
-):
-
-    # Return PNG/SVG image
-    if output in ["png", "svg"]:
-        return _compile_image_response(
-            chart_data,
-            layout,
-            options,
-            output,
-        )
-
-    # Return HTML template
-    else:
-        return _compile_template_response(
-            request,
-            chart_data,
-            input_data,
-            layout,
-            options,
         )
 
 
@@ -608,6 +556,252 @@ async def random_data(
 # ------------------------------------
 
 
+# Bar chart
+# - - -
+# https://plotly.com/javascript/bar-charts/
+@chartviz_router.get("/bar", summary="Render a bar chart from URL data")
+@chartviz_router.get("/bar/{data_id}", summary="Render a bar chart from Redis data")
+async def chart_bar(
+    # fmt: off
+    request: Request,
+    input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
+    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
+    options: dict = Depends(query_params),
+    # Bar chart specific options
+    horizontal: bool = Query(False, alias="h", description="Render bar chart horizontally"),
+    # fmt: on
+):
+    if not config._viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
+    # Fetch data from URL or Redis/in-memory
+    input_data = await parse_input_data(request, input_data, data_id)
+
+    # Render chart
+    output = options.get("output")
+    result = render.bar(input_data, output, options, horizontal)
+
+    # Response
+    return compile_response(
+        request,
+        output,
+        result,
+        input_data,
+        options,
+    )
+
+
+# Line chart
+# - - -
+# https://plotly.com/javascript/line-charts/
+@chartviz_router.get("/line", summary="Render a line chart from URL data")
+@chartviz_router.get("/line/{data_id}", summary="Render a line chart from Redis data")
+async def chart_line(
+    # fmt: off
+    request: Request,
+    input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
+    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
+    options: dict = Depends(query_params),
+    # Line chart specific options
+    horizontal: bool = Query(False, alias="h", description="Render line chart horizontally"),
+    # fmt: on
+):
+    if not config._viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
+    # Fetch data from URL or Redis/in-memory
+    input_data = await parse_input_data(request, input_data, data_id)
+
+    # Render chart
+    output = options.get("output")
+    result = render.line(input_data, output, options, horizontal)
+
+    # Response
+    return compile_response(
+        request,
+        output,
+        result,
+        input_data,
+        options,
+    )
+
+
+# Scatter chart
+# - - -
+# https://plotly.com/javascript/line-and-scatter/
+@chartviz_router.get("/scatter", summary="Render a scatter plot from URL data")
+@chartviz_router.get(
+    "/scatter/{data_id}", summary="Render a scatter plot from Redis data"
+)
+async def chart_scatter(
+    # fmt: off
+    request: Request,
+    input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
+    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
+    options: dict = Depends(query_params),
+    # fmt: on
+):
+    if not config._viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
+    # Fetch data from URL or Redis/in-memory
+    input_data = await parse_input_data(request, input_data, data_id)
+
+    # Render chart
+    output = options.get("output")
+    result = render.scatter(input_data, output, options)
+
+    # Response
+    return compile_response(
+        request,
+        output,
+        result,
+        input_data,
+        options,
+    )
+
+
+# Bubble chart
+# - - -
+# https://plotly.com/javascript/bubble-charts/
+@chartviz_router.get("/bubble", summary="Render a bubble chart from URL data")
+@chartviz_router.get(
+    "/bubble/{data_id}", summary="Render a bubble chart from Redis data"
+)
+async def chart_bubble(
+    # fmt: off
+    request: Request,
+    input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
+    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
+    options: dict = Depends(query_params),
+    # fmt: on
+):
+    if not config._viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
+    # Fetch data from URL or Redis/in-memory
+    input_data = await parse_input_data(request, input_data, data_id)
+
+    # Render chart
+    output = options.get("output")
+    result = render.bubble(input_data, output, options)
+
+    # Response
+    return compile_response(
+        request,
+        output,
+        result,
+        input_data,
+        options,
+    )
+
+
+# Pie chart
+# - - -
+# fmt: off
+# https://plotly.com/javascript/pie-charts/
+@chartviz_router.get("/pie", summary="Render a pie chart from URL data")
+@chartviz_router.get("/pie/{data_id}", summary="Render a pie chart from Redis data")
+async def chart_pie(
+    request: Request,
+    input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
+    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
+    options: dict = Depends(query_params),
+    # fmt: on
+):
+    if not config._viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
+    # Fetch data from URL or Redis/in-memory
+    input_data = await parse_input_data(request, input_data, data_id)
+
+    # Render chart
+    output = options.get("output")
+    result = render.pie(input_data, output, options)
+
+    # Response
+    return compile_response(
+        request,
+        output,
+        result,
+        input_data,
+        options,
+    )
+
+
+# Box plot chart
+# - - -
+# fmt: off
+# https://plotly.com/javascript/box-plots/
+@chartviz_router.get("/boxplot", summary="Render a box plot chart from URL data")
+@chartviz_router.get("/boxplot/{data_id}", summary="Render a box plot chart from Redis data")
+async def chart_boxplot(
+    request: Request,
+    input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
+    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
+    options: dict = Depends(query_params),
+    # Boxplot specific options
+    horizontal: bool = Query(False, alias="h", description="Render box plot horizontally"),
+    show_points: bool = Query(False, description="Show data points on the box plot"),
+    boxmean: Literal[True, "True", "true", "1", False, "False", "false", "0", "sd"]
+        = Query(False, description="Show mean and standard deviation on the box plot"),
+    # fmt: on
+):
+    if not config._viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
+    # Fetch data from URL or Redis/in-memory
+    input_data = await parse_input_data(request, input_data, data_id)
+
+    # Render chart
+    output = options.get("output")
+    result = render.boxplot(input_data, output, options, horizontal, show_points, boxmean)
+
+    # Response
+    return compile_response(
+        request,
+        output,
+        result,
+        input_data,
+        options,
+    )
+
+
+# Histogram chart
+# - - -
+# https://plotly.com/javascript/histograms/
+@chartviz_router.get("/histogram", summary="Render a histogram chart from URL data")
+@chartviz_router.get("/histogram/{data_id}", summary="Render a histogram chart from Redis data")
+async def chart_histogram(
+    # fmt: off
+    request: Request,
+    input_data: str | None = Query(None, alias="data", description="JSON-encoded chart data"),
+    data_id: str | None = Query(None, description="Redis or in-memory ID for the input data"),
+    options: dict = Depends(query_params),
+    # Histogram specific options
+    horizontal: bool = Query(False, alias="h", description="Render histogram chart horizontally"),
+    barmode: Literal["stack", "group", "overlay", "relative"] = Query("overlay", description="Bar mode for histogram chart"),
+    # fmt: on
+):
+    if not config._viz_deps:
+        raise omg_exc.MissingDependenciesViz
+
+    # Fetch data from URL or Redis/in-memory
+    input_data = await parse_input_data(request, input_data, data_id)
+
+    # Render chart
+    output = options.get("output")
+    result = render.histogram(input_data, output, options, horizontal, barmode)
+
+    # Response
+    return compile_response(
+        request,
+        output,
+        result,
+        input_data,
+        options,
+    )
+
 # Redis POST
 @chartviz_router.post(
     "/{chart_type}", summary="Render different chart types from POST data"
@@ -651,410 +845,6 @@ async def post_chart_data(
         "url": f"/viz/chart/{chart_type.value}/{unique_id}",
         "note": "Data stored in in-memory cache (no expiry, not persistent). Configure config.redis_url to enable Redis storage.",
     }
-
-
-# Bar chart
-# - - -
-# https://plotly.com/javascript/bar-charts/
-@chartviz_router.get("/bar", summary="Render a bar chart from URL data")
-@chartviz_router.get("/bar/{data_id}", summary="Render a bar chart from Redis data")
-async def chart_bar(
-    # fmt: off
-    request: Request,
-    data_json: str | None = Query(None, alias="data"),
-    data_id: str | None = None,
-    options: dict = Depends(query_params),
-    horizontal: bool = Query(False, alias="h", description="Render bar chart horizontally"),
-    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
-    # fmt: on
-):
-    if not config._viz_deps:
-        raise omg_exc.MissingDependenciesViz
-
-    # Parse data
-    input_data = await parse_input_data(request, data_json, data_id)
-
-    # Compile Plotly data dict
-    chart_data = []
-    for [_, ds] in enumerate(input_data):
-        if horizontal:
-            chart_data.append(
-                {
-                    "type": "bar",
-                    "name": ds.get("name"),
-                    "y": ds.get("keys"),
-                    "x": ds.get("values"),
-                    "orientation": "h",
-                    # "opacity": 0.5,
-                }
-            )
-        else:
-            chart_data.append(
-                {
-                    "type": "bar",
-                    "name": ds.get("name"),
-                    "x": ds.get("keys"),
-                    "y": ds.get("values"),
-                    # "opacity": 0.5,
-                }
-            )
-
-    # Compile Plotly layout dict
-    layout = compile_layout(ChartType.BAR, chart_data, options)
-
-    # Response
-    return compile_response(
-        request,
-        output,
-        chart_data,
-        input_data,
-        layout,
-        options,
-    )
-
-
-# Line chart
-# - - -
-# https://plotly.com/javascript/line-charts/
-@chartviz_router.get("/line", summary="Render a line chart from URL data")
-@chartviz_router.get("/line/{data_id}", summary="Render a line chart from Redis data")
-async def chart_line(
-    # fmt: off
-    request: Request,
-    data_json: str | None = Query(None, alias="data"),
-    data_id: str | None = None,
-    options: dict = Depends(query_params),
-    horizontal: bool = Query(False, alias="h", description="Render line chart horizontally"),
-    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
-    # fmt: on
-):
-    if not config._viz_deps:
-        raise omg_exc.MissingDependenciesViz
-
-    # Parse data
-    input_data = await parse_input_data(request, data_json, data_id)
-
-    # Compile Plotly data dict
-    chart_data = []
-    for [_, ds] in enumerate(input_data):
-        if horizontal:
-            chart_data.append(
-                {
-                    "type": "scatter",
-                    "mode": "lines",
-                    "name": ds.get("name"),
-                    "x": ds.get("y"),
-                    "y": ds.get("x"),
-                }
-            )
-        else:
-            chart_data.append(
-                {
-                    "type": "scatter",
-                    "mode": "lines",  # <--
-                    "name": ds.get("name"),
-                    "x": ds.get("x"),
-                    "y": ds.get("y"),
-                }
-            )
-
-    # Compile Plotly layout dict
-    layout = compile_layout(ChartType.LINE, chart_data, options)
-
-    # Response
-    return compile_response(
-        request,
-        output,
-        chart_data,
-        input_data,
-        layout,
-        options,
-    )
-
-
-# Scatter chart
-# - - -
-# https://plotly.com/javascript/line-and-scatter/
-@chartviz_router.get("/scatter", summary="Render a scatter plot from URL data")
-@chartviz_router.get(
-    "/scatter/{data_id}", summary="Render a scatter plot from Redis data"
-)
-async def chart_scatter(
-    # fmt: off
-    request: Request,
-    data_json: str | None = Query(None, alias="data"),
-    data_id: str | None = None,
-    options: dict = Depends(query_params),
-    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
-    # fmt: on
-):
-    if not config._viz_deps:
-        raise omg_exc.MissingDependenciesViz
-
-    # Parse data
-    input_data = await parse_input_data(request, data_json, data_id)
-
-    # Compile Plotly data dict
-    chart_data = []
-    for [_, ds] in enumerate(input_data):
-        chart_data.append(
-            {
-                "type": "scatter",
-                "mode": "markers",  # <--
-                "name": ds.get("name"),
-                "x": ds.get("x"),
-                "y": ds.get("y"),
-            }
-        )
-
-    # Compile Plotly layout dict
-    layout = compile_layout(ChartType.SCATTER, chart_data, options)
-
-    # Response
-    return compile_response(
-        request,
-        output,
-        chart_data,
-        input_data,
-        layout,
-        options,
-    )
-
-
-# Bubble chart
-# - - -
-# https://plotly.com/javascript/bubble-charts/
-@chartviz_router.get("/bubble", summary="Render a bubble chart from URL data")
-@chartviz_router.get(
-    "/bubble/{data_id}", summary="Render a bubble chart from Redis data"
-)
-async def chart_bubble(
-    # fmt: off
-    request: Request,
-    data_json: str | None = Query(None, alias="data"),
-    data_id: str | None = None,
-    options: dict = Depends(query_params),
-    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
-    # fmt: on
-):
-    if not config._viz_deps:
-        raise omg_exc.MissingDependenciesViz
-
-    # Parse data
-    input_data = await parse_input_data(request, data_json, data_id)
-
-    # Compile Plotly data dict
-    chart_data = []
-    for [_, ds] in enumerate(input_data):
-        chart_data.append(
-            {
-                "type": "scatter",
-                "mode": "markers",  # <--
-                "name": ds.get("name"),
-                "x": ds.get("x"),
-                "y": ds.get("y"),
-                "marker": {"size": ds.get("size")},
-            }
-        )
-
-    # Compile Plotly layout dict
-    layout = compile_layout(ChartType.BUBBLE, chart_data, options)
-
-    # Response
-    return compile_response(
-        request,
-        output,
-        chart_data,
-        input_data,
-        layout,
-        options,
-    )
-
-
-# Pie chart
-# - - -
-# fmt: off
-# https://plotly.com/javascript/pie-charts/
-@chartviz_router.get("/pie", summary="Render a pie chart from URL data")
-@chartviz_router.get("/pie/{data_id}", summary="Render a pie chart from Redis data")
-async def chart_pie(
-    request: Request,
-    data_json: str | None = Query(None, alias="data"),
-    data_id: str | None = None,
-    options: dict = Depends(query_params),
-    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
-    # fmt: on
-):
-    if not config._viz_deps:
-        raise omg_exc.MissingDependenciesViz
-
-    # Parse data
-    input_data = await parse_input_data(request, data_json, data_id)
-
-    # Compile Plotly data dict
-    chart_data = []
-    for [_, ds] in enumerate(input_data):
-        chart_data.append(
-            {
-                "type": "pie",
-                "values": ds.get("values"),
-                "labels": ds.get("labels"),
-            }
-        )
-
-    # Compile Plotly layout dict
-    layout = compile_layout(ChartType.PIE, chart_data, options)
-
-    # Response
-    return compile_response(
-        request,
-        output,
-        chart_data,
-        input_data,
-        layout,
-        options,
-    )
-
-
-# Box plot chart
-# - - -
-# fmt: off
-# https://plotly.com/javascript/box-plots/
-@chartviz_router.get("/boxplot", summary="Render a box plot chart from URL data")
-@chartviz_router.get("/boxplot/{data_id}", summary="Render a box plot chart from Redis data")
-async def chart_boxplot(
-    request: Request,
-    data_json: str | None = Query(None, alias="data"),
-    data_id: str | None = None,
-    options: dict = Depends(query_params),
-    
-    # Boxplot specific options
-    horizontal: bool = Query(False, alias="h", description="Render box plot horizontally"),
-    show_points: bool = Query(False, description="Show data points on the box plot"),
-    boxmean: Literal[True, "True", "true", "1", False, "False", "false", "0", "sd"]
-        = Query(False, description="Show mean and standard deviation on the box plot"),
-    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
-    # fmt: on
-):
-    if not config._viz_deps:
-        raise omg_exc.MissingDependenciesViz
-
-    # Parse data
-    input_data = await parse_input_data(request, data_json, data_id)
-
-    # fmt: off
-    # Parse boxmean
-    # Because it's a boolean OR a string, it's always parsed as a string
-    boxmean = "sd" if boxmean == "sd" else True if boxmean in [True, "True", "true", "1"] else False
-    # fmt: on
-
-    # Compile Plotly data dict
-    chart_data = []
-    for [_, ds] in enumerate(input_data):
-        # fmt: off
-        x = ds.get("data") if horizontal else ds.get("groups")
-        y = ds.get("data") if not horizontal else ds.get("groups")
-        # fmt: on
-        chart_data.append(
-            {
-                "type": "box",
-                "name": ds.get("name"),
-                "x": x,
-                "y": y,
-                "orientation": "h" if horizontal else "v",
-                #
-                # Box styling
-                "line": {
-                    "width": 1,
-                },
-                #
-                # Data points
-                "boxpoints": "all" if show_points else False,
-                "pointpos": -2,
-                "jitter": 0.3,
-                "marker": {
-                    "size": 3,
-                    "opacity": 1,
-                },
-                #
-                # Show mean/standard deviation
-                "boxmean": boxmean,
-            }
-        )
-    
-    # Determine boxmode
-    options["boxmode"] = "group" if "groups" in input_data[0] else "overlay"
-
-    # Compile Plotly layout dict
-    layout = compile_layout(ChartType.BOXPLOT, chart_data, options)
-
-    # Response
-    return compile_response(
-        request,
-        output,
-        chart_data,
-        input_data,
-        layout,
-        options,
-    )
-
-
-# Histogram chart
-# - - -
-# https://plotly.com/javascript/histograms/
-@chartviz_router.get("/histogram", summary="Render a histogram chart from URL data")
-@chartviz_router.get("/histogram/{data_id}", summary="Render a histogram chart from Redis data")
-async def chart_histogram(
-    # fmt: off
-    request: Request,
-    data_json: str | None = Query(None, alias="data"),
-    data_id: str | None = None,
-    options: dict = Depends(query_params),
-    horizontal: bool = Query(False, alias="h", description="Render histogram chart horizontally"),
-    barmode: Literal["stack", "group", "overlay", "relative"] = Query("overlay", description="Bar mode for histogram chart"),
-    output: Literal["png", "svg"] | None = Query(None, description="Output format: png, svg, or None for HTML"),
-    # fmt: on
-):
-    if not config._viz_deps:
-        raise omg_exc.MissingDependenciesViz
-
-    # Parse data
-    input_data = await parse_input_data(request, data_json, data_id)
-
-    # Compile Plotly data dict
-    chart_data = []
-    for [_, ds] in enumerate(input_data):
-        if horizontal:
-            chart_data.append(
-                {
-                    "type": "histogram",
-                    "name": ds.get("name"),
-                    "y": ds.get("values"),
-                    "opacity": 1 if barmode == "stack" else 0.5,
-                }
-            )
-        else:
-            chart_data.append(
-                {
-                    "type": "histogram",
-                    "name": ds.get("name"),
-                    "x": ds.get("values"),
-                    "opacity": 1 if barmode == "stack" else 0.5,
-                }
-            )
-
-    # Compile Plotly layout dict
-    layout = compile_layout(ChartType.HISTOGRAM, chart_data, options)
-
-    # Response
-    return compile_response(
-        request,
-        output,
-        chart_data,
-        input_data,
-        layout,
-        options,
-    )
 
 
 # endregion
