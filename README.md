@@ -18,6 +18,7 @@ Run it from a **Jupyter Notebook** or any **Python** script.
 ```python
 import omgui
 omgui.show_mol('dopamine')
+omgui.show_mols(['CCO', 'C=C'])
 ```
 
 Included are also the [chartviz](docs/chartviz.md) and [molviz](docs/molviz.md) sub-libraries for generating charts an molecular images in 2D & 3D.
