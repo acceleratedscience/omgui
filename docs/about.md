@@ -19,7 +19,8 @@ For suggestions & bug reports you can always create an [issues](../../../issues)
 
 -   **OMGUI Frontend**  
     Lives in the [omgui-frontend] repo. It is written in [Vue.js], using the composition API with [TypeScript] and [SCSS].  
-    The molecule viewer relies on [RDKit] for 2D visualization and [Miew] for rendering interactive 3D molecules.
+    The molecule viewer relies on [RDKit] for 2D visualization and [Miew] for rendering interactive 3D molecules.  
+    It's based on the [Carbon Design System].
 
 -   **molviz**  
     Uses [RDKit] for 2D rendering and [CineMol] for static 3D molecules.  
@@ -39,6 +40,7 @@ For suggestions & bug reports you can always create an [issues](../../../issues)
 [SCSS]: https://sass-lang.com
 [RDKit]: https://github.com/rdkit/rdkit#readme
 [Miew]: https://github.com/epam/miew#readme
+[Carbon Design System]: https://carbondesignsystem.com
 [Jinja]: https://jinja.palletsprojects.com
 [CineMol]: https://github.com/moltools/CineMol#readme
 [omgui-frontend]: https://github.com/acceleratedscience/omgui-frontend
